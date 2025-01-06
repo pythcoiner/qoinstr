@@ -115,9 +115,7 @@ void Send::addOutput() {
     m_output_id++;
 }
 
-void Send::doConnect() {
-    // connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::onNext, UNIQUE);
-}
+void Send::doConnect() {}
 
 void Send::view() {
     auto *oldColumn = m_column;
@@ -154,7 +152,6 @@ void Send::view() {
     delete oldWidget;
     delete this->layout();
     this->setLayout(m_main_widget->layout());
-
 }
 
 void Send::deleteOutput(int id) {
