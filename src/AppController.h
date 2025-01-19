@@ -44,4 +44,6 @@ public slots:
     void copyAddress(QString addr);
     void saveAddressLabel(QString addr, QString label);
     void generateAddress();
+    
+    void listpools();
 };

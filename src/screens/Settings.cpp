@@ -21,7 +21,7 @@ namespace screen {
     }
 
     void Settings::doConnect() {
-        // connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::onNext, UNIQUE);
+        connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::listpools, UNIQUE);
     }
 
     void Settings::view() {

@@ -4,6 +4,8 @@
 #include "screens/Send.h"
 #include "screens/Receive.h"
 #include "screens/Settings.h"
+#include "joinstr.h"
+#include <qlogging.h>
 
 
 void AppController::loadPanels() {
@@ -127,4 +129,16 @@ void AppController::saveAddressLabel(QString addr, QString label) {
 
 void AppController::generateAddress() {
     qDebug() << "AppController::generateAddress()";
+}
+
+void AppController::listpools() {
+    qDebug() << "AppController::listpools()";
+    auto relay = QString("wss://nostr.wine");
+    const auto *relayPtr = relay.toUtf8().constData();
+    auto pools = list_pools(0, 100000, relayPtr);
+
+    auto error = errorToString(pools.error);
+    qDebug() << error;
+
+
 }
