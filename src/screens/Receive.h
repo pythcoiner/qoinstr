@@ -10,7 +10,7 @@
 
 namespace screen {
 
-class Receive : public Screen {
+class Receive : public qontrol::Screen {
     Q_OBJECT
 public:
     explicit Receive();

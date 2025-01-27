@@ -79,7 +79,7 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
     auto *details = new QPushButton("Details");
     QObject::connect(details, &QPushButton::clicked, controller,
             [controller, poolId]() {controller->poolDetails(poolId);});
-    auto *row = (new Row(table))
+    auto *row = (new qontrol::Row(table))
         ->pushSpacer()
         ->push(join)
         ->pushSpacer()
@@ -89,8 +89,8 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
     table->setCellWidget(index, 5, row);
 }
 
-void Pools::insertRelay(Column *col, const payload::Relay *relay) {
-    auto *collapsible = new Collapsible(relay->url, col);
+void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
+    auto *collapsible = new qontrol::widgets::Collapsible(relay->url, col);
 
     int rowCount = relay->pools.size() + 1;
     const int c_table_width = 6;
@@ -118,7 +118,7 @@ void Pools::insertRelay(Column *col, const payload::Relay *relay) {
     auto *controller = AppController::get();
     connect(create, &QPushButton::clicked, controller, 
             [relay, controller]() {controller->createPoolOnRelay(relay->url);});
-    auto *row = (new Row(table))
+    auto *row = (new qontrol::Row(table))
         -> pushSpacer()
         ->push(create)
         -> pushSpacer()
@@ -140,7 +140,7 @@ void Pools::insertRelay(Column *col, const payload::Relay *relay) {
 }
 
 void Pools::view() {
-    auto *col = new Column;
+    auto *col = new qontrol::Column;
 
     auto *oldTables = m_tables;
     m_tables = new QList<QTableWidget*>();

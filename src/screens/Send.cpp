@@ -20,7 +20,7 @@ auto Output::widget(Send *screen, int id) -> QWidget* {
 
     auto *delBtn = new QPushButton(" - ");
 
-    auto *addrRow = (new Row)
+    auto *addrRow = (new qontrol::Row)
         ->push(addr)
         ->push(m_address)
         ->pushSpacer(10)
@@ -34,7 +34,7 @@ auto Output::widget(Send *screen, int id) -> QWidget* {
     m_label = new QLineEdit;
     m_label->setFixedWidth(2 * INPUT_WIDTH );
 
-    auto *labelRow = (new Row)
+    auto *labelRow = (new qontrol::Row)
         ->push(label)
         ->push(m_label)
         ->pushSpacer()
@@ -58,7 +58,7 @@ auto Output::widget(Send *screen, int id) -> QWidget* {
     auto *sats = new QLabel("sats/vb");
     sats->setFixedWidth(120);
 
-    auto *lastRow = (new Row)
+    auto *lastRow = (new qontrol::Row)
         ->push(amount)
         ->push(m_amount)
         ->pushSpacer(5)
@@ -70,7 +70,7 @@ auto Output::widget(Send *screen, int id) -> QWidget* {
         ->pushSpacer()
         ;
 
-    auto *col = (new Column)
+    auto *col = (new qontrol::Column)
         ->pushSpacer(V_SPACER)
         ->push(addrRow)
         ->pushSpacer(V_SPACER)
@@ -99,7 +99,7 @@ Send::Send() {
 }
 
 void Send::init() {
-    m_column = (new Column);
+    m_column = (new qontrol::Column);
     this->addOutput();
 
     m_send_btn = new QPushButton("Send");
@@ -120,7 +120,7 @@ void Send::doConnect() {}
 void Send::view() {
     auto *oldColumn = m_column;
 
-    m_column = new Column;
+    m_column = new qontrol::Column;
     
     auto keys = QList<int>();
     for (auto id : m_outputs.keys()) {
@@ -133,14 +133,14 @@ void Send::view() {
     }
     delete oldColumn;
 
-    auto *lastRow = (new Row)
+    auto *lastRow = (new qontrol::Row)
         ->push(m_send_btn)
         ->pushSpacer(400)
         ->push(m_add_btn)
         ->pushSpacer()
         ;
 
-    auto *col = (new Column)
+    auto *col = (new qontrol::Column)
         ->push(m_column)
         ->pushSpacer(10)
         ->push(lastRow)

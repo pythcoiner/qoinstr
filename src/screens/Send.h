@@ -31,7 +31,7 @@ private:
 //     bool max = false;
 // };
 
-class Send : public Screen {
+class Send : public qontrol::Screen {
     Q_OBJECT
 public:
     explicit Send();
@@ -47,7 +47,7 @@ protected:
 private:
     int m_output_id = 0;
     QHash<int, Output*> m_outputs;
-    Column *m_column = nullptr;
+    qontrol::Column *m_column = nullptr;
     QWidget *m_main_widget = nullptr;
     QPushButton *m_add_btn = nullptr;
     QPushButton *m_send_btn = nullptr;

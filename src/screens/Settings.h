@@ -6,7 +6,7 @@
 #include <qwidget.h>
 
 namespace screen {
-    class Settings : public Screen {
+    class Settings : public qontrol::Screen {
         Q_OBJECT
     public:
         explicit Settings();

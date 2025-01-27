@@ -43,7 +43,7 @@ auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count
     auto *coins = new QLabel(coinStr);
     coins->setFixedWidth(PRICE_WIDTH);
 
-    auto *row = (new Row)
+    auto *row = (new qontrol::Row)
         ->push(label)
         ->push(price)
         ->push(coins)
@@ -81,7 +81,7 @@ void insertCoin(QTableWidget *table, const payload::Coin *coin, int index) {
     auto *create = new QPushButton("Create");
     QObject::connect(create, &QPushButton::clicked, controller,
             [controller, outpoint]() {controller->createPoolWithOutPoint(outpoint);});
-    auto *row = (new Row(table))
+    auto *row = (new qontrol::Row(table))
         ->pushSpacer()
         ->push(join)
         ->pushSpacer()
@@ -129,7 +129,7 @@ void Coins::view() {
     table->resizeColumnsToContents();
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    auto *mainLayout = (new Column(this))
+    auto *mainLayout = (new qontrol::Column(this))
         ->push(confirmed)
         ->pushSpacer(V_SPACER)
         ->push(unconfirmed)

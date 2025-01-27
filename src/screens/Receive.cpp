@@ -43,7 +43,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
 
     auto *saveBtn = new QPushButton("Save");
 
-    auto *addrRow = (new Row)
+    auto *addrRow = (new qontrol::Row)
         ->push(addr)
         ->push(addrStr)
         ->pushSpacer(10)
@@ -53,7 +53,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
         ->pushSpacer()
         ;
 
-    auto *labelRow = (new Row)
+    auto *labelRow = (new qontrol::Row)
         ->push(label)
         ->push(labelInput)
         ->pushSpacer(10)
@@ -61,7 +61,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
         ->pushSpacer()
         ;
 
-    auto *col = (new Column)
+    auto *col = (new qontrol::Column)
         ->pushSpacer(V_SPACER)
         ->push(addrRow)
         ->pushSpacer(V_SPACER)
@@ -90,7 +90,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
 }
 
 void Receive::view() {
-    auto *col = new Column;
+    auto *col = new qontrol::Column;
     m_label_inputs.clear();
 
     for (const auto *addr : *m_addresses) {
@@ -98,7 +98,7 @@ void Receive::view() {
     }
 
     auto *generateBtn = new QPushButton("Generate new address");
-    auto *row = (new Row)
+    auto *row = (new qontrol::Row)
         ->push(generateBtn)
         ->pushSpacer()
         ;

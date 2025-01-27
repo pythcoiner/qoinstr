@@ -13,7 +13,7 @@ namespace screen {
 
     void Settings::init() {
         m_btn = new QPushButton("Settings", this);
-        m_row = (new Row(this))
+        m_row = (new qontrol::Row(this))
             ->pushSpacer()
             ->push(m_btn)
             ->pushSpacer()
@@ -21,11 +21,11 @@ namespace screen {
     }
 
     void Settings::doConnect() {
-        connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::listpools, UNIQUE);
+        connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::listpools, qontrol::UNIQUE);
     }
 
     void Settings::view() {
-        auto *mainLayout = (new Column(this))
+        auto *mainLayout = (new qontrol::Column(this))
             ->pushSpacer()
             ->push(m_row)
             ->pushSpacer()

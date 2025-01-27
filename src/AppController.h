@@ -12,7 +12,7 @@ class Receive;
 class Settings;
 } // namespace screen
 
-class AppController : public Controller {
+class AppController : public qontrol::Controller {
     Q_OBJECT 
 public:
     void loadPanels() override;

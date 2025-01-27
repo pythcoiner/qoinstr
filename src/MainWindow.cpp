@@ -24,7 +24,7 @@ void MainWindow::initWindow() {
         receive->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         auto *settings = new QPushButton("Settings");
         settings->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_side_menu = (new Column(this))
+        m_side_menu = (new qontrol::Column(this))
             ->push(coins)
             ->push(pools)
             ->push(send)
@@ -45,7 +45,7 @@ void MainWindow::initWindow() {
         m_panel_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
-    auto *mainLayout = (new Row(this))
+    auto *mainLayout = (new qontrol::Row(this))
         ->push(m_side_menu)
         ->push(m_panel_widget)
         ;

@@ -10,7 +10,7 @@
 
 namespace screen {
 
-class Coins : public Screen {
+class Coins : public qontrol::Screen {
     Q_OBJECT
 public:
     explicit Coins();

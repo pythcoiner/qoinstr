@@ -10,7 +10,7 @@
 
 namespace screen {
 
-class Pools : public Screen {
+class Pools : public qontrol::Screen {
     Q_OBJECT
 public:
     explicit Pools();
@@ -28,7 +28,7 @@ private:
     QWidget *m_main_widget = nullptr;
     QList<QTableWidget*> *m_tables = nullptr;
 
-    void insertRelay(Column *col, const payload::Relay *relay);
+    void insertRelay(qontrol::Column *col, const payload::Relay *relay);
 };
 
 } // namespace screen

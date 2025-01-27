@@ -9,19 +9,19 @@
 
 
 void AppController::loadPanels() {
-    auto *coins = new Panel(new screen::Coins(), "coins");
+    auto *coins = new qontrol::Panel(new screen::Coins(), "coins");
     this->insertPanel(coins);
 
-    auto *pools = new Panel(new screen::Pools(), "pools");
+    auto *pools = new qontrol::Panel(new screen::Pools(), "pools");
     this->insertPanel(pools);
 
-    auto *send = new Panel(new screen::Send(), "send");
+    auto *send = new qontrol::Panel(new screen::Send(), "send");
     this->insertPanel(send);
 
-    auto *receive = new Panel(new screen::Receive(), "receive");
+    auto *receive = new qontrol::Panel(new screen::Receive(), "receive");
     this->insertPanel(receive);
 
-    auto *settings = new Panel(new screen::Settings(), "settings");
+    auto *settings = new qontrol::Panel(new screen::Settings(), "settings");
     this->insertPanel(settings);
 
     this->loadPanel("coins");
