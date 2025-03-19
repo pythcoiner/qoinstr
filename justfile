@@ -3,12 +3,12 @@ joinstr:
 
 clean:
     rm -fRd ./build
-    rm -fRd ./qt_joinstr/target
+    rm -fRd ./cpp_joinstr/target
     rm -fRd ./lib
 
 clear:
     just clean
-    rm -fRd ./qt_joinstr
+    rm -fRd ./cpp_joinstr
     rm -fRd ./.cache
 
 make:
@@ -16,3 +16,6 @@ make:
 
 build:
     ./build.sh
+
+run:
+    ./build/Qoinstr

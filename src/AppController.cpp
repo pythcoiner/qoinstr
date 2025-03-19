@@ -5,6 +5,8 @@
 #include "screens/Receive.h"
 #include "screens/Settings.h"
 #include <qlogging.h>
+#include <include/cpp_joinstr.h>
+#include <include/cxx.h>
 
 
 void AppController::loadPanels() {
@@ -132,4 +134,14 @@ void AppController::generateAddress() {
 
 void AppController::listpools() {
     qDebug() << "AppController::listpools()";
+    auto mnemonicStr = rust::String("rigid brother public ship curve holiday scrub plate furnace emerge weather derive");
+    auto mnemonic = mnemonic_from_string(mnemonicStr);
+    if (mnemonic->is_ok()) {
+        qDebug() << "valid mnemonic:" ;
+    } else if (mnemonic->is_err()) {
+        qDebug() << "wrong mnemonic";
+    } else {
+        qDebug() << "empty mnemonic";
+    }
+
 }

@@ -2,10 +2,7 @@
 
 set -e
 
-export CXX_QT_EXPORT_CRATE_qt_joinstr=1
-export CXX_QT_EXPORT_DIR="./include"
-
-JOINSTR_REPO="https://github.com/pythcoiner/qt_joinstr.git"
+JOINSTR_REPO="https://github.com/pythcoiner/cpp_joinstr.git"
 JOINSTR_BRANCH="master"
 
 # create ./lib if not existing
@@ -18,16 +15,16 @@ fi
 
 mkdir ./lib/include
 
-# if qt_joinstr exists update
-if [ -d "qt_joinstr" ]; then 
-    cd qt_joinstr
+# if cpp_joinstr exists update
+if [ -d "cpp_joinstr" ]; then 
+    cd cpp_joinstr
     git fetch --all
     git pull origin "$JOINSTR_BRANCH" --force --rebase
     git checkout "$JOINSTR_BRANCH"
-# if qt_joinstr not exists clone
+# if cpp_joinstr not exists clone
 else
     git clone "$JOINSTR_REPO"
-    cd qt_joinstr
+    cd cpp_joinstr
     git fetch --all
     git pull origin "$JOINSTR_BRANCH" --force --rebase
     git checkout "$JOINSTR_BRANCH"
@@ -39,20 +36,11 @@ cargo build --release
 
 cd ..
 # copy bindings into ./lib/include/
-cp -r ./qt_joinstr/include/crates/qt_joinstr/include/qt_joinstr ./lib/include/qt_joinstr
-cp -r ./qt_joinstr/include/crates/qt_joinstr/include/cxx-qt ./lib/include/cxx-qt
-cp -r ./qt_joinstr/include/crates/qt_joinstr/include/cxx-qt-lib ./lib/include/cxx-qt-lib
-cp -r ./qt_joinstr/include/crates/qt_joinstr/include/rust ./lib/include/rust
-
-# modify some path in order to fix compilation error
-sed -i 's|#include "cxx-qt/connection.h"|#include "../../cxx-qt/connection.h"|' ./lib/include/qt_joinstr/src/lib.cxx.h
-sed -i 's|#include "qt_joinstr/src/lib.cxxqt.h"| |' ./lib/include/qt_joinstr/src/lib.cxx.h
-sed -i 's|#include "qt_joinstr/src/lib.cxx.h"|#include "../lib.cxx.h"|' ./lib/include/qt_joinstr/src/lib.cxxqt.h
-sed -i 's|#include "rust/cxx.h"|#include "../cxx-qt/connection.h"|' ./lib/include/cxx-qt/connection.h
+cp -L ./cpp_joinstr/target/cxxbridge/cpp_joinstr/src/lib.rs.h ./lib/include/cpp_joinstr.h
+cp -L ./cpp_joinstr/target/cxxbridge/rust/cxx.h ./lib/include/cxx.h
 
 # copy libraries into ./lib/
-ls ./qt_joinstr/target/release
-cp ./qt_joinstr/target/release/libqt_joinstr.a ./lib/libqt_joinstr.a
-cp ./qt_joinstr/target/release/libqt_joinstr.rlib ./lib/libqt_joinstr.rlib
-cp ./qt_joinstr/target/release/libqt_joinstr.so ./lib/libqt_joinstr.so
-cp ./qt_joinstr/target/release/libqt_joinstr.d ./lib/libqt_joinstr.d
+cp ./cpp_joinstr/target/release/libcpp_joinstr.a ./lib/libcpp_joinstr.a
+cp ./cpp_joinstr/target/release/libcpp_joinstr.rlib ./lib/libcpp_joinstr.rlib
+cp ./cpp_joinstr/target/release/libcpp_joinstr.so ./lib/libcpp_joinstr.so
+cp ./cpp_joinstr/target/release/libcpp_joinstr.d ./lib/libcpp_joinstr.d

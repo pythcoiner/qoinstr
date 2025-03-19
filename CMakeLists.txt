@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 set(BIN Qoinstr)
 project(${BIN} VERSION 0.0.1 LANGUAGES CXX)
 
-# build qt_joinstr from source
+# build cpp_joinstr from source
 add_custom_target(
     RunBeforeBuild ALL
     COMMAND bash joinstr.sh
@@ -16,9 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(qt_joinstr STATIC IMPORTED)
-set_target_properties(qt_joinstr PROPERTIES
-    IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libqt_joinstr.a
+add_library(cpp_joinstr STATIC IMPORTED)
+set_target_properties(cpp_joinstr PROPERTIES
+    IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libcpp_joinstr.a
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
@@ -60,12 +60,7 @@ add_dependencies(${BIN}
 target_include_directories(${BIN}
   PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-    # $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib/include/
-    # $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib/include/qt_joinstr/src>
-    # $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib/include/cxx-qt>
-    # $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib/include/cxx-qt-lib>
-    # $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib/include/rust>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
 )
 
 target_link_libraries(${BIN} 
@@ -74,7 +69,7 @@ target_link_libraries(${BIN}
     Qt6::Core 
     Qt6::Widgets 
     qontrol
-    qt_joinstr
+    cpp_joinstr
 )
 
 set_target_properties(${BIN} PROPERTIES
