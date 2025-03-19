@@ -1,5 +1,5 @@
 build/
-joinstr/
+qt_joinstr/
 lib/
 compile_commands.json
 .cache/
