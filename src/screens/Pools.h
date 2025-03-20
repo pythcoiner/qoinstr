@@ -27,6 +27,7 @@ private:
     QList<payload::Relay*> *m_payload = nullptr;
     QWidget *m_main_widget = nullptr;
     QList<QTableWidget*> *m_tables = nullptr;
+    QList<qontrol::widgets::Collapsible*> *m_collapsibles = nullptr;
 
     void insertRelay(qontrol::Column *col, const payload::Relay *relay);
 };

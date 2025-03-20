@@ -8,6 +8,7 @@
 #include <qpushbutton.h>
 #include <qtablewidget.h>
 #include "common.h"
+#include "widgets/Collapsible.h"
 
 namespace screen {
 
@@ -17,7 +18,33 @@ Pools::Pools() {
     this->view();
 }
 
+auto relaysEquals(const QList<payload::Relay*>& a, const QList<payload::Relay*>& b) -> bool {
+    if (a.size() != b.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < a.size(); ++i) {
+        const payload::Relay* lhs = a[i];
+        const payload::Relay* rhs = b[i];
+
+        if ((lhs == nullptr) || (rhs == nullptr)) {
+            if (lhs != rhs) return false;  // one is null, one is not
+            continue;                      // both are null, consider equal
+        }
+
+        if (!(*lhs == *rhs)) {
+            return false;  // value mismatch
+        }
+    }
+
+    return true;
+}
+
 void Pools::recvPayload(QList<payload::Relay*> *payload) {
+    if (relaysEquals(*m_payload, *payload)) {
+        return;
+    }
+
     auto *old = m_payload;
     m_payload = payload;
     for (auto *relay : *old) {
@@ -28,10 +55,12 @@ void Pools::recvPayload(QList<payload::Relay*> *payload) {
 }
 
 void Pools::init() {
-    m_payload = payload::Relay::dummyRelays();
+    m_payload =  new QList<payload::Relay*>;
 }
 
-void Pools::doConnect() {}
+void Pools::doConnect() {
+    connect(AppController::get(), &AppController::updatePools, this, &Pools::recvPayload);
+}
 
 auto remainingTime(const QDateTime &timeout) -> QString {
     // TODO:
@@ -92,6 +121,12 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
 void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     auto *collapsible = new qontrol::widgets::Collapsible(relay->url, col);
 
+    if (m_collapsibles==nullptr) {
+        m_collapsibles = new QList<qontrol::widgets::Collapsible*>;
+    }
+
+    m_collapsibles->push_back(collapsible);
+
     int rowCount = relay->pools.size() + 1;
     const int c_table_width = 6;
     auto *table = new QTableWidget(rowCount, c_table_width);
@@ -131,7 +166,7 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     collapsible->pushInner(table);
     collapsible->pushInner(table);
 
-    collapsible->setCollapsed(false);
+    collapsible->setCollapsed(true);
     col->push(collapsible)
         ->pushSpacer(15)
         ;
@@ -143,8 +178,22 @@ void Pools::view() {
     auto *col = new qontrol::Column;
 
     auto *oldTables = m_tables;
-    m_tables = new QList<QTableWidget*>();
+    m_tables = new QList<QTableWidget*>;
+    if (oldTables != nullptr) {
+        for (auto *item: *oldTables) {
+            delete item;
+        }
+    }
     delete oldTables;
+
+    auto *oldCollapsibles = m_collapsibles;
+    m_collapsibles = new QList<qontrol::widgets::Collapsible*>;
+    if (oldCollapsibles != nullptr) {
+        for (auto *item: *oldCollapsibles) {
+            delete item;
+        }
+    }
+    delete oldCollapsibles;
 
     for (const auto *relay : *m_payload) {
         insertRelay(col, relay);
@@ -153,6 +202,10 @@ void Pools::view() {
     col->pushSpacer();
 
     auto *boxed = margin(col);
+
+    auto *old = this->layout();
+    delete old;
+
     this->setLayout(boxed->layout());
 }
 

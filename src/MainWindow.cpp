@@ -4,11 +4,13 @@
 #include "Row.h"
 #include <qpushbutton.h>
 #include <qsizepolicy.h>
+#include <qvariant.h>
 
 MainWindow::MainWindow(QWidget *parent) : Window(parent) {
     AppController::init();
     AppController::get()->start(this);
     this->initWindow();
+    AppController::get()->initState();
     AppController::get()->loadPanels();
 }
 

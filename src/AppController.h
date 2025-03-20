@@ -1,8 +1,16 @@
 #pragma once
 
+#include "screens/Coins.h"
 #include <QObject>
 #include <Qontrol>
 #include <cstdint>
+#include <include/cpp_joinstr.h>
+#include <optional>
+#include <qtimer.h>
+
+namespace payload {
+class Relay;
+}
 
 namespace screen {
 class Coins;
@@ -25,9 +33,19 @@ public:
     static auto send() -> screen::Send*;
     static auto receive() -> screen::Receive*;
     static auto settings() -> screen::Settings*;
+    static auto relay() -> QString;
 
+signals:
+    void updateCoins(payload::Coins*);
+    void updatePools(QList<payload::Relay*>* pools);
 
 public slots:
+    void initState();
+    void poll();
+    void pollCoins();
+    void pollPools();
+    void pollNotifications();
+
     void coinsClicked();
     void poolsClicked();
     void sendClicked();
@@ -46,4 +64,9 @@ public slots:
     void generateAddress();
     
     void listpools();
+
+private:
+    std::optional<rust::Box<Wallet>> m_wallet = std::nullopt;
+    QTimer *m_timer = nullptr;
+    payload::Coins *m_coins = nullptr;
 };

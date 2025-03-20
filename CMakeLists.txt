@@ -44,6 +44,9 @@ set(SOURCES
     src/screens/Send.cpp
     src/screens/Receive.cpp
     src/screens/Settings.cpp
+    src/payloads/Coins.cpp
+    src/payloads/Receive.cpp
+    src/payloads/Pools.cpp
 )
 
 qt_add_executable(${BIN}

@@ -18,18 +18,23 @@ Coins::Coins() {
 }
 
 void Coins::init() {
-    // m_payload = new payload::Coins();
-    m_payload = payload::Coins::dummy();
+    m_payload = new payload::Coins();
 }
 
 void Coins::recvPayload(payload::Coins *payload) {
+    if (*m_payload == *payload) {
+        // if payload content is unchanged, do not update
+        return;
+    }
     auto *old = m_payload;
     m_payload = payload;
     delete old;
     this->view();
 }
 
-void Coins::doConnect() {}
+void Coins::doConnect() {
+    connect(AppController::get(), &AppController::updateCoins, this, &Coins::recvPayload);
+}
 
 auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count) -> QWidget* {
     auto *label = new QLabel(label_str);
@@ -141,6 +146,8 @@ void Coins::view() {
     delete m_main_widget;
     m_main_widget = boxed;
 
+    auto *old = this->layout();
+    delete old;
     this->setLayout(boxed->layout());
 }
 
