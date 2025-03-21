@@ -18,6 +18,7 @@ struct Coin {
     bool locked = false;
 
     Coin() = default;
+    Coin(const Coin& other);
     static auto dummy() -> Coin*;
     static auto fromRust(rust::Box<RustCoin> coin) -> Coin*;
 

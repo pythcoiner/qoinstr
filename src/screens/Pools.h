@@ -14,6 +14,8 @@ class Pools : public qontrol::Screen {
     Q_OBJECT
 public:
     explicit Pools();
+signals:
+    void poolsUpdated();
 
 public slots:
     void recvPayload(QList<payload::Relay*> *payload);

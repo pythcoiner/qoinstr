@@ -15,6 +15,9 @@ class Coins : public qontrol::Screen {
 public:
     explicit Coins();
 
+signals:
+    void coinsUpdated();
+
 public slots:
     void recvPayload(payload::Coins *payload);
 

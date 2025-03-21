@@ -44,6 +44,8 @@ set(SOURCES
     src/screens/Send.cpp
     src/screens/Receive.cpp
     src/screens/Settings.cpp
+    src/screens/modals/Error.cpp
+    src/screens/modals/CreatePool.cpp
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
     src/payloads/Pools.cpp

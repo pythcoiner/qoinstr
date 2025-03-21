@@ -5,10 +5,14 @@
 #include "screens/Receive.h"
 #include "screens/Send.h"
 #include "screens/Settings.h"
+#include "screens/modals/CreatePool.h"
+#include "screens/modals/Error.h"
 #include <cstdint>
 #include <include/cxx.h>
 #include <optional>
+#include <qcontainerfwd.h>
 #include <qlogging.h>
+#include <qsystemtrayicon.h>
 #include <qtimer.h>
 #include <string>
 
@@ -42,6 +46,11 @@ void AppController::initState() {
     m_timer =  new QTimer;
     connect(m_timer, &QTimer::timeout, this, &AppController::poll);
     m_timer->start(100); // poll every 100ms
+
+    m_tray_icon = new QSystemTrayIcon;
+    m_tray_icon->setIcon(QIcon::fromTheme("dialog-information")); // required on Linux!
+    m_tray_icon->setVisible(true);
+
 }
 
 void AppController::poll() {
@@ -85,6 +94,11 @@ void AppController::pollNotifications() {
             }
         }
     }
+}
+
+void AppController::execModal(QDialog *modal) {
+    modal->exec();
+    delete modal;
 }
 
 void AppController::loadPanels() {
@@ -167,6 +181,7 @@ auto AppController::relay() -> QString {
     if (ctrl->m_wallet.has_value()) {
         return QString(ctrl->m_wallet.value()->relay().c_str());
     }
+    return QString("Unknow relay");
 
 }
 
@@ -181,45 +196,45 @@ auto AppController::window() -> QWidget* {
     return Controller::window();
 }
 
-void AppController::createPoolWithOutPoint(QString outpoint) {
-    qDebug() << "AppController::createPoolWithOutPoint("<<outpoint<<")";
+void AppController::actionCreatePool(payload::Coin coin) { // NOLINT
+    auto *modal = new modal::CreatePool(coin);
+    AppController::execModal(modal);
 }
 
-void AppController::createPoolOnRelay(QString relay){
-    qDebug() << "AppController::createPoolOnRelay("<<relay<<")";
+void AppController::cmdCreatePool(
+    const QString &outpoint,
+    uint64_t denomination,
+    uint32_t fees,
+    uint64_t max_duration,
+    size_t peers
+) {
+    if (m_wallet.has_value()) {
+        m_wallet.value()->create_dummy_pool(denomination, peers, max_duration, fees);
+    }
 }
 
-void AppController::joinPool(QString outpoint) {
-    qDebug() << "AppController::joinPool("<<outpoint<<")";
-}
-
-void AppController::joinPoolById(QString id) {
-    qDebug() << "AppController::joinPoolById("<<id<<")";
-}
-
-void AppController::poolDetails(QString id) {
-    qDebug() << "AppController::poolDetails("<<id<<")";
-}
-
-void AppController::showAddressQr(QString addr, uint64_t index, bool change) {
-    qDebug() << "AppController::showAddressQr("<<addr<<")";
-}
-
-void AppController::copyAddress(QString addr) {
-    qDebug() << "AppController::copyAddress("<<addr<<")";
-}
-
-void AppController::saveAddressLabel(QString addr, QString label) {
-    qDebug() << "AppController::saveAddressLabel("<<label<<")";
-}
-
-void AppController::generateAddress() {
-    qDebug() << "AppController::generateAddress()";
-}
+    // if (m_wallet.has_value()) {
+    //     m_wallet.value()->create_dummy_pool(300000, 5, 1000, 5);
+    // }
 
 void AppController::listpools() {
     qDebug() << "AppController::listpools()";
-    if (m_wallet.has_value()) {
-        m_wallet.value()->create_dummy_pool(300000, 5, 1000, 5);
-    }
+
+    // auto *modal = new modal::Error("Error message");
+    // AppController::execModal(modal);
+
+
+}
+
+void AppController::osMessage(QString title, QString msg, int delay) { // NOLINT 
+    m_tray_icon->showMessage(title, msg, QSystemTrayIcon::NoIcon, delay);
+}
+void AppController::osInfo(QString title, QString msg, int delay) { // NOLINT
+    m_tray_icon->showMessage(title, msg, QSystemTrayIcon::NoIcon, delay);
+}
+void AppController::osWarning(QString title, QString msg, int delay) { // NOLINT
+    m_tray_icon->showMessage(title, msg, QSystemTrayIcon::NoIcon, delay);
+}
+void AppController::osCritical(QString title, QString msg, int delay) { // NOLINT
+    m_tray_icon->showMessage(title, msg, QSystemTrayIcon::NoIcon, delay);
 }

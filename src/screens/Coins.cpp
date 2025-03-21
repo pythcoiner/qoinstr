@@ -30,10 +30,15 @@ void Coins::recvPayload(payload::Coins *payload) {
     m_payload = payload;
     delete old;
     this->view();
+    emit coinsUpdated();
 }
 
 void Coins::doConnect() {
-    connect(AppController::get(), &AppController::updateCoins, this, &Coins::recvPayload);
+    auto *ctrl = AppController::get();
+    connect(ctrl, &AppController::updateCoins, this, &Coins::recvPayload);
+    connect(this, &Coins::coinsUpdated, ctrl, [ctrl]() {
+        ctrl->osInfo("Coins updated", "List of coins have been updated");
+    } );
 }
 
 auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count) -> QWidget* {
@@ -80,12 +85,13 @@ void insertCoin(QTableWidget *table, const payload::Coin *coin, int index) {
     auto *controller = AppController::get();
 
     auto *join = new QPushButton("Join");
-    QObject::connect(join, &QPushButton::clicked, controller,
-            [controller, outpoint]() {controller->joinPool(outpoint);});
+    // QObject::connect(join, &QPushButton::clicked, controller,
+    //         [controller, outpoint]() {controller->joinPool(outpoint);});
 
+    auto ccoin = payload::Coin(*coin);
     auto *create = new QPushButton("Create");
     QObject::connect(create, &QPushButton::clicked, controller,
-            [controller, outpoint]() {controller->createPoolWithOutPoint(outpoint);});
+            [controller, ccoin]() {controller->actionCreatePool(ccoin);});
     auto *row = (new qontrol::Row(table))
         ->pushSpacer()
         ->push(join)

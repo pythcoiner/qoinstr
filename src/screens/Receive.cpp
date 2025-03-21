@@ -70,21 +70,21 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
         ;
 
     auto *controller = AppController::get();
-    connect(qrBtn, &QPushButton::clicked, controller, 
-            [address, controller]() {
-                controller->showAddressQr(address->address, address->index, address->change);
-            });
-
-    connect(copyBtn, &QPushButton::clicked, controller, 
-            [address, controller]() {controller->copyAddress(address->address);});
-
-    connect(saveBtn, &QPushButton::clicked, controller, 
-            [this, address, controller]() {
-                auto *label = m_label_inputs.value(address->address);
-                if (label != nullptr) {
-                    controller->saveAddressLabel(address->address, label->text());
-                }
-            });
+    // connect(qrBtn, &QPushButton::clicked, controller, 
+    //         [address, controller]() {
+    //             controller->showAddressQr(address->address, address->index, address->change);
+    //         });
+    //
+    // connect(copyBtn, &QPushButton::clicked, controller, 
+    //         [address, controller]() {controller->copyAddress(address->address);});
+    //
+    // connect(saveBtn, &QPushButton::clicked, controller, 
+    //         [this, address, controller]() {
+    //             auto *label = m_label_inputs.value(address->address);
+    //             if (label != nullptr) {
+    //                 controller->saveAddressLabel(address->address, label->text());
+    //             }
+    //         });
 
     return col;
 }
@@ -107,7 +107,7 @@ void Receive::view() {
         ->pushSpacer()
         ;
 
-    connect(generateBtn, &QPushButton::clicked, AppController::get(), &AppController::generateAddress);
+    // connect(generateBtn, &QPushButton::clicked, AppController::get(), &AppController::generateAddress);
 
     auto *oldWidget = m_main_widget;
     m_main_widget = margin(col);

@@ -1,14 +1,14 @@
 #include "Pools.h"
 #include "AppController.h"
 #include "Row.h"
+#include "common.h"
+#include "widgets/Collapsible.h"
 #include <Qontrol>
 #include <cstdint>
 #include <qlabel.h>
 #include <qlist.h>
 #include <qpushbutton.h>
 #include <qtablewidget.h>
-#include "common.h"
-#include "widgets/Collapsible.h"
 
 namespace screen {
 
@@ -59,7 +59,11 @@ void Pools::init() {
 }
 
 void Pools::doConnect() {
-    connect(AppController::get(), &AppController::updatePools, this, &Pools::recvPayload);
+    auto *ctrl = AppController::get();
+    connect(ctrl, &AppController::updatePools, this, &Pools::recvPayload);
+    connect(this, &Pools::poolsUpdated, ctrl, [ctrl]() {
+        ctrl->osInfo("Pools updated", "List of pools have been updated");
+    } );
 }
 
 auto remainingTime(const QDateTime &timeout) -> QString {
@@ -102,12 +106,12 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
     auto *controller = AppController::get();
 
     auto *join = new QPushButton("Join");
-    QObject::connect(join, &QPushButton::clicked, controller,
-            [controller, poolId]() {controller->joinPoolById(poolId);});
+    // QObject::connect(join, &QPushButton::clicked, controller,
+    //         [controller, poolId]() {controller->joinPoolById(poolId);});
 
     auto *details = new QPushButton("Details");
-    QObject::connect(details, &QPushButton::clicked, controller,
-            [controller, poolId]() {controller->poolDetails(poolId);});
+    // QObject::connect(details, &QPushButton::clicked, controller,
+    //         [controller, poolId]() {controller->poolDetails(poolId);});
     auto *row = (new qontrol::Row(table))
         ->pushSpacer()
         ->push(join)
@@ -151,8 +155,8 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
 
     auto *create = new QPushButton("Create pool");
     auto *controller = AppController::get();
-    connect(create, &QPushButton::clicked, controller, 
-            [relay, controller]() {controller->createPoolOnRelay(relay->url);});
+    // connect(create, &QPushButton::clicked, controller, 
+    //         [relay, controller]() {controller->createPoolOnRelay(relay->url);});
     auto *row = (new qontrol::Row(table))
         -> pushSpacer()
         ->push(create)

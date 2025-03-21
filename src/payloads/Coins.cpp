@@ -1,8 +1,9 @@
 #include "Coins.h"
 #include <algorithm>
-#include <utility>
 
 namespace payload {
+
+    Coin::Coin(const Coin& other) = default;
 
     auto Coin::dummy() -> Coin* {
         auto *coin = new Coin();
