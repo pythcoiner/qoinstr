@@ -1,7 +1,6 @@
 #pragma once
 
 #include "screens/Coins.h"
-#include "screens/modals/Error.h"
 #include <QObject>
 #include <Qontrol>
 #include <cmath>
@@ -28,7 +27,6 @@ class AppController : public qontrol::Controller {
     Q_OBJECT 
 public:
     void loadPanels() override;
-    static void execModal(QDialog *modal);
     static void init();
     static auto get() -> AppController*;
     static auto window() -> QWidget*;

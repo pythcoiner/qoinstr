@@ -1,6 +1,7 @@
 #include "CreatePool.h"
 #include "AppController.h"
 #include "Column.h"
+#include "Modal.h"
 #include "Row.h"
 #include "screens/common.h"
 
@@ -22,186 +23,173 @@ const int CP_V_SPACER =5;
 const int CP_L_SPACER = 205;
 const int VB_FEE = 150;
 
-
 namespace modal {
+using qontrol::Modal;
 
-    CreatePool::CreatePool(const payload::Coin &coin) {
-        this->setModal(true);
-        this->setWindowTitle("Create Pool");
-        this->setLayout(new QHBoxLayout);
-        this->setFixedSize(680,400);
+CreatePool::CreatePool(const payload::Coin &coin) {
+  this->setWindowTitle("Create Pool");
+  this->setFixedSize(680, 400);
 
-        m_coin = payload::Coin(coin);
+  m_coin = payload::Coin(coin);
 
-        m_peers_validator = new QIntValidator(2, 10,this);
-        m_fees_validator = new QIntValidator(1, 1000, this);
-        m_timeout_validator = new QIntValidator(1, 240, this);
-        m_denom_validator = new QDoubleValidator(0.0001, 10.0, 5, this);
+  m_peers_validator = new QIntValidator(2, 10, this);
+  m_fees_validator = new QIntValidator(1, 1000, this);
+  m_timeout_validator = new QIntValidator(1, 240, this);
+  m_denom_validator = new QDoubleValidator(0.0001, 10.0, 5, this);
 
-        // Title
-        auto relay = AppController::relay();
-        auto titleStr = QString("Create a new Joinstr Pool on ");
-        titleStr = titleStr + relay + QString(" ?");
-        auto *title = new QLabel(titleStr);
-        auto font = title->font();
-        font.setPointSize(16);
-        title->setFont(font);
+  // Title
+  auto relay = AppController::relay();
+  auto titleStr = QString("Create a new Joinstr Pool on ");
+  titleStr = titleStr + relay + QString(" ?");
+  auto *title = new QLabel(titleStr);
+  auto font = title->font();
+  font.setPointSize(16);
+  title->setFont(font);
 
-        auto *titleRow = (new qontrol::Row)
-            ->pushSpacer()
-            ->push(title)
-            ->pushSpacer()
-        ;
+  auto *titleRow = (new qontrol::Row)->pushSpacer()->push(title)->pushSpacer();
 
-        // Coin
-        auto *outpoint = new QLineEdit();
-        outpoint->setFixedWidth(500);
-        outpoint->setText(m_coin.outpoint);
-        outpoint->setEnabled(false);
+  // Coin
+  auto *outpoint = new QLineEdit();
+  outpoint->setFixedWidth(500);
+  outpoint->setText(m_coin.outpoint);
+  outpoint->setEnabled(false);
 
-        double btcAmount = coin.value;
-        btcAmount = btcAmount / SATS;
-        auto *amount = new QLineEdit();
-        amount->setFixedWidth(CP_INPUT_WIDTH);
-        amount->setText(QString::number(btcAmount, 'f', 1));
-        amount->setEnabled(false);
+  double btcAmount = coin.value;
+  btcAmount = btcAmount / SATS;
+  auto *amount = new QLineEdit();
+  amount->setFixedWidth(CP_INPUT_WIDTH);
+  amount->setText(QString::number(btcAmount, 'f', 1));
+  amount->setEnabled(false);
 
-        auto *btcLabel = new QLabel("BTC");
+  auto *btcLabel = new QLabel("BTC");
 
-        auto *coinRow = (new qontrol::Row)
-            ->push(outpoint)
-            ->pushSpacer(10)
-            ->push(amount)
-            ->pushSpacer(10)
-            ->push(btcLabel)
-            ->pushSpacer()
-        ;
+  auto *coinRow = (new qontrol::Row)
+                      ->push(outpoint)
+                      ->pushSpacer(10)
+                      ->push(amount)
+                      ->pushSpacer(10)
+                      ->push(btcLabel)
+                      ->pushSpacer();
 
-        // Denomination
-        auto *denomLabel = new QLabel("Denomination");
-        denomLabel->setFixedWidth(CP_LABEL_WIDTH);
+  // Denomination
+  auto *denomLabel = new QLabel("Denomination");
+  denomLabel->setFixedWidth(CP_LABEL_WIDTH);
 
-        double denomination = m_coin.value; // Value is updated in CreatePool::process();
-        denomination = denomination / SATS;
+  double denomination =
+      m_coin.value; // Value is updated in CreatePool::process();
+  denomination = denomination / SATS;
 
-        m_w_denomination = new QLineEdit();
-        m_w_denomination->setFixedWidth(CP_INPUT_WIDTH);
-        m_w_denomination->setValidator(m_denom_validator);
-        m_w_denomination->setText(QString::number(denomination, 'f', 1));
-        connect(m_w_denomination, &QLineEdit::editingFinished, 
-                this, [this]() {this->process(true);  });
+  m_w_denomination = new QLineEdit();
+  m_w_denomination->setFixedWidth(CP_INPUT_WIDTH);
+  m_w_denomination->setValidator(m_denom_validator);
+  m_w_denomination->setText(QString::number(denomination, 'f', 1));
+  connect(m_w_denomination, &QLineEdit::editingFinished, this,
+          [this]() { this->process(true); });
 
-        auto *dbtcLabel = new QLabel("BTC");
+  auto *dbtcLabel = new QLabel("BTC");
 
-        auto *denomRow = (new qontrol::Row)
-            ->pushSpacer(CP_L_SPACER)
-            ->push(denomLabel)
-            ->push(m_w_denomination)
-            ->pushSpacer(10)
-            ->push(dbtcLabel)
-            ->pushSpacer()
-        ;
+  auto *denomRow = (new qontrol::Row)
+                       ->pushSpacer(CP_L_SPACER)
+                       ->push(denomLabel)
+                       ->push(m_w_denomination)
+                       ->pushSpacer(10)
+                       ->push(dbtcLabel)
+                       ->pushSpacer();
 
-        // Fees
-        auto *feesLabel = new QLabel("Fees");
-        feesLabel->setFixedWidth(CP_LABEL_WIDTH);
+  // Fees
+  auto *feesLabel = new QLabel("Fees");
+  feesLabel->setFixedWidth(CP_LABEL_WIDTH);
 
-        m_w_fee = new QLineEdit();
-        m_w_fee->setFixedWidth(CP_INPUT_WIDTH);
-        m_w_fee->setValidator(m_fees_validator);
-        m_w_fee->setText(QString("1"));
-        connect(m_w_fee, &QLineEdit::editingFinished, 
-                this, [this]() {this->process();  });
+  m_w_fee = new QLineEdit();
+  m_w_fee->setFixedWidth(CP_INPUT_WIDTH);
+  m_w_fee->setValidator(m_fees_validator);
+  m_w_fee->setText(QString("1"));
+  connect(m_w_fee, &QLineEdit::editingFinished, this,
+          [this]() { this->process(); });
 
-        auto *satLabel = new QLabel("sats/Vb");
+  auto *satLabel = new QLabel("sats/Vb");
 
-        auto *feeRow = (new qontrol::Row)
-            ->pushSpacer(CP_L_SPACER)
-            ->push(feesLabel)
-            ->push(m_w_fee)
-            ->pushSpacer(10)
-            ->push(satLabel)
-            ->pushSpacer()
-        ;
+  auto *feeRow = (new qontrol::Row)
+                     ->pushSpacer(CP_L_SPACER)
+                     ->push(feesLabel)
+                     ->push(m_w_fee)
+                     ->pushSpacer(10)
+                     ->push(satLabel)
+                     ->pushSpacer();
 
-        // Peers
-        auto *peersLabel = new QLabel("Peers");
-        peersLabel->setFixedWidth(CP_LABEL_WIDTH);
+  // Peers
+  auto *peersLabel = new QLabel("Peers");
+  peersLabel->setFixedWidth(CP_LABEL_WIDTH);
 
-        m_w_peers = new QLineEdit();
-        m_w_peers->setFixedWidth(CP_INPUT_WIDTH);
-        m_w_peers->setValidator(m_peers_validator);
-        m_w_peers->setText("5");
-        connect(m_w_peers, &QLineEdit::textEdited, 
-                this, [this]() {this->process();  });
+  m_w_peers = new QLineEdit();
+  m_w_peers->setFixedWidth(CP_INPUT_WIDTH);
+  m_w_peers->setValidator(m_peers_validator);
+  m_w_peers->setText("5");
+  connect(m_w_peers, &QLineEdit::textEdited, this,
+          [this]() { this->process(); });
 
-        auto *peersRow = (new qontrol::Row)
-            ->pushSpacer(CP_L_SPACER)
-            ->push(peersLabel)
-            ->push(m_w_peers)
-            ->pushSpacer()
-        ;
+  auto *peersRow = (new qontrol::Row)
+                       ->pushSpacer(CP_L_SPACER)
+                       ->push(peersLabel)
+                       ->push(m_w_peers)
+                       ->pushSpacer();
 
-        // Timeout
-        auto *timeoutLabel = new QLabel("Max duration");
-        timeoutLabel->setFixedWidth(CP_LABEL_WIDTH);
+  // Timeout
+  auto *timeoutLabel = new QLabel("Max duration");
+  timeoutLabel->setFixedWidth(CP_LABEL_WIDTH);
 
-        m_w_timeout = new QLineEdit();
-        m_w_timeout->setFixedWidth(100);
-        m_w_timeout->setValidator(m_timeout_validator);
-        m_w_timeout->setText("24");
-        connect(m_w_timeout, &QLineEdit::textEdited, 
-                this, [this]() {this->process();  });
+  m_w_timeout = new QLineEdit();
+  m_w_timeout->setFixedWidth(100);
+  m_w_timeout->setValidator(m_timeout_validator);
+  m_w_timeout->setText("24");
+  connect(m_w_timeout, &QLineEdit::textEdited, this,
+          [this]() { this->process(); });
 
-        auto *hoursLabel = new QLabel("Hours");
-        hoursLabel->setFixedWidth(120);
+  auto *hoursLabel = new QLabel("Hours");
+  hoursLabel->setFixedWidth(120);
 
-        auto *timeoutRow = (new qontrol::Row)
-            ->pushSpacer(CP_L_SPACER)
-            ->push(timeoutLabel)
-            ->push(m_w_timeout)
-            ->pushSpacer(10)
-            ->push(hoursLabel)
-            ->pushSpacer()
-        ;
+  auto *timeoutRow = (new qontrol::Row)
+                         ->pushSpacer(CP_L_SPACER)
+                         ->push(timeoutLabel)
+                         ->push(m_w_timeout)
+                         ->pushSpacer(10)
+                         ->push(hoursLabel)
+                         ->pushSpacer();
 
-        // Buttons
-        auto  *createBtn = new QPushButton("Create");
-        createBtn->setEnabled(false);
-        m_create_btn = createBtn;
-        connect(createBtn, &QPushButton::clicked, this, &CreatePool::onCreatePool);
+  // Buttons
+  auto *createBtn = new QPushButton("Create");
+  createBtn->setEnabled(false);
+  m_create_btn = createBtn;
+  connect(createBtn, &QPushButton::clicked, this, &CreatePool::onCreatePool);
 
-        auto  *cancelBtn = new QPushButton("Cancel");
-        connect(cancelBtn, &QPushButton::clicked, this, &QDialog::close);
+  auto *cancelBtn = new QPushButton("Cancel");
+  connect(cancelBtn, &QPushButton::clicked, this, &QDialog::close);
 
-        auto *btnRow = (new qontrol::Row)
-            ->pushSpacer()
-            ->push(createBtn)
-            ->pushSpacer(100)
-            ->push(cancelBtn)
-            ->pushSpacer()
-        ;
+  auto *btnRow = (new qontrol::Row)
+                     ->pushSpacer()
+                     ->push(createBtn)
+                     ->pushSpacer(100)
+                     ->push(cancelBtn)
+                     ->pushSpacer();
 
-        auto *col = (new qontrol::Column)
-            ->push(titleRow)
-            ->pushSpacer(40)
-            ->push(coinRow)
-            ->pushSpacer(40)
-            ->push(denomRow)
-            ->pushSpacer(CP_V_SPACER)
-            ->push(feeRow)
-            ->pushSpacer(CP_V_SPACER)
-            ->push(peersRow)
-            ->pushSpacer(CP_V_SPACER)
-            ->push(timeoutRow)
-            ->pushSpacer()
-            ->push(btnRow)
-            ->pushSpacer(20)
-            ;
-        this->layout()->addWidget(col);
-        col->setParent(this);
-        this->process();
-    }
+  auto *col = (new qontrol::Column)
+                  ->push(titleRow)
+                  ->pushSpacer(40)
+                  ->push(coinRow)
+                  ->pushSpacer(40)
+                  ->push(denomRow)
+                  ->pushSpacer(CP_V_SPACER)
+                  ->push(feeRow)
+                  ->pushSpacer(CP_V_SPACER)
+                  ->push(peersRow)
+                  ->pushSpacer(CP_V_SPACER)
+                  ->push(timeoutRow)
+                  ->pushSpacer()
+                  ->push(btnRow)
+                  ->pushSpacer(20);
+  this->setMainWidget(col);
+  this->process();
+}
 
     auto CreatePool::fetch() -> bool {
         bool ok = true;
@@ -280,4 +268,4 @@ namespace modal {
 
     }
 
-} // namespace modal
+    } // namespace modal

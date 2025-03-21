@@ -6,7 +6,6 @@
 #include "screens/Send.h"
 #include "screens/Settings.h"
 #include "screens/modals/CreatePool.h"
-#include "screens/modals/Error.h"
 #include <cstdint>
 #include <include/cxx.h>
 #include <optional>
@@ -94,11 +93,6 @@ void AppController::pollNotifications() {
             }
         }
     }
-}
-
-void AppController::execModal(QDialog *modal) {
-    modal->exec();
-    delete modal;
 }
 
 void AppController::loadPanels() {
@@ -220,10 +214,8 @@ void AppController::cmdCreatePool(
 void AppController::listpools() {
     qDebug() << "AppController::listpools()";
 
-    // auto *modal = new modal::Error("Error message");
-    // AppController::execModal(modal);
-
-
+    auto *modal = new qontrol::Modal("Error", "Toto blblalbla.........");
+    AppController::execModal(modal);
 }
 
 void AppController::osMessage(QString title, QString msg, int delay) { // NOLINT 

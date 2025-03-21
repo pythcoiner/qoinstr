@@ -10,7 +10,7 @@
 
 namespace modal {
 
-class CreatePool : public QDialog {
+class CreatePool : public qontrol::Modal {
     Q_OBJECT
 public:
     CreatePool(const payload::Coin &coin);

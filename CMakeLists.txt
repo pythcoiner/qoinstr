@@ -27,7 +27,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 include(FetchContent)
 FetchContent_Declare(qontrol
     GIT_REPOSITORY https://github.com/pythcoiner/qontrol.git
-    GIT_TAG 2ecde00
+    GIT_TAG 230f1d6
 )
 FetchContent_MakeAvailable(qontrol)
 
@@ -44,7 +44,6 @@ set(SOURCES
     src/screens/Send.cpp
     src/screens/Receive.cpp
     src/screens/Settings.cpp
-    src/screens/modals/Error.cpp
     src/screens/modals/CreatePool.cpp
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
