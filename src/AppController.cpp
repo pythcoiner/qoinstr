@@ -1,11 +1,13 @@
 #include "AppController.h"
 #include "include/cpp_joinstr.h"
+#include "payloads/Receive.h"
 #include "screens/Coins.h"
 #include "screens/Pools.h"
 #include "screens/Receive.h"
 #include "screens/Send.h"
 #include "screens/Settings.h"
 #include "screens/modals/CreatePool.h"
+#include <algorithm>
 #include <cstdint>
 #include <include/cxx.h>
 #include <optional>
@@ -211,6 +213,15 @@ auto AppController::window() -> QWidget* {
 void AppController::actionCreatePool(payload::Coin coin) { // NOLINT
     auto *modal = new modal::CreatePool(coin);
     AppController::execModal(modal);
+}
+
+void AppController::actionCreateNewAddress() {
+    if (m_wallet.has_value()) {
+        auto raddr = m_wallet.value()->new_addr();
+        auto *addr = payload::Address::fromRust(std::move(raddr));
+
+        emit newAddress(addr);
+    }
 }
 
 void AppController::cmdCreatePool(

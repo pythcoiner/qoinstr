@@ -6,6 +6,7 @@
 #include "payloads/Receive.h"
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qlist.h>
 #include <qpushbutton.h>
 
 namespace screen {
@@ -17,11 +18,29 @@ Receive::Receive() {
 }
 
 void Receive::init() {
-    m_addresses = payload::Address::dummyAddresses();
 }
 
 void Receive::doConnect() {
-    // connect(m_btn, &QPushButton::clicked, AppController::get(), &AppController::onNext, UNIQUE);
+    connect(AppController::get(), &AppController::newAddress, this, &Receive::onNewAddress);
+}
+
+void Receive::onUnload() {
+    qDebug() << "Receive::onUnload()";
+    for (auto *item : m_addresses) {
+        delete item;
+    }
+    for (auto *widget : m_widgets) {
+        delete widget;
+    }
+    m_widgets.clear();
+    m_addresses.clear();
+    m_label_inputs.clear();
+}
+
+void Receive::onNewAddress(payload::Address* addr) {
+    m_addresses.push_back(addr);
+    view();
+
 }
 
 auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
@@ -31,7 +50,8 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
     auto *addrStr = new QLabel(address->address);
     addrStr->setFixedWidth(3 * INPUT_WIDTH );
 
-    auto *qrBtn = new QPushButton("QR Code");
+    // auto *qrBtn = new QPushButton("QR Code");
+    // m_widgets->push_back(qrBtn);
     auto *copyBtn = new QPushButton("Copy");
 
     auto *label = new QLabel("Label:");
@@ -41,33 +61,34 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
     labelInput->setFixedWidth(3 * INPUT_WIDTH );
     m_label_inputs.insert(address->address, labelInput);
 
-    auto *saveBtn = new QPushButton("Save");
+    // auto *saveBtn = new QPushButton("Save");
 
     auto *addrRow = (new qontrol::Row)
         ->push(addr)
         ->push(addrStr)
         ->pushSpacer(10)
-        ->push(qrBtn)
-        ->pushSpacer(10)
+        // ->push(qrBtn)
+        // ->pushSpacer(10)
         ->push(copyBtn)
         ->pushSpacer()
         ;
 
-    auto *labelRow = (new qontrol::Row)
-        ->push(label)
-        ->push(labelInput)
-        ->pushSpacer(10)
-        ->push(saveBtn)
-        ->pushSpacer()
-        ;
+    // auto *labelRow = (new qontrol::Row)
+    //     ->push(label)
+    //     ->push(labelInput)
+    //     ->pushSpacer(10)
+    //     ->push(saveBtn)
+    //     ->pushSpacer()
+    //     ;
 
     auto *col = (new qontrol::Column)
         ->pushSpacer(V_SPACER)
         ->push(addrRow)
-        ->pushSpacer(V_SPACER)
-        ->push(labelRow)
+        // ->pushSpacer(V_SPACER)
+        // ->push(labelRow)
         ->pushSpacer(2 * V_SPACER)
         ;
+    m_widgets.push_back(col);
 
     auto *controller = AppController::get();
     // connect(qrBtn, &QPushButton::clicked, controller, 
@@ -75,9 +96,9 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
     //             controller->showAddressQr(address->address, address->index, address->change);
     //         });
     //
-    // connect(copyBtn, &QPushButton::clicked, controller, 
-    //         [address, controller]() {controller->copyAddress(address->address);});
-    //
+    connect(copyBtn, &QPushButton::clicked, controller, 
+            [address]() { QApplication::clipboard()->setText(address->address);});
+
     // connect(saveBtn, &QPushButton::clicked, controller, 
     //         [this, address, controller]() {
     //             auto *label = m_label_inputs.value(address->address);
@@ -93,13 +114,16 @@ void Receive::view() {
     auto *col = new qontrol::Column;
     m_label_inputs.clear();
 
-    for (const auto *addr : *m_addresses) {
+    for (const auto *addr : m_addresses) {
         col->push(addressWidget(addr));
     }
 
-    auto *generateBtn = new QPushButton("Generate new address");
+    if (m_btn_generate == nullptr) {
+        m_btn_generate = new QPushButton("Generate new address");
+        connect(m_btn_generate, &QPushButton::clicked, AppController::get(), &AppController::actionCreateNewAddress);
+    }
     auto *row = (new qontrol::Row)
-        ->push(generateBtn)
+        ->push(m_btn_generate)
         ->pushSpacer()
         ;
 
@@ -107,11 +131,12 @@ void Receive::view() {
         ->pushSpacer()
         ;
 
-    // connect(generateBtn, &QPushButton::clicked, AppController::get(), &AppController::generateAddress);
 
     auto *oldWidget = m_main_widget;
     m_main_widget = margin(col);
     delete oldWidget;
+    auto *oldLayout = this->layout();
+    delete oldLayout;
     this->setLayout(m_main_widget->layout());
 }
 

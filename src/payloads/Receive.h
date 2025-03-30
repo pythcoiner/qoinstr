@@ -1,5 +1,6 @@
 #pragma once
 
+#include "include/cpp_joinstr.h"
 #include <QList>
 #include <cstdint>
 #include <qlist.h>
@@ -15,6 +16,7 @@ struct Address {
     static auto dummy() -> Address*;
     static auto none() -> Address*;
     static auto dummyAddresses() -> QList<Address*>*;
+    static auto fromRust(rust::Box<RustAddress>) -> Address*;
 
     auto operator==(const Address& other) const -> bool;
 };

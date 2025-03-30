@@ -1,5 +1,6 @@
 #pragma once
 
+#include "payloads/Receive.h"
 #include "screens/Coins.h"
 #include <QObject>
 #include <Qontrol>
@@ -42,6 +43,7 @@ signals:
     // Backend => GUI
     void updateCoins(payload::Coins*);
     void updatePools(QList<payload::Relay*>* pools);
+    void newAddress(payload::Address*);
 
     // GUI => Backend
 
@@ -68,6 +70,7 @@ public slots:
 
     // User Actions handlers
     void actionCreatePool(payload::Coin coin);
+    void actionCreateNewAddress();
 
     // Wallet Commands
     void cmdCreatePool(
