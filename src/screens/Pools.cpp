@@ -44,6 +44,7 @@ void Pools::recvPayload(QList<payload::Relay*> *payload) {
     if (relaysEquals(*m_payload, *payload)) {
         return;
     }
+    emit poolsUpdated();
 
     auto *old = m_payload;
     m_payload = payload;
@@ -125,16 +126,13 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
 void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     auto *collapsible = new qontrol::widgets::Collapsible(relay->url, col);
 
-    if (m_collapsibles==nullptr) {
-        m_collapsibles = new QList<qontrol::widgets::Collapsible*>;
-    }
-
     m_collapsibles->push_back(collapsible);
 
     int rowCount = relay->pools.size() + 1;
     const int c_table_width = 6;
     auto *table = new QTableWidget(rowCount, c_table_width);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    table->setMinimumHeight((rowCount+1)*30);
     auto headers = QStringList{
         "Id",
         "Denomination",

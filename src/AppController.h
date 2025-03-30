@@ -81,7 +81,7 @@ public slots:
     void listpools();
 
 private:
-    std::optional<rust::Box<Wallet>> m_wallet = std::nullopt;
+    std::optional<rust::Box<Account>> m_wallet = std::nullopt;
     QTimer *m_timer = nullptr;
     payload::Coins *m_coins = nullptr;
     QSystemTrayIcon *m_tray_icon;

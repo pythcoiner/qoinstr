@@ -27,7 +27,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 include(FetchContent)
 FetchContent_Declare(qontrol
     GIT_REPOSITORY https://github.com/pythcoiner/qontrol.git
-    GIT_TAG 230f1d6
+    GIT_TAG b14faba
 )
 FetchContent_MakeAvailable(qontrol)
 

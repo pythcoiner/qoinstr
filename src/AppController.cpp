@@ -30,7 +30,7 @@ void AppController::initState() {
     auto network = Network::Regtest;
     auto electrum = rust::String("192.168.1.21");
     uint16_t port = 50003;
-    auto relay = rust::String("wss://relay.damus.io");
+    auto relay = rust::String("ws://192.168.1.21:8100");
     // look for pools up to yesterday
     uint64_t back = 60 * 60 * 24;
 
@@ -83,11 +83,14 @@ void AppController::pollNotifications() {
         auto poll = m_wallet.value()->try_recv();
         if (poll->is_ok()) {
             auto signal = poll->boxed();
-            if (signal->is_ok()) {
-                auto signalStr = signal_flag_to_string(signal->unwrap());
-                qDebug() << "AppController::pollNotification() signal: " << std::string(signalStr);
+            if (!signal->is_err()) {
+                auto signalStr = QString(signal_flag_to_string(signal->unwrap()).c_str());
+                qDebug() << "AppController::pollNotification() signal: " << signalStr;
+                osInfo("Info", signalStr);
             } else if (signal->is_err()) {
-                qDebug() << "AppController::pollNotification() error: " << std::string(signal->error());
+                auto error = QString(std::string(signal->error()).c_str());
+                qDebug() << "AppController::pollNotification() error: " << error;
+                osCritical("Error", error, 5000);
             } else {
                 qDebug() << "AppController::pollNotification() empty: ";
             }
@@ -196,6 +199,7 @@ void AppController::actionCreatePool(payload::Coin coin) { // NOLINT
 }
 
 void AppController::cmdCreatePool(
+    // TODO: pass by value
     const QString &outpoint,
     uint64_t denomination,
     uint32_t fees,
@@ -206,10 +210,6 @@ void AppController::cmdCreatePool(
         m_wallet.value()->create_dummy_pool(denomination, peers, max_duration, fees);
     }
 }
-
-    // if (m_wallet.has_value()) {
-    //     m_wallet.value()->create_dummy_pool(300000, 5, 1000, 5);
-    // }
 
 void AppController::listpools() {
     qDebug() << "AppController::listpools()";
