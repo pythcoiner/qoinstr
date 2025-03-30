@@ -53,12 +53,11 @@ void AppController::initState() {
 }
 
 void AppController::poll() {
-    pollCoins();
-    pollPools();
     pollNotifications();
 }
 
 void AppController::pollCoins() {
+    qDebug() << "AppController::pollCoins()";
     if (m_wallet.has_value()) {
         auto rcoins = m_wallet.value()->spendable_coins();
         if (rcoins->is_ok()) {
@@ -69,6 +68,7 @@ void AppController::pollCoins() {
 }
 
 void AppController::pollPools() {
+    qDebug() << "AppController::pollPools()";
     if (m_wallet.has_value()) {
         auto rpools = m_wallet.value()->pools();
         if (rpools->is_ok()) {
@@ -78,15 +78,29 @@ void AppController::pollPools() {
     }
 }
 
+void AppController::pollAddresses() {
+    qDebug() << "AppController::pollAddresses()";
+
+}
+
 void AppController::pollNotifications() {
     if (m_wallet.has_value()) {
         auto poll = m_wallet.value()->try_recv();
-        if (poll->is_ok()) {
+        while (poll->is_ok()) {
             auto signal = poll->boxed();
             if (!signal->is_err()) {
-                auto signalStr = QString(signal_flag_to_string(signal->unwrap()).c_str());
-                qDebug() << "AppController::pollNotification() signal: " << signalStr;
-                osInfo("Info", signalStr);
+                auto s = signal->unwrap();
+                if ( s == SignalFlag::CoinUpdate) {
+                    pollCoins();
+                } else if (s == SignalFlag::PoolUpdate) {
+                    pollPools();
+                } else if (s == SignalFlag::AddressTipChanged) {
+                    pollAddresses();
+                } else {
+                    auto signalStr = QString(signal_flag_to_string(signal->unwrap()).c_str());
+                    qDebug() << "AppController::pollNotification() signal: " << signalStr;
+                    osInfo("Info", signalStr);
+                }
             } else if (signal->is_err()) {
                 auto error = QString(std::string(signal->error()).c_str());
                 qDebug() << "AppController::pollNotification() error: " << error;
@@ -94,6 +108,7 @@ void AppController::pollNotifications() {
             } else {
                 qDebug() << "AppController::pollNotification() empty: ";
             }
+            poll = m_wallet.value()->try_recv();
         }
     }
 }

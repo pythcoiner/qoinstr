@@ -50,6 +50,7 @@ public slots:
     void poll();
     void pollCoins();
     void pollPools();
+    void pollAddresses();
     void pollNotifications();
 
     // Main buttons actions
