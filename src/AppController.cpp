@@ -19,6 +19,7 @@
 
 void AppController::initState() {
     qDebug() << "AppController::initState()";
+    init_rust_logger(LogLevel::Debug);
 
     // init the wallet
     auto mnemonicStr = 
@@ -29,15 +30,21 @@ void AppController::initState() {
         qDebug() << "Invalid mnemonic: "<< errStr;
         return;
     }
-    auto network = Network::Regtest;
-    auto electrum = rust::String("192.168.1.21");
-    uint16_t port = 50003;
-    auto relay = rust::String("ws://192.168.1.21:8100");
+    // auto network = Network::Regtest;
+    // auto electrum = rust::String("192.168.1.21");
+    // uint16_t port = 50003;
+    // auto relay = rust::String("ws://192.168.1.21:8100");
+
+    auto network = Network::Signet;
+    auto electrum = rust::String("ssl://mempool.space");
+    uint16_t port = 50002;
+    auto relay = rust::String("wss://wss.damus.io");
+
     // look for pools up to yesterday
     uint64_t back = 60 * 60 * 24;
 
     auto wallet = 
-        new_wallet(std::move(mnemonic), network, electrum, port, relay, back);
+        new_account(std::move(mnemonic), network);
 
     auto addr = wallet->recv_addr_at(0);
     qDebug() << std::string(addr);
@@ -46,7 +53,7 @@ void AppController::initState() {
     // init the timer that trigger polls
     m_timer =  new QTimer;
     connect(m_timer, &QTimer::timeout, this, &AppController::poll);
-    m_timer->start(100); // poll every 100ms
+    m_timer->start(500); // poll every 100ms
 
     m_tray_icon = new QSystemTrayIcon;
     m_tray_icon->setIcon(QIcon::fromTheme("dialog-information")); // required on Linux!
@@ -235,6 +242,19 @@ void AppController::cmdCreatePool(
     if (m_wallet.has_value()) {
         m_wallet.value()->create_dummy_pool(denomination, peers, max_duration, fees);
     }
+}
+
+void AppController::cmdSaveConfig(payload::Config payload) {
+    auto conf = config_from_file(rust::String("main"));
+    conf->set_electrum_url(payload.electrum_url.toStdString());
+    conf->set_electrum_port(payload.electrum_port.toStdString());
+    conf->set_nostr_relay(payload.nostr_relay.toStdString());
+    conf->set_nostr_back(payload.nostr_back.toStdString());
+}
+
+void AppController::cmdLoadConfig() {
+    auto conf = payload::Config::fromRust(config_from_file(rust::String("main")));
+    emit loadConfig(conf);
 }
 
 void AppController::listpools() {

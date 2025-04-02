@@ -48,6 +48,7 @@ set(SOURCES
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
     src/payloads/Pools.cpp
+    src/payloads/Config.cpp
 )
 
 qt_add_executable(${BIN}

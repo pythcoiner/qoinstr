@@ -1,6 +1,7 @@
 #pragma once
 
 #include "payloads/Receive.h"
+#include "payloads/Config.h"
 #include "screens/Coins.h"
 #include <QObject>
 #include <Qontrol>
@@ -9,8 +10,8 @@
 #include <include/cpp_joinstr.h>
 #include <optional>
 #include <qdialog.h>
-#include <qtimer.h>
 #include <qsystemtrayicon.h>
+#include <qtimer.h>
 
 namespace payload {
 class Relay;
@@ -44,8 +45,7 @@ signals:
     void updateCoins(payload::Coins*);
     void updatePools(QList<payload::Relay*>* pools);
     void newAddress(payload::Address*);
-
-    // GUI => Backend
+    void loadConfig(payload::Config);
 
 public slots:
     void initState();
@@ -80,6 +80,8 @@ public slots:
         uint64_t max_duration,
         size_t peers
     );
+    void cmdSaveConfig(payload::Config payload);
+    void cmdLoadConfig();
 
     
     void listpools();
