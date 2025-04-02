@@ -15,14 +15,11 @@ namespace screen {
 
 Settings::Settings() {
     this->init();
-    this->doConnect();
     this->view();
+    this->doConnect();
 }
 
-void Settings::init() {
-    view();
-    doConnect();
-}
+void Settings::init() {}
 
 void Settings::doConnect() {
     auto *ctrl = AppController::get();
@@ -49,21 +46,28 @@ void Settings::loadConfig(payload::Config payload) { // NOLINT(performance-unnec
 }
 
 void Settings::view() {
+    if (m_view_init) return;
     m_electrum_url = (new qontrol::widgets::InputLine("elecrum_url"))
         ->label("Electrum url:")
-        ->input(qontrol::widgets::InputType::String);
+        ->input(qontrol::widgets::InputType::String)
+        ->inputWidth( 2)
+        ;
 
     m_electrum_port = (new qontrol::widgets::InputLine("electrum_port"))
         ->label("Electrum port:")
-        ->input(qontrol::widgets::InputType::Int);
+        ->input(qontrol::widgets::InputType::Int)
+        ;
 
     m_nostr_relay = (new qontrol::widgets::InputLine("nostr_relay"))
         ->label("Nostr relay url:")
-        ->input(qontrol::widgets::InputType::String);
+        ->input(qontrol::widgets::InputType::String)
+        ->inputWidth( 2)
+        ;
 
     m_nostr_back = (new qontrol::widgets::InputLine("nostr_back"))
         ->label("Nostr scan back:")
-        ->input(qontrol::widgets::InputType::Int);
+        ->input(qontrol::widgets::InputType::Int)
+        ;
 
     m_btn_save = new QPushButton("Save");
 

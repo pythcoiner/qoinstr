@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) : Window(parent) {
     this->initWindow();
     AppController::get()->initState();
     AppController::get()->loadPanels();
+    AppController::get()->cmdLoadConfig();
 }
 
 void MainWindow::initWindow() {

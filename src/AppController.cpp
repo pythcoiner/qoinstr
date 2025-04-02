@@ -16,10 +16,11 @@
 #include <qsystemtrayicon.h>
 #include <qtimer.h>
 #include <string>
+#include <utility>
 
 void AppController::initState() {
     qDebug() << "AppController::initState()";
-    init_rust_logger(LogLevel::Debug);
+    init_rust_logger(LogLevel::Info);
 
     // init the wallet
     auto mnemonicStr = 
@@ -30,24 +31,12 @@ void AppController::initState() {
         qDebug() << "Invalid mnemonic: "<< errStr;
         return;
     }
-    // auto network = Network::Regtest;
-    // auto electrum = rust::String("192.168.1.21");
-    // uint16_t port = 50003;
-    // auto relay = rust::String("ws://192.168.1.21:8100");
 
-    auto network = Network::Signet;
-    auto electrum = rust::String("ssl://mempool.space");
-    uint16_t port = 50002;
-    auto relay = rust::String("wss://wss.damus.io");
-
-    // look for pools up to yesterday
-    uint64_t back = 60 * 60 * 24;
+    auto network = Network::Bitcoin;
 
     auto wallet = 
-        new_account(std::move(mnemonic), network);
+        new_account(std::move(mnemonic), network, "main");
 
-    auto addr = wallet->recv_addr_at(0);
-    qDebug() << std::string(addr);
     m_wallet = std::make_optional(std::move(wallet));
 
     // init the timer that trigger polls
@@ -245,16 +234,20 @@ void AppController::cmdCreatePool(
 }
 
 void AppController::cmdSaveConfig(payload::Config payload) {
-    auto conf = config_from_file(rust::String("main"));
-    conf->set_electrum_url(payload.electrum_url.toStdString());
-    conf->set_electrum_port(payload.electrum_port.toStdString());
-    conf->set_nostr_relay(payload.nostr_relay.toStdString());
-    conf->set_nostr_back(payload.nostr_back.toStdString());
+    qDebug() << "AppController::cmdSaveConfig()";
+    if (m_wallet.has_value()) {
+        m_wallet.value()->set_electrum(payload.electrum_url.toStdString(), payload.electrum_port.toStdString());
+        m_wallet.value()->set_nostr(payload.nostr_relay.toStdString(), payload.nostr_back.toStdString());
+    }
 }
 
 void AppController::cmdLoadConfig() {
-    auto conf = payload::Config::fromRust(config_from_file(rust::String("main")));
-    emit loadConfig(conf);
+    qDebug() << "AppController::cmdLoadConfig()";
+    if (m_wallet.has_value()) {
+        auto rconf = m_wallet.value()->get_config();
+        auto config = payload::Config::fromRust(std::move(rconf));
+        emit loadConfig(config);
+    }
 }
 
 void AppController::listpools() {
