@@ -34,6 +34,7 @@ private:
     qontrol::widgets::InputLine *m_electrum_port = nullptr;
     qontrol::widgets::InputLine *m_nostr_relay = nullptr;
     qontrol::widgets::InputLine *m_nostr_back = nullptr;
+    qontrol::widgets::InputLine *m_look_ahead = nullptr;
     QPushButton *m_btn_save =  nullptr;
 };
 

@@ -34,6 +34,7 @@ void Settings::actionSave() {
     payload.electrum_port = QString::number(m_electrum_port->value().toInt());
     payload.nostr_relay = m_nostr_relay->value().toString();
     payload.nostr_back = QString::number(m_nostr_back->value().toInt());
+    payload.look_ahead = QString::number(m_look_ahead->value().toInt());
     emit saveSettings(payload);
 }
 
@@ -43,6 +44,7 @@ void Settings::loadConfig(payload::Config payload) { // NOLINT(performance-unnec
     m_electrum_port->setValue(payload.electrum_port);
     m_nostr_relay->setValue(payload.nostr_relay);
     m_nostr_back->setValue(payload.nostr_back);
+    m_look_ahead->setValue(payload.look_ahead);
 }
 
 void Settings::view() {
@@ -69,6 +71,11 @@ void Settings::view() {
         ->input(qontrol::widgets::InputType::Int)
         ;
 
+    m_look_ahead = (new qontrol::widgets::InputLine("look_ahead"))
+        ->label("Look ahead:")
+        ->input(qontrol::widgets::InputType::Int)
+        ;
+
     m_btn_save = new QPushButton("Save");
 
     auto *saveRow = (new qontrol::Row)
@@ -86,6 +93,8 @@ void Settings::view() {
         ->push(m_nostr_relay)
         ->pushSpacer(V_SPACER)
         ->push(m_nostr_back)
+        ->pushSpacer(V_SPACER)
+        ->push(m_look_ahead)
         ->pushSpacer(30)
         ->push(saveRow)
         ->pushSpacer()

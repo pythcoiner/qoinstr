@@ -12,6 +12,7 @@ struct Config {
     QString electrum_port;
     QString nostr_relay;
     QString nostr_back;
+    QString look_ahead;
 
     static auto fromRust(rust::Box<RustConfig> rconf) -> Config;
 };

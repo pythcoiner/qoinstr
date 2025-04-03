@@ -35,7 +35,7 @@ void AppController::initState() {
     auto network = Network::Bitcoin;
 
     auto wallet = 
-        new_account(std::move(mnemonic), network, "main");
+        new_account(std::move(mnemonic),  "main");
 
     m_wallet = std::make_optional(std::move(wallet));
 
@@ -233,11 +233,12 @@ void AppController::cmdCreatePool(
     }
 }
 
-void AppController::cmdSaveConfig(payload::Config payload) {
+void AppController::cmdSaveConfig(payload::Config payload) { // NOLINT(performance-unnecessary-value-param)
     qDebug() << "AppController::cmdSaveConfig()";
     if (m_wallet.has_value()) {
         m_wallet.value()->set_electrum(payload.electrum_url.toStdString(), payload.electrum_port.toStdString());
         m_wallet.value()->set_nostr(payload.nostr_relay.toStdString(), payload.nostr_back.toStdString());
+        m_wallet.value()->set_look_ahead(payload.look_ahead.toStdString());
     }
 }
 
