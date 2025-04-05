@@ -1,7 +1,7 @@
 #include "Pools.h"
 
+#include "AccountController.h"
 #include <algorithm>
-#include "AppController.h"
 
 namespace payload {
 
@@ -57,10 +57,9 @@ namespace payload {
         return list;
     }
 
-    auto Relay::fromRust(rust::Box<RustPools> rpools) -> QList<Relay*>* {
-        // auto wallet = AppController::relay()
+    auto Relay::fromRust(rust::Box<RustPools> rpools, const QString &relay_url) -> QList<Relay*>* {
         auto *relay = new Relay();
-        relay->url = AppController::relay();
+        relay->url = relay_url;
 
         for (size_t i = 0; i < rpools->count() ; i++) {
             auto *pool = Pool::fromRust(rpools->get(i));

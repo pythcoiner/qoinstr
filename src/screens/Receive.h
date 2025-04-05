@@ -9,12 +9,14 @@
 #include <qtmetamacros.h>
 #include <qwidget.h>
 
+class AccountController;
+
 namespace screen {
 
 class Receive : public qontrol::Screen {
     Q_OBJECT
 public:
-    explicit Receive();
+    Receive(AccountController *ctrl);
 
     void onUnload() override;
     void onNewAddress(payload::Address* addr);
@@ -24,6 +26,7 @@ protected:
     void doConnect() override;
     void view() override;
 private:
+    AccountController *m_controller;
     QList<payload::Address*> m_addresses;
     QList<QWidget*> m_widgets;
     QWidget *m_main_widget = nullptr;

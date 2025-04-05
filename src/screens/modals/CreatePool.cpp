@@ -1,4 +1,5 @@
 #include "CreatePool.h"
+#include "AccountController.h"
 #include "AppController.h"
 #include "Column.h"
 #include "Modal.h"
@@ -26,11 +27,12 @@ const int VB_FEE = 150;
 namespace modal {
 using qontrol::Modal;
 
-CreatePool::CreatePool(const payload::Coin &coin) {
+CreatePool::CreatePool(const payload::Coin &coin, AccountController *ctrl) {
   this->setWindowTitle("Create Pool");
   this->setFixedSize(680, 400);
 
   m_coin = payload::Coin(coin);
+    m_controller = ctrl;
 
   m_peers_validator = new QIntValidator(2, 10, this);
   m_fees_validator = new QIntValidator(1, 1000, this);
@@ -38,7 +40,7 @@ CreatePool::CreatePool(const payload::Coin &coin) {
   m_denom_validator = new QDoubleValidator(0.0001, 10.0, 5, this);
 
   // Title
-  auto relay = AppController::relay();
+  auto relay = m_controller->relay();
   auto titleStr = QString("Create a new Joinstr Pool on ");
   titleStr = titleStr + relay + QString(" ?");
   auto *title = new QLabel(titleStr);
@@ -254,8 +256,7 @@ CreatePool::CreatePool(const payload::Coin &coin) {
     void CreatePool::onCreatePool() {
         this->process();
 
-        auto *ctrl = AppController::get();
-        connect(this, &CreatePool::createPool, ctrl, &AppController::cmdCreatePool);
+        connect(this, &CreatePool::createPool, m_controller, &AccountController::cmdCreatePool);
         connect(this, &CreatePool::createPool, this, [this]() {this->close();});
 
         emit this->createPool(

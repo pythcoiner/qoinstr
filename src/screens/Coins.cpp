@@ -1,4 +1,5 @@
 #include "Coins.h"
+#include "AccountController.h"
 #include "AppController.h"
 #include "Row.h"
 #include "common.h"
@@ -11,7 +12,8 @@
 
 namespace screen {
 
-Coins::Coins() {
+Coins::Coins(AccountController *ctrl) {
+    m_controller = ctrl;
     this->init();
     this->doConnect();
     this->view();
@@ -34,10 +36,10 @@ void Coins::recvPayload(payload::Coins *payload) {
 }
 
 void Coins::doConnect() {
-    auto *ctrl = AppController::get();
-    connect(ctrl, &AppController::updateCoins, this, &Coins::recvPayload);
-    connect(this, &Coins::coinsUpdated, ctrl, [ctrl]() {
-        ctrl->osInfo("Coins updated", "List of coins have been updated");
+    auto *ctrl = m_controller;
+    connect(ctrl, &AccountController::updateCoins, this, &Coins::recvPayload);
+    connect(this, &Coins::coinsUpdated,  []() {
+        AppController::get()->osInfo("Coins updated", "List of coins have been updated");
     } );
 }
 
@@ -63,7 +65,7 @@ auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count
     return row;
 }
 
-void insertCoin(QTableWidget *table, const payload::Coin *coin, int index) {
+void insertCoin(AccountController *ctrl, QTableWidget *table, const payload::Coin *coin, int index) {
     QString date;
     if (coin->date.has_value()) {
         date = coin->date.value().toString();
@@ -82,7 +84,7 @@ void insertCoin(QTableWidget *table, const payload::Coin *coin, int index) {
     table->setItem(index, 5, depth);
 
     auto outpoint = coin->outpoint;
-    auto *controller = AppController::get();
+    auto *controller = ctrl;
 
     auto *join = new QPushButton("Join");
     // QObject::connect(join, &QPushButton::clicked, controller,
@@ -131,7 +133,7 @@ void Coins::view() {
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (auto *coin : m_payload->coins) {
-        insertCoin(table, coin, index);
+        insertCoin(m_controller, table, coin, index);
         index++;
     }
     auto *oldTable = m_table;

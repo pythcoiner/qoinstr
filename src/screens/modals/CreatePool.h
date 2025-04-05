@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountController.h"
 #include "screens/Coins.h"
 #include <cstdint>
 #include <qdialog.h>
@@ -13,7 +14,7 @@ namespace modal {
 class CreatePool : public qontrol::Modal {
     Q_OBJECT
 public:
-    CreatePool(const payload::Coin &coin);
+    CreatePool(const payload::Coin &coin, AccountController *ctrl);
 
 signals:
     void createPool(
@@ -31,10 +32,10 @@ public slots:
 private:
     auto fetch() -> bool;
 
-
-
 private:
     payload::Coin m_coin;
+    QString m_relay;
+    AccountController *m_controller = nullptr;
 
     // Processed values
     uint64_t m_denomination = 0;
@@ -43,18 +44,17 @@ private:
     size_t m_peers = 0;
 
     // Widgets
-    QLineEdit *m_w_denomination;
-    QLineEdit *m_w_fee;
-    QLineEdit *m_w_peers;
-    QLineEdit *m_w_timeout;
-    QPushButton *m_create_btn;
+    QLineEdit *m_w_denomination = nullptr;
+    QLineEdit *m_w_fee = nullptr;
+    QLineEdit *m_w_peers = nullptr;
+    QLineEdit *m_w_timeout = nullptr;
+    QPushButton *m_create_btn = nullptr;
 
     // Input validators
-    QIntValidator *m_fees_validator;
-    QIntValidator *m_peers_validator;
-    QIntValidator *m_timeout_validator;
-    QDoubleValidator *m_denom_validator;
-
+    QIntValidator *m_fees_validator = nullptr;
+    QIntValidator *m_peers_validator = nullptr;
+    QIntValidator *m_timeout_validator = nullptr;
+    QDoubleValidator *m_denom_validator = nullptr;
 };
 
 } // namespace modal

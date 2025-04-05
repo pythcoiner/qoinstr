@@ -1,3 +1,4 @@
+#include "MouseInspector.h"
 #include <MainWindow.h>
 #include <QApplication>
 #include <Qontrol>
@@ -10,6 +11,9 @@ auto main(int argc, char *argv[]) -> int {
     window.setMinimumSize(1300,800);
     window.setWindowTitle("Qoinstr");
     window.show();
+
+    // auto *inspector = new MouseInspector(&app);
+    // app.installEventFilter(inspector);
 
     return QApplication::exec();
 }

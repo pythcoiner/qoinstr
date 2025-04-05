@@ -37,7 +37,10 @@ set(CMAKE_AUTOUIC ON)
 set(SOURCES
     src/main.cpp
     src/AppController.cpp
+    src/AccountController.cpp
+    src/AccountWidget.cpp
     src/MainWindow.cpp
+    src/MouseInspector.cpp
     src/screens/common.cpp
     src/screens/Coins.cpp
     src/screens/Pools.cpp

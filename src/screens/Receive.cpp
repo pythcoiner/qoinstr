@@ -1,5 +1,6 @@
 #include "Receive.h"
 #include "AppController.h"
+#include "AccountController.h"
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
@@ -11,7 +12,8 @@
 
 namespace screen {
 
-Receive::Receive() {
+Receive::Receive(AccountController *ctrl) {
+    m_controller = ctrl;
     this->init();
     this->doConnect();
     this->view();
@@ -21,7 +23,7 @@ void Receive::init() {
 }
 
 void Receive::doConnect() {
-    connect(AppController::get(), &AppController::newAddress, this, &Receive::onNewAddress);
+    connect(m_controller, &AccountController::newAddress, this, &Receive::onNewAddress);
 }
 
 void Receive::onUnload() {
@@ -90,7 +92,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget* {
         ;
     m_widgets.push_back(col);
 
-    auto *controller = AppController::get();
+    auto *controller = m_controller;
     // connect(qrBtn, &QPushButton::clicked, controller, 
     //         [address, controller]() {
     //             controller->showAddressQr(address->address, address->index, address->change);
@@ -120,7 +122,7 @@ void Receive::view() {
 
     if (m_btn_generate == nullptr) {
         m_btn_generate = new QPushButton("Generate new address");
-        connect(m_btn_generate, &QPushButton::clicked, AppController::get(), &AppController::actionCreateNewAddress);
+        connect(m_btn_generate, &QPushButton::clicked, m_controller, &AccountController::actionCreateNewAddress);
     }
     auto *row = (new qontrol::Row)
         ->push(m_btn_generate)

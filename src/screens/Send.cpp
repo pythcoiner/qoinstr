@@ -1,7 +1,9 @@
 #include "Send.h"
 #include "AppController.h"
+#include "AccountController.h"
 #include "common.h"
 #include <Qontrol>
+#include <algorithm>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
@@ -92,7 +94,8 @@ auto Output::output() -> payload::Output {
 
 }
 
-Send::Send() {
+Send::Send(AccountController *ctrl) {
+    m_controller = ctrl;
     this->init();
     this->doConnect();
     this->view();
@@ -126,7 +129,7 @@ void Send::view() {
     for (auto id : m_outputs.keys()) {
         keys.push_back(id);
     }
-    std::sort(keys.begin(), keys.end());
+    std::ranges::sort(keys);
     for (auto id : keys) {
         auto *output = m_outputs.value(id);
         m_column->push(output->widget(this, id));

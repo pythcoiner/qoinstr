@@ -1,4 +1,5 @@
 #include "Pools.h"
+#include "AccountController.h"
 #include "AppController.h"
 #include "Row.h"
 #include "common.h"
@@ -12,7 +13,8 @@
 
 namespace screen {
 
-Pools::Pools() {
+Pools::Pools(AccountController *ctrl) {
+    m_controller = ctrl;
     this->init();
     this->doConnect();
     this->view();
@@ -60,10 +62,10 @@ void Pools::init() {
 }
 
 void Pools::doConnect() {
-    auto *ctrl = AppController::get();
-    connect(ctrl, &AppController::updatePools, this, &Pools::recvPayload);
-    connect(this, &Pools::poolsUpdated, ctrl, [ctrl]() {
-        ctrl->osInfo("Pools updated", "List of pools have been updated");
+    auto *ctrl = m_controller;
+    connect(ctrl, &AccountController::updatePools, this, &Pools::recvPayload);
+    connect(this, &Pools::poolsUpdated, ctrl, []() {
+        AppController::get()->osInfo("Pools updated", "List of pools have been updated");
     } );
 }
 
@@ -77,7 +79,7 @@ auto peersCount(uint8_t peers, uint8_t total) -> QString {
     return "0/0";
 }
 
-void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
+void insertPool(AccountController *ctrl, QTableWidget *table, const payload::Pool *pool, int index) {
     auto *id = 
         new QTableWidgetItem(pool->id);
     id->setTextAlignment(Qt::AlignCenter);
@@ -104,7 +106,7 @@ void insertPool(QTableWidget *table, const payload::Pool *pool, int index) {
     table->setItem(index, 4, peers);
 
     auto poolId = pool->id;
-    auto *controller = AppController::get();
+    // auto *controller = ctrl;
 
     auto *join = new QPushButton("Join");
     // QObject::connect(join, &QPushButton::clicked, controller,
@@ -144,7 +146,7 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (auto *pool : relay->pools) {
-        insertPool(table, pool, index);
+        insertPool(m_controller, table, pool, index);
         index++;
     }
 
@@ -152,7 +154,7 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     table->setSpan(index, 0, 6, c_table_width);
 
     auto *create = new QPushButton("Create pool");
-    auto *controller = AppController::get();
+    // auto *controller = m_controller;
     // connect(create, &QPushButton::clicked, controller, 
     //         [relay, controller]() {controller->createPoolOnRelay(relay->url);});
     auto *row = (new qontrol::Row(table))

@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "AccountController.h"
 #include "AppController.h"
 #include "Column.h"
 #include "Row.h"
@@ -7,13 +8,13 @@
 #include "screens/common.h"
 #include "widgets/Input.h"
 #include "widgets/InputLine.h"
-#include <cstdint>
 #include <qlabel.h>
 #include <qpushbutton.h>
 
 namespace screen {
 
-Settings::Settings() {
+Settings::Settings(AccountController *ctrl) {
+    m_controller = ctrl;
     this->init();
     this->view();
     this->doConnect();
@@ -22,10 +23,10 @@ Settings::Settings() {
 void Settings::init() {}
 
 void Settings::doConnect() {
-    auto *ctrl = AppController::get();
+    auto *ctrl = m_controller;
     connect(m_btn_save, &QPushButton::clicked, this, &Settings::actionSave, qontrol::UNIQUE);
-    connect(this, &Settings::saveSettings, ctrl, &AppController::cmdSaveConfig, qontrol::UNIQUE);
-    connect(ctrl, &AppController::loadConfig, this, &Settings::loadConfig, qontrol::UNIQUE);
+    connect(this, &Settings::saveSettings, ctrl, &AccountController::cmdSaveConfig, qontrol::UNIQUE);
+    connect(ctrl, &AccountController::loadConfig, this, &Settings::loadConfig, qontrol::UNIQUE);
 }
 
 void Settings::actionSave() {

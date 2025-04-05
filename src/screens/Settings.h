@@ -7,12 +7,14 @@
 #include <qtmetamacros.h>
 #include <qwidget.h>
 
+class AccountController;
+
 namespace screen {
 
 class Settings : public qontrol::Screen {
     Q_OBJECT
 public:
-    explicit Settings();
+    explicit Settings(AccountController *ctrl);
 
 signals:
     void saveSettings(payload::Config);
@@ -28,6 +30,7 @@ protected:
     void actionSave();
     
 private:
+    AccountController *m_controller = nullptr;
     bool m_view_init = false;
     QWidget *m_main_widget = nullptr;
     qontrol::widgets::InputLine *m_electrum_url = nullptr;

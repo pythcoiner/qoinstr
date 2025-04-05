@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../payloads/Coins.h"
+#include "AccountController.h"
 #include <Qontrol>
 #include <cstdint>
 #include <qpushbutton.h>
@@ -8,12 +9,14 @@
 #include <qtmetamacros.h>
 #include <qwidget.h>
 
+class AccountController;
+
 namespace screen {
 
 class Coins : public qontrol::Screen {
     Q_OBJECT
 public:
-    explicit Coins();
+    Coins(AccountController *ctrl);
 
 signals:
     void coinsUpdated();
@@ -31,6 +34,7 @@ private:
     QTableWidget *m_table = nullptr;
     QList<QString /*outpoint*/> m_selected_coins;
     uint64_t m_amount_selected = 0;
+    AccountController *m_controller = nullptr;
 };
 
 } // namespace screen

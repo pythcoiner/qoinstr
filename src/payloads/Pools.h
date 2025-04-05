@@ -31,7 +31,7 @@ struct Relay {
     Relay() = default;
     static auto dummy() -> Relay*;
     static auto dummyRelays() -> QList<Relay*>*;
-    static auto fromRust(rust::Box<RustPools> rpools) -> QList<Relay*>*;
+    static auto fromRust(rust::Box<RustPools> rpools, const QString &relay_url) -> QList<Relay*>*;
     auto operator==(const Relay& other) const -> bool;
     void sort();
 };

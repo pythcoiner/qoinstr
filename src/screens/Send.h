@@ -7,6 +7,8 @@
 #include <qtmetamacros.h>
 #include <qwidget.h>
 
+class AccountController;
+
 namespace screen {
 class Send;
 class Output {
@@ -24,17 +26,10 @@ private:
     QWidget *m_widget = nullptr;
 };
 
-// payload::Output {
-//     QString address;
-//     uint64_t amount = 0;
-//     QString label;
-//     bool max = false;
-// };
-
 class Send : public qontrol::Screen {
     Q_OBJECT
 public:
-    explicit Send();
+    Send(AccountController *ctrl);
 
 public slots:
     void deleteOutput(int id);
@@ -45,6 +40,7 @@ protected:
     void doConnect() override;
     void view() override;
 private:
+    AccountController *m_controller = nullptr;
     int m_output_id = 0;
     QHash<int, Output*> m_outputs;
     qontrol::Column *m_column = nullptr;
