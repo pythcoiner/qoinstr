@@ -27,7 +27,6 @@ void Receive::doConnect() {
 }
 
 void Receive::onUnload() {
-    qDebug() << "Receive::onUnload()";
     for (auto *item : m_addresses) {
         delete item;
     }

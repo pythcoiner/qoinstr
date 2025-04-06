@@ -17,8 +17,9 @@ public:
     ~AccountWidget() override;
     void loadLayout(QLayout *layout);
     auto screenContainer() -> QWidget*;
-    auto takePanel() -> qontrol::Panel*;
-    void loadPanel(qontrol::Panel*);
+    auto takeScreen() -> qontrol::Screen*;
+    void setScreen(qontrol::Screen* screen);
+    void loadPanel(qontrol::Panel* layout);
 
 signals:
 

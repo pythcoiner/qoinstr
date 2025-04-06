@@ -3,6 +3,7 @@
 #include "AppController.h"
 #include "Column.h"
 #include "Row.h"
+#include <qboxlayout.h>
 #include <qlogging.h>
 #include <qpushbutton.h>
 #include <qsizepolicy.h>
@@ -65,20 +66,40 @@ void AccountWidget::loadPanel(qontrol::Panel *panel) {
     if (panel == nullptr) return;
 
     if (m_current_panel != nullptr) {
-
-        auto *previousScreen = m_current_screen;
+        auto *previousScreen = takeScreen();
         if (previousScreen != nullptr) {
+
+            // m_current_panel takes ownership of unloaded screen
+            m_current_panel->setScreen(previousScreen); 
+
             previousScreen->onUnload();
-            previousScreen->setVisible(false);
         }
-        m_current_panel->widget()->setLayout(m_screen_container->layout());
-        m_current_panel->widget()->setVisible(false);
+        if (m_current_screen != nullptr) {
+            m_screen_container->layout()->removeWidget(m_current_screen);
+        }
     }
  
     m_current_panel = panel;
-    m_screen_container->setLayout(panel->widget()->layout());
+    m_current_panel->connectScreen();
+    setScreen(panel->widget());
     m_current_panel->widget()->setVisible(true);
 
+}
+
+void AccountWidget::setScreen(qontrol::Screen* screen) {
+    if (m_screen_container->layout() == nullptr) {
+        m_screen_container->setLayout(new QHBoxLayout);
+    }
+    m_screen_container->layout()->addWidget(screen);
+    m_current_screen = screen;
+    m_current_screen->setVisible(true);
+}
+
+auto AccountWidget::takeScreen() -> qontrol::Screen* {
+    auto *screen = m_current_screen;
+    m_current_screen = nullptr;
+    screen->setVisible(false);
+    return screen;
 }
 
 // load a qontrol::Screen::layout() into the screen container

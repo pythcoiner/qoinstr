@@ -122,27 +122,22 @@ void AccountController::pollNotifications() {
 
 void AccountController::loadPanels() {
     auto *cScreen = new screen::Coins(this);
-    cScreen->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto *coins = new qontrol::Panel(cScreen, "coins");
     this->insertPanel(coins);
 
     auto *pScreen = new screen::Pools(this);
-    pScreen->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto *pools = new qontrol::Panel(pScreen, "pools");
     this->insertPanel(pools);
 
     auto *sScreen = new screen::Send(this);
-    sScreen->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto *send = new qontrol::Panel(sScreen, "send");
     this->insertPanel(send);
 
     auto *rScreen = new screen::Receive(this);
-    rScreen->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto *receive = new qontrol::Panel(rScreen, "receive");
     this->insertPanel(receive);
 
     auto *ssScreen = new screen::Settings(this);
-    ssScreen->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto *settings = new qontrol::Panel(ssScreen, "settings");
     this->insertPanel(settings);
 
