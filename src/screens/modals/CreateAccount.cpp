@@ -52,7 +52,6 @@ CreateAccount::CreateAccount() {
     // Create btn
     m_create_btn = new QPushButton("Create wallet");
     connect(m_create_btn, &QPushButton::clicked, this, &CreateAccount::onCreateAccount, qontrol::UNIQUE);
-    connect(m_create_btn, &QPushButton::clicked, this, &QDialog::close, qontrol::UNIQUE);
     connect(this, &CreateAccount::createAccount, AppController::get(), &AppController::createAccount, qontrol::UNIQUE);
     auto *btn = (new qontrol::Row)
         ->pushSpacer()
@@ -130,10 +129,10 @@ void CreateAccount::onCreateAccount() {
         );
         AppController::execModal(modal);
         return;
-
     }
 
     emit createAccount(m_name->input()->text(), m_mnemonic->input()->text(), network);
+    close();
 }
 
 void CreateAccount::onGenerateMnemonic() {

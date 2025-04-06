@@ -199,8 +199,8 @@ auto AccountController::relay() -> QString {
 
 
 void AccountController::actionCreatePool(payload::Coin coin) { // NOLINT
-    // auto *modal = new modal::CreatePool(coin);
-    // AppController::execModal(modal);
+    auto *modal = new modal::CreatePool(coin, this);
+    AppController::execModal(modal);
 }
 
 void AccountController::actionCreateNewAddress() {

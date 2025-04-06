@@ -32,10 +32,6 @@ void AppController::initState() {
 
     connect(this, &AppController::accountCreated, this, &AppController::onAccountCreated, qontrol::UNIQUE);
 
-    // // DEBUG:
-    // addAccount("main");
-    // addAccount("main2");
-
 }
 
 void AppController::addAccount(const QString &name) { // NOLINT(readability-convert-member-functions-to-static)

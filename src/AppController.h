@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountController.h"
 #include "include/cpp_joinstr.h"
 #include <QObject>
 #include <Qontrol>
