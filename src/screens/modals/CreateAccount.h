@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountController.h"
+#include "include/cpp_joinstr.h"
 #include "screens/Coins.h"
 #include "widgets/ComboLine.h"
 #include "widgets/InputLine.h"

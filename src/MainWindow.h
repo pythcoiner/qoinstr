@@ -28,6 +28,9 @@ public:
 
 signals:
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     bool m_init = false;
     QTabWidget *m_tab = nullptr;

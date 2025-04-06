@@ -20,6 +20,7 @@ public:
     auto takeScreen() -> qontrol::Screen*;
     void setScreen(qontrol::Screen* screen);
     void loadPanel(qontrol::Panel* layout);
+    auto controller() -> AccountController*;
 
 signals:
 

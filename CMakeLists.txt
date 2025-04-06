@@ -52,6 +52,7 @@ set(SOURCES
     src/screens/MenuTab.cpp
     src/screens/modals/CreatePool.cpp
     src/screens/modals/CreateAccount.cpp
+    src/screens/modals/Stop.cpp
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
     src/payloads/Pools.cpp

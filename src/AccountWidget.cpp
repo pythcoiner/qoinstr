@@ -112,3 +112,8 @@ auto AccountWidget::screenContainer() -> QWidget* {
     return m_screen_container;
 }
 
+
+auto AccountWidget::controller() -> AccountController* {
+    return m_controller;
+}
+

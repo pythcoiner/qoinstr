@@ -50,6 +50,7 @@ signals:
     void updatePools(QList<payload::Relay*>* pools);
     void newAddress(payload::Address*);
     void loadConfig(payload::Config);
+    void stopped();
 
 public slots:
     void loadPanel(const QString &name);
@@ -84,6 +85,8 @@ public slots:
     void cmdLoadConfig();
 
     void listpools();
+
+    void stop();
 
 private:
     QPointer<qontrol::Panel> m_current_panel;

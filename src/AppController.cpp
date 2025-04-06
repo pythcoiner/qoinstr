@@ -40,6 +40,7 @@ void AppController::addAccount(const QString &name) { // NOLINT(readability-conv
     if (!win->accountExists(name)) {
         auto *acc = new AccountWidget(name);
         win->insertAccount(acc, name);
+        m_accounts.insert(name, acc->controller());
 
     } else {
         qCritical() << "Account " << name << " already exists!";
@@ -49,6 +50,7 @@ void AppController::addAccount(const QString &name) { // NOLINT(readability-conv
 void AppController::removeAccount(const QString &account) { // NOLINT(readability-convert-member-functions-to-static)
     auto *win = dynamic_cast<MainWindow*>(window());
     win->removeAccount(account);
+    m_accounts.remove(account);
 }
 
 void AppController::listAccounts() {
@@ -92,4 +94,17 @@ void AppController::osWarning(QString title, QString msg, int delay) { // NOLINT
 }
 void AppController::osCritical(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Critical, delay);
+}
+
+auto AppController::accounts() -> int {
+    return m_accounts.size();
+}
+
+void AppController::stop(modal::Stop *modal) {
+    for (auto *account : m_accounts) {
+        connect(account, &AccountController::stopped, modal, &modal::Stop::onStopped, qontrol::UNIQUE);
+        account->stop();
+    }
+    m_tray_icon->hide();
+    m_tray_icon->deleteLater();
 }

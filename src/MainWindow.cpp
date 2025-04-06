@@ -1,6 +1,7 @@
-#include "MainWindow.h"
 #include "AppController.h"
+#include "MainWindow.h"
 #include "screens/MenuTab.h"
+#include "screens/modals/Stop.h"
 #include <qcontainerfwd.h>
 #include <qlogging.h>
 #include <qtabwidget.h>
@@ -63,6 +64,13 @@ void MainWindow::updateTabs() {
         m_tab->addTab(tab.second, tab.first);
     }
     m_tab->addTab(m_menu_tab, "+");
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    auto *modal = new modal::Stop;
+    modal->stop();
+    AppController::execModal(modal);
+    event->accept();
 }
 
 MainWindow::~MainWindow() = default;

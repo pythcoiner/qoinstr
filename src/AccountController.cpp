@@ -1,6 +1,5 @@
 #include "AccountController.h"
 #include "AccountWidget.h"
-#include "AccountWidget.h"
 #include "AppController.h"
 #include "include/cpp_joinstr.h"
 #include "payloads/Receive.h"
@@ -103,6 +102,8 @@ void AccountController::pollNotifications() {
                     pollPools();
                 } else if (s == SignalFlag::AddressTipChanged) {
                     pollAddresses();
+                } else if (s == SignalFlag::Stopped) {
+                    emit stopped();
                 } else {
                     auto signalStr = QString(signal_flag_to_string(signal->unwrap()).c_str());
                     qDebug() << "AppController::pollNotification() signal: " << signalStr;
@@ -248,5 +249,12 @@ void AccountController::listpools() {
 
     auto *modal = new qontrol::Modal("Error", "Toto blblalbla.........");
     AppController::execModal(modal);
+}
+
+void AccountController::stop() {
+    if (m_wallet.has_value()) {
+        m_wallet.value()->stop();
+    }
+    emit stopped();
 }
 

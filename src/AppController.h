@@ -6,6 +6,7 @@
 #include <Qontrol>
 #include <qobject.h>
 #include <qsystemtrayicon.h>
+#include "screens/modals/Stop.h"
 
 
 namespace screen {
@@ -22,6 +23,7 @@ public:
     AppController();
     static void init();
     static auto get() -> AppController*;
+    auto accounts() -> int;
 
 signals:
     void accountList(QList<QString>);
@@ -35,6 +37,7 @@ public slots:
     void onCreateAccount();
     void createAccount(const QString &name, const QString &mnemonic, Network network);
     void onAccountCreated(const QString &name);
+    void stop(modal::Stop* modal);
 
     // OS Notifications
     void osMessage(QString title, QString msg, int delay=10000);
@@ -43,6 +46,7 @@ public slots:
     void osCritical(QString title, QString msg, int delay=10000);
 
 private:
+    QHash<QString, AccountController*> m_accounts;
     QSystemTrayIcon *m_tray_icon = nullptr;
 
 };
