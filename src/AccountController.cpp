@@ -27,17 +27,8 @@ AccountController::AccountController(const QString &account, AccountWidget *widg
 
 void AccountController::init(const QString &account ) {
     // init the wallet
-    auto mnemonicStr = 
-        rust::String("rigid brother public ship curve holiday scrub plate furnace emerge weather derive");
-    auto mnemonic = mnemonic_from_string(mnemonicStr);
-    if (mnemonic->is_err()) {
-        auto errStr = std::string(mnemonic->error());
-        qDebug() << "Invalid mnemonic: "<< errStr;
-        return;
-    }
-
     auto wallet = 
-        new_account(std::move(mnemonic),  account.toStdString());
+        new_account( account.toStdString());
 
     m_wallet = std::make_optional(std::move(wallet));
 
