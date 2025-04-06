@@ -81,6 +81,7 @@ void AppController::createAccount(const QString &name, const QString &mnemonic, 
 }
 
 void AppController::onAccountCreated(const QString &name) {
+    qDebug() << "AppController::onAccountCreated()";
     addAccount(name);
 }
 

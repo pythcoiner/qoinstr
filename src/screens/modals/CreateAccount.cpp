@@ -84,8 +84,8 @@ void CreateAccount::onCreateAccount() {
     auto mnemo = mnemonic_from_string(m_mnemonic->input()->text().toStdString());
     if (!mnemo->is_ok()) {
         auto *modal = new qontrol::Modal(
-            "Invalid mnemonic!", 
-            "Your mnemonic is not a valid BIP39 mnemonic!"
+            "Your mnemonic is not a valid BIP39 mnemonic!",
+            "Invalid mnemonic!"
         );
         AppController::execModal(modal);
         return;
@@ -95,8 +95,8 @@ void CreateAccount::onCreateAccount() {
     auto name = m_name->input()->text();
     if (name.contains(" ")) {
         auto *modal = new qontrol::Modal(
-            "Invalid Name!", 
-            "The name of the wallet must not contains any space!"
+            "The name of the wallet must not contains any space!",
+            "Invalid Name!"
         );
         AppController::execModal(modal);
         return;
@@ -104,8 +104,8 @@ void CreateAccount::onCreateAccount() {
 
     if (config_exists(name.toStdString())) {
         auto *modal = new qontrol::Modal(
-            "Wallet already exists!", 
-            "There is an existing configuration file for a wallet with the same name!"
+            "There is an existing configuration file for a wallet with the same name!",
+            "Wallet already exists!"
         );
         AppController::execModal(modal);
         return;
@@ -117,7 +117,7 @@ void CreateAccount::onCreateAccount() {
         network = Network::Bitcoin;
     } else if (networkStr == "Signet") {
         network = Network::Signet;
-    } else if (networkStr == "Restest") {
+    } else if (networkStr == "Regtest") {
         network = Network::Regtest;
     } else if (networkStr == "Testnet") {
         network = Network::Testnet;
@@ -125,8 +125,8 @@ void CreateAccount::onCreateAccount() {
 
         auto comment = QString("%1 is not a valid network!").arg(networkStr);
         auto *modal = new qontrol::Modal(
-            "Invalid network!", 
-            comment
+            comment,
+            "Invalid network!"
         );
         AppController::execModal(modal);
         return;
