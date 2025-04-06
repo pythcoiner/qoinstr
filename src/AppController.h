@@ -22,10 +22,18 @@ public:
     static void init();
     static auto get() -> AppController*;
 
+signals:
+    void accountList(QList<QString>);
+    void accountCreated(const QString &name);
+
 public slots:
     void initState();
     void addAccount(const QString &name);
     void removeAccount(const QString &account);
+    void listAccounts();
+    void onCreateAccount();
+    void createAccount(const QString &name, const QString &mnemonic, Network network);
+    void onAccountCreated(const QString &name);
 
     // OS Notifications
     void osMessage(QString title, QString msg, int delay=10000);

@@ -1,13 +1,14 @@
 #include "MainWindow.h"
 #include "AppController.h"
+#include "screens/MenuTab.h"
 #include <qcontainerfwd.h>
 #include <qlogging.h>
 #include <qtabwidget.h>
 #include <qwidget.h>
 
 MainWindow::MainWindow(QWidget *parent) : Window(parent) {
-    this->initWindow();
     AppController::init();
+    this->initWindow();
     AppController::get()->start(this);
     AppController::get()->initState();
 }
@@ -15,8 +16,7 @@ MainWindow::MainWindow(QWidget *parent) : Window(parent) {
 void MainWindow::initWindow() {
     if (m_init) return;
 
-    // TODO: implement the menu
-    m_menu_tab = new QWidget(this);
+    m_menu_tab = new screen::MenuTab(this);
 
     m_tab = new QTabWidget(this);
 

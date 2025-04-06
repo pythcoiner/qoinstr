@@ -14,6 +14,7 @@ const int INPUT_WIDTH = 200;
 const int PRICE_WIDTH = 200;
 
 const int V_SPACER = 5;
+const int H_SPACER = 5;
 
 const int SATS = 100000000;
 

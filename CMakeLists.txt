@@ -41,13 +41,17 @@ set(SOURCES
     src/AccountWidget.cpp
     src/MainWindow.cpp
     src/MouseInspector.cpp
+    src/widgets/ComboLine.cpp
+    src/widgets/InputLine.cpp
     src/screens/common.cpp
     src/screens/Coins.cpp
     src/screens/Pools.cpp
     src/screens/Send.cpp
     src/screens/Receive.cpp
     src/screens/Settings.cpp
+    src/screens/MenuTab.cpp
     src/screens/modals/CreatePool.cpp
+    src/screens/modals/CreateAccount.cpp
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
     src/payloads/Pools.cpp

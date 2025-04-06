@@ -1,5 +1,8 @@
 #include "AppController.h"
 #include "MainWindow.h"
+#include "common.h"
+#include "include/cpp_joinstr.h"
+#include "screens/modals/CreateAccount.h"
 #include <qlogging.h>
 #include <qsystemtrayicon.h>
 
@@ -25,11 +28,13 @@ void AppController::initState() {
     m_tray_icon->setIcon(QIcon::fromTheme("dialog-information")); // required on Linux!
     m_tray_icon->setVisible(true);
 
-    // DEBUG:
-    addAccount("main");
-    addAccount("main2");
+    listAccounts();
 
-    // TODO: load existing wallet that have open == true
+    connect(this, &AppController::accountCreated, this, &AppController::onAccountCreated, qontrol::UNIQUE);
+
+    // // DEBUG:
+    // addAccount("main");
+    // addAccount("main2");
 
 }
 
@@ -48,6 +53,35 @@ void AppController::addAccount(const QString &name) { // NOLINT(readability-conv
 void AppController::removeAccount(const QString &account) { // NOLINT(readability-convert-member-functions-to-static)
     auto *win = dynamic_cast<MainWindow*>(window());
     win->removeAccount(account);
+}
+
+void AppController::listAccounts() {
+
+    auto raccounts = list_configs();
+    auto accounts = QList<QString>();
+    for (auto acc : raccounts) {
+        accounts.append(acc.c_str());
+    }
+    emit accountList(accounts);
+}
+
+void AppController::onCreateAccount() {
+    auto *modal = new modal::CreateAccount();
+    AppController::execModal(modal);
+}
+
+void AppController::createAccount(const QString &name, const QString &mnemonic, Network network) {
+    auto config = config_from_file(name.toStdString());
+    config->set_account(name.toStdString());
+    config->set_mnemonic(mnemonic.toStdString());
+    config->set_network(network);
+    config->to_file();
+
+    emit accountCreated(name);
+}
+
+void AppController::onAccountCreated(const QString &name) {
+    addAccount(name);
 }
 
 void AppController::osMessage(QString title, QString msg, int delay) { // NOLINT 
