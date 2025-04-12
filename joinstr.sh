@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "OFFLINE=$OFFLINE"
+
 set -e
 
 JOINSTR_REPO="https://github.com/pythcoiner/cpp_joinstr.git"
@@ -15,12 +17,19 @@ fi
 
 mkdir ./lib/include
 
-# if cpp_joinstr exists update
+# if cpp_joinstr exists update or skip if offline
 if [ -d "cpp_joinstr" ]; then 
     cd cpp_joinstr
-    git fetch --all
-    git pull origin "$JOINSTR_BRANCH" --force --rebase
-    git checkout "$JOINSTR_BRANCH"
+    if [ -z "$OFFLINE" ]; then
+        OFFLINE=false
+    fi
+    if [ "$OFFLINE" = false ]; then
+        git fetch --all
+        git pull origin "$JOINSTR_BRANCH" --force --rebase
+        git checkout "$JOINSTR_BRANCH"
+    else
+        echo "Running in offline mode. Skipping fetch."
+    fi
 # if cpp_joinstr not exists clone
 else
     git clone "$JOINSTR_REPO"
@@ -32,7 +41,11 @@ fi
 # cargo will:
 #   - first generate c++ bindings
 #   - then build library
-cargo build --release
+if [ "$OFFLINE" = false ]; then
+    cargo build --release
+else
+    cargo build --release --offline
+fi
 
 cd ..
 # copy bindings into ./lib/include/

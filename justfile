@@ -19,3 +19,7 @@ build:
 
 run:
     ./build/Qoinstr
+
+br:
+    just build
+    just run

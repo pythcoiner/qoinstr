@@ -25,10 +25,16 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 
 # include qontrol from git repo
 include(FetchContent)
-FetchContent_Declare(qontrol
-    GIT_REPOSITORY https://github.com/pythcoiner/qontrol.git
-    GIT_TAG a80e416
-)
+if(NOT DEFINED ENV{OFFLINE} OR "$ENV{OFFLINE}" STREQUAL "false")
+    FetchContent_Declare(qontrol
+        GIT_REPOSITORY https://github.com/pythcoiner/qontrol.git
+        GIT_TAG a80e416
+    )
+else()
+    FetchContent_Declare(qontrol
+        SOURCE_DIR ./_deps/qontrol-src/
+    )
+endif()
 FetchContent_MakeAvailable(qontrol)
 
 set(CMAKE_AUTOMOC ON)
