@@ -22,7 +22,7 @@ auto AppController::get() -> AppController* {
 }
 
 void AppController::initState() {
-    init_rust_logger(LogLevel::Info);
+    init_rust_logger(LogLevel::Debug);
 
     m_tray_icon = new QSystemTrayIcon;
     m_tray_icon->setIcon(QIcon::fromTheme("dialog-information")); // required on Linux!

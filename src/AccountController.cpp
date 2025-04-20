@@ -33,10 +33,15 @@ void AccountController::init(const QString &account ) {
 
     m_wallet = std::make_optional(std::move(wallet));
 
-    // init the timer that trigger polls
-    m_timer =  new QTimer;
-    connect(m_timer, &QTimer::timeout, this, &AccountController::poll);
-    m_timer->start(500); // poll every 100ms
+    // init the timer that poll notifications
+    m_notif_timer =  new QTimer;
+    connect(m_notif_timer, &QTimer::timeout, this, &AccountController::poll);
+    m_notif_timer->start(100); // poll every 100ms
+    // init the timer that poll coins
+    m_coins_timer =  new QTimer;
+    connect(m_coins_timer, &QTimer::timeout, this, &AccountController::pollCoins);
+    m_coins_timer->start(1000); 
+
     m_init = true;
 
 }
@@ -65,8 +70,8 @@ void AccountController::poll() {
 }
 
 void AccountController::pollCoins() {
-    qDebug() << "AppController::pollCoins()";
     if (m_wallet.has_value()) {
+        m_wallet.value()->generate_coins();
         auto rcoins = m_wallet.value()->spendable_coins();
         if (rcoins->is_ok()) {
             auto *coins =  payload::Coins::fromRust(std::move(rcoins));
@@ -100,7 +105,6 @@ void AccountController::pollNotifications() {
             if (!signal->is_err()) {
                 auto s = signal->unwrap();
                 if ( s == SignalFlag::CoinUpdate) {
-                    pollCoins();
                 } else if (s == SignalFlag::PoolUpdate) {
                     pollPools();
                 } else if (s == SignalFlag::AddressTipChanged) {
