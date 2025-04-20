@@ -12,7 +12,6 @@
 AccountWidget::AccountWidget(const QString &account, QWidget *parent) : QWidget(parent) {
     m_controller = new AccountController(account, this);
     initWidget();
-    m_controller->init(account);
     m_controller->loadPanels();
     m_controller->cmdLoadConfig();
 }

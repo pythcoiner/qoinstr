@@ -94,4 +94,5 @@ private:
     AccountWidget *m_widget;
     std::optional<rust::Box<Account>> m_wallet = std::nullopt;
     QTimer *m_timer = nullptr;
+    bool m_init = false;
 };

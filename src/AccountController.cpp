@@ -25,6 +25,8 @@ AccountController::AccountController(const QString &account, AccountWidget *widg
 }
 
 void AccountController::init(const QString &account ) {
+    if (m_init) return;
+
     // init the wallet
     auto wallet = 
         new_account( account.toStdString());
@@ -35,6 +37,7 @@ void AccountController::init(const QString &account ) {
     m_timer =  new QTimer;
     connect(m_timer, &QTimer::timeout, this, &AccountController::poll);
     m_timer->start(500); // poll every 100ms
+    m_init = true;
 
 }
 
