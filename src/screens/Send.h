@@ -59,6 +59,7 @@ public slots:
     void deleteOutput(int id);
     void addOutput();
     void updateRadio();
+    void setBroadcastable(bool broadcastable);
 
 protected:
     void init() override;
@@ -70,12 +71,20 @@ private:
     QHash<int, Output*> m_outputs;
     qontrol::Column *m_column = nullptr;
     QWidget *m_main_widget = nullptr;
-    QPushButton *m_add_btn = nullptr;
-    QPushButton *m_send_btn = nullptr;
+
     RadioElement *m_fee_sats_vb = nullptr;
     RadioElement *m_fee_sats = nullptr;
     RadioElement *m_fee_blocks = nullptr;
     QButtonGroup *m_fee_group = nullptr;
+
+    QPushButton *m_add_btn = nullptr;
+
+    QPushButton *m_export_btn = nullptr;
+    QPushButton *m_clear_btn = nullptr;
+    QPushButton *m_sign_btn = nullptr;
+    QPushButton *m_broadcast_button = nullptr;
+
+    bool m_broadcastable = false;
 
     auto output() -> QWidget*;
 };

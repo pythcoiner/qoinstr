@@ -142,15 +142,21 @@ Send::Send(AccountController *ctrl) {
     this->doConnect();
     this->view();
     this->updateRadio();
+    this->setBroadcastable(false);
 }
 
 void Send::init() {
     m_column = (new qontrol::Column);
     this->addOutput();
 
-    m_send_btn = new QPushButton("Send");
-    m_add_btn = new QPushButton("+ Add");
+    m_add_btn = new QPushButton("+ Add an Output");
     connect(m_add_btn, &QPushButton::clicked, this, &Send::addOutput);
+
+    m_sign_btn = new QPushButton("Sign");
+    m_broadcast_button = new QPushButton("Broadcast");
+    m_clear_btn = new QPushButton("Clear");
+    m_export_btn = new QPushButton("Export");
+
 
     m_fee_sats = new RadioElement(this, "sats");
     m_fee_sats_vb = new RadioElement(this, "sats/vb");
@@ -182,10 +188,20 @@ void Send::view() {
     }
     delete oldColumn;
 
-    auto *lastRow = (new qontrol::Row)
-        ->push(m_send_btn)
-        ->pushSpacer(400)
+    auto *addOutputRow = (new qontrol::Row)
+        ->pushSpacer()
         ->push(m_add_btn)
+        ->pushSpacer()
+        ;
+
+    auto *lastRow = (new qontrol::Row)
+        ->pushSpacer()
+        ->push(m_clear_btn)
+        ->pushSpacer()
+        ->push(m_export_btn)
+        ->pushSpacer()
+        ->push(m_sign_btn)
+        ->push(m_broadcast_button)
         ->pushSpacer()
         ;
 
@@ -212,6 +228,7 @@ void Send::view() {
 
     auto *col = (new qontrol::Column)
         ->push(m_column)
+        ->push(addOutputRow)
         ->pushSpacer(20)
         ->push(feeRow)
         ->pushSpacer(20)
@@ -277,6 +294,17 @@ void Send::outputSetMax(int id) {
         }
     }
 
+}
+
+void Send::setBroadcastable(bool broadcastable) {
+    m_broadcastable = broadcastable;
+    if (broadcastable) {
+        m_sign_btn->setVisible(false);
+        m_broadcast_button->setVisible(true);
+    } else {
+        m_sign_btn->setVisible(true);
+        m_broadcast_button->setVisible(false);
+    }
 }
 
 } // namespace screen
