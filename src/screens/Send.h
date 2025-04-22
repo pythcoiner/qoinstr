@@ -2,6 +2,7 @@
 
 #include "payloads/Send.h"
 #include <Qontrol>
+#include <qcheckbox.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
 #include <qtmetamacros.h>
@@ -13,16 +14,20 @@ namespace screen {
 class Send;
 class Output {
 public:
-    Output() = default;
-    auto widget(Send *screen, int id) -> QWidget*;
-    auto output() -> payload::Output;
+    Output(Send *screen, int id);
+    auto widget() -> QWidget*;
+    void setDeletable(bool deletable);
+    void enableMax(bool max);
+    auto isMax() -> bool;
 
 private:
     QLineEdit *m_address = nullptr;
     QLineEdit *m_label = nullptr;
     QLineEdit *m_amount = nullptr;
-    QLineEdit *m_fees = nullptr;
-    QPushButton *m_remove = nullptr;
+    QPushButton *m_delete = nullptr;
+    QWidget *m_delete_spacer = nullptr;
+    QCheckBox *m_max = nullptr;
+    QLabel *m_max_label = nullptr;
     QWidget *m_widget = nullptr;
 };
 
@@ -32,6 +37,7 @@ public:
     Send(AccountController *ctrl);
 
 public slots:
+    void outputSetMax(int id);
     void deleteOutput(int id);
     void addOutput();
 

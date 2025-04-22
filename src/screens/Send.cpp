@@ -1,74 +1,58 @@
 #include "Send.h"
-#include "AppController.h"
 #include "AccountController.h"
+#include "AppController.h"
 #include "common.h"
 #include <Qontrol>
 #include <algorithm>
+#include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
 
 namespace screen {
 
-auto Output::widget(Send *screen, int id) -> QWidget* {
-    if (m_widget != nullptr) {
-        return m_widget;
-    }
-    auto *addr = new QLabel("Address:");
-    addr->setFixedWidth(LABEL_WIDTH);
-
+Output::Output(Send *screen, int id) {
     m_address = new QLineEdit;
     m_address->setFixedWidth(2 * INPUT_WIDTH);
+    m_address->setPlaceholderText("Address: bc1.....");
 
-    auto *delBtn = new QPushButton(" - ");
+    m_delete = new QPushButton();
+    QIcon closeIcon = m_delete->style()->standardIcon(QStyle::SP_DialogCloseButton);
+    m_delete->setIcon(closeIcon);
+    m_delete->setFixedWidth(25);
+    m_delete->setFixedHeight(25);
 
-    auto *addrRow = (new qontrol::Row)
-        ->push(addr)
-        ->push(m_address)
-        ->pushSpacer(10)
-        ->push(delBtn)
-        ->pushSpacer()
-        ;
-
-    auto *label = new QLabel("Label:");
-    label->setFixedWidth(LABEL_WIDTH);
-
-    m_label = new QLineEdit;
-    m_label->setFixedWidth(2 * INPUT_WIDTH );
-
-    auto *labelRow = (new qontrol::Row)
-        ->push(label)
-        ->push(m_label)
-        ->pushSpacer()
-        ;
-
-    auto *amount = new QLabel("Amount:");
-    amount->setFixedWidth(LABEL_WIDTH);
+    m_delete_spacer = new QWidget;
+    m_delete_spacer->setFixedWidth(V_SPACER);
 
     m_amount = new QLineEdit;
     m_amount->setFixedWidth(120);
+    m_amount->setPlaceholderText("0.002 BTC");
 
-    auto *btc = new QLabel("BTC");
-    btc->setFixedWidth(80);
+    m_label = new QLineEdit;
+    m_label->setFixedWidth(2 * INPUT_WIDTH );
+    m_label->setPlaceholderText("Label");
 
-    auto *fee = new QLabel("Fees:");
-    fee->setFixedWidth(75);
+    m_max = new QCheckBox;
 
-    m_fees = new QLineEdit;
-    m_fees->setFixedWidth(120);
+    m_max_label = new QLabel("MAX");
+    m_max_label->setFixedWidth(120);
 
-    auto *sats = new QLabel("sats/vb");
-    sats->setFixedWidth(120);
-
-    auto *lastRow = (new qontrol::Row)
-        ->push(amount)
+    auto *addrRow = (new qontrol::Row)
+        ->push(m_delete)
+        ->push(m_delete_spacer)
+        ->push(m_address)
+        ->pushSpacer(H_SPACER)
         ->push(m_amount)
-        ->pushSpacer(5)
-        ->push(btc)
-        ->push(fee)
-        ->push(m_fees)
-        ->pushSpacer(5)
-        ->push(sats)
+        ->pushSpacer(H_SPACER)
+        ->push(m_max)
+        ->pushSpacer(H_SPACER)
+        ->push(m_max_label)
+        ->pushSpacer()
+        ;
+
+    auto *labelRow = (new qontrol::Row)
+        ->push(m_label)
         ->pushSpacer()
         ;
 
@@ -77,21 +61,37 @@ auto Output::widget(Send *screen, int id) -> QWidget* {
         ->push(addrRow)
         ->pushSpacer(V_SPACER)
         ->push(labelRow)
-        ->pushSpacer( V_SPACER)
-        ->push(lastRow)
         ->pushSpacer(2 * V_SPACER)
         ;
 
-    QObject::connect(delBtn, &QPushButton::clicked, screen, [screen, id]() {
+    QObject::connect(m_delete, &QPushButton::clicked, screen, [screen, id]() {
         screen->deleteOutput(id);
+    });
+    QObject::connect(m_max, &QCheckBox::checkStateChanged, screen, [screen, id]() {
+        screen->outputSetMax(id);
     });
 
     m_widget = col;
-    return col;
+
 }
 
-auto Output::output() -> payload::Output {
+auto Output::widget() -> QWidget* {
+    return m_widget;
+}
 
+void Output::setDeletable(bool deletable) {
+    m_delete->setVisible(deletable);
+    m_delete_spacer->setVisible(deletable);
+}
+
+void Output::enableMax(bool max) {
+    m_max->setChecked(false);
+    m_max->setVisible(max);
+    m_max_label->setVisible(max);
+}
+
+auto Output::isMax() -> bool {
+    return m_max->isChecked();
 }
 
 Send::Send(AccountController *ctrl) {
@@ -111,13 +111,6 @@ void Send::init() {
 
 }
 
-void Send::addOutput() {
-    auto *output = new Output;
-    m_outputs.insert(m_output_id, output);
-    m_column->push(output->widget(this, m_output_id));
-    m_output_id++;
-}
-
 void Send::doConnect() {}
 
 void Send::view() {
@@ -132,7 +125,7 @@ void Send::view() {
     std::ranges::sort(keys);
     for (auto id : keys) {
         auto *output = m_outputs.value(id);
-        m_column->push(output->widget(this, id));
+        m_column->push(output->widget());
     }
     delete oldColumn;
 
@@ -157,11 +150,42 @@ void Send::view() {
     this->setLayout(m_main_widget->layout());
 }
 
+void Send::addOutput() {
+    auto *output = new Output(this, m_output_id);
+    if (m_outputs.size() == 0) {
+        output->setDeletable(false);
+    } else {
+        for (auto &out : m_outputs) {
+            out->setDeletable(true);
+        }
+    }
+    m_outputs.insert(m_output_id, output);
+    m_column->push(output->widget());
+    m_output_id++;
+}
+
 void Send::deleteOutput(int id) {
-    if (m_outputs.size() < 2) return;
     auto *output = m_outputs.take(id);
     delete output;
+    if (m_outputs.size() == 1) {
+        m_outputs.value(m_outputs.keys().first())->setDeletable(false);
+    }
     this->view();
+}
+
+void Send::outputSetMax(int id) {
+    if (m_outputs.value(id)->isMax()) {
+        for (auto &key : m_outputs.keys()) {
+            if (key != id) {
+                m_outputs.value(key)->enableMax(false);
+            }
+        }
+    } else {
+        for (auto &key : m_outputs.keys()) {
+            m_outputs.value(key)->enableMax(true);
+        }
+    }
+
 }
 
 } // namespace screen
