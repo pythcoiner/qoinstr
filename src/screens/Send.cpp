@@ -16,20 +16,20 @@ namespace screen {
 
 Output::Output(Send *screen, int id) {
     m_address = new QLineEdit;
-    m_address->setFixedWidth(2 * INPUT_WIDTH);
+    m_address->setFixedWidth(300);
     m_address->setPlaceholderText("Address: bc1.....");
 
     m_delete = new QPushButton();
     QIcon closeIcon = m_delete->style()->standardIcon(QStyle::SP_DialogCloseButton);
     m_delete->setIcon(closeIcon);
-    m_delete->setFixedWidth(25);
-    m_delete->setFixedHeight(25);
+    m_delete->setFixedWidth(m_address->minimumSizeHint().height());
+    m_delete->setFixedHeight(m_address->minimumSizeHint().height());
 
     m_delete_spacer = new QWidget;
     m_delete_spacer->setFixedWidth(V_SPACER);
 
     m_amount = new QLineEdit;
-    m_amount->setFixedWidth(120);
+    m_amount->setFixedWidth(95);
     m_amount->setPlaceholderText("0.002 BTC");
 
     m_label = new QLineEdit;
@@ -37,9 +37,17 @@ Output::Output(Send *screen, int id) {
     m_label->setPlaceholderText("Label");
 
     m_max = new QCheckBox;
+    m_max->setStyleSheet(R"(
+      QCheckBox::indicator {
+        width: 28px;
+        height: 28px;
+      }
+    )");
 
     m_max_label = new QLabel("MAX");
-    m_max_label->setFixedWidth(120);
+    QFont f = m_max_label->font();
+    f.setPointSize(f.pointSize() + 4);
+    m_max_label->setFont(f);
 
     auto *addrRow = (new qontrol::Row)
         ->push(m_delete)
@@ -100,7 +108,7 @@ auto Output::isMax() -> bool {
 RadioElement::RadioElement(Send *parent, const QString &label) {
     m_button = new QRadioButton(parent);
     m_value = new QLineEdit;
-    m_value->setFixedWidth(120);
+    m_value->setFixedWidth(100);
     m_label = new QLabel(label);
     QObject::connect(m_button, &QAbstractButton::toggled, parent, [parent]{parent->updateRadio();});
 
@@ -162,7 +170,7 @@ void Send::view() {
     auto *oldColumn = m_column;
 
     m_column = new qontrol::Column;
-    
+
     auto keys = QList<int>();
     for (auto id : m_outputs.keys()) {
         keys.push_back(id);
@@ -227,6 +235,12 @@ void Send::addOutput() {
             out->setDeletable(true);
         }
     }
+    for (auto *outp : m_outputs) {
+        if (outp->isMax()) {
+            output->enableMax(false);
+            break;
+        }
+    }
     m_outputs.insert(m_output_id, output);
     m_column->push(output->widget());
     m_output_id++;
@@ -234,6 +248,11 @@ void Send::addOutput() {
 
 void Send::deleteOutput(int id) {
     auto *output = m_outputs.take(id);
+    if (output->isMax()) {
+        for (auto *outp : m_outputs) {
+            outp->enableMax(true);
+        }
+    }
     delete output;
     if (m_outputs.size() == 1) {
         auto *outp = m_outputs.value(m_outputs.keys().first());
