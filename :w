@@ -183,21 +183,13 @@ void Send::view() {
 
     auto *feeRow = (new qontrol::Row)
         ->push(m_fee_sats_vb->widget().at(0))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_sats_vb->widget().at(1))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_sats_vb->widget().at(2))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_sats->widget().at(0))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_sats->widget().at(1))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_sats->widget().at(2))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_blocks->widget().at(0))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_blocks->widget().at(1))
-        ->pushSpacer(V_SPACER)
         ->push(m_fee_blocks->widget().at(2))
         ->pushSpacer()
         ;
@@ -236,11 +228,7 @@ void Send::deleteOutput(int id) {
     auto *output = m_outputs.take(id);
     delete output;
     if (m_outputs.size() == 1) {
-        auto *outp = m_outputs.value(m_outputs.keys().first());
-        outp->setDeletable(false);
-        if (!outp->isMax()) {
-            outp->enableMax(true);
-        }
+        m_outputs.value(m_outputs.keys().first())->setDeletable(false);
     }
     this->view();
 }

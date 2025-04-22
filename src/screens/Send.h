@@ -2,9 +2,12 @@
 
 #include "payloads/Send.h"
 #include <Qontrol>
+#include <qabstractbutton.h>
+#include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qtmetamacros.h>
 #include <qwidget.h>
 
@@ -12,6 +15,7 @@ class AccountController;
 
 namespace screen {
 class Send;
+
 class Output {
 public:
     Output(Send *screen, int id);
@@ -31,6 +35,20 @@ private:
     QWidget *m_widget = nullptr;
 };
 
+class RadioElement {
+public:
+    RadioElement(Send *parent, const QString &label);
+    auto widget() -> QList<QWidget*>;
+    void update();
+    auto button() -> QAbstractButton*;
+
+private:
+    QRadioButton *m_button = nullptr;
+    QLineEdit *m_value = nullptr;
+    QLabel *m_label = nullptr;
+    QList<QWidget*> m_widget;
+};
+
 class Send : public qontrol::Screen {
     Q_OBJECT
 public:
@@ -40,6 +58,7 @@ public slots:
     void outputSetMax(int id);
     void deleteOutput(int id);
     void addOutput();
+    void updateRadio();
 
 protected:
     void init() override;
@@ -53,6 +72,10 @@ private:
     QWidget *m_main_widget = nullptr;
     QPushButton *m_add_btn = nullptr;
     QPushButton *m_send_btn = nullptr;
+    RadioElement *m_fee_sats_vb = nullptr;
+    RadioElement *m_fee_sats = nullptr;
+    RadioElement *m_fee_blocks = nullptr;
+    QButtonGroup *m_fee_group = nullptr;
 
     auto output() -> QWidget*;
 };
