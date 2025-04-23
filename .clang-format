@@ -5,9 +5,9 @@ UseTab: Never        # always use spaces, never literal tabs
 
 BreakBeforeBraces: Attach                 # put “{” on same line
 AllowShortFunctionsOnASingleLine: None    # never collapse bodies into one line
-PointerAlignment: Right                    # bind the ‘*’ to the type
-ColumnLimit: 120
-MaxEmptyLinesToKeep: 1
+PointerAlignment: Right                   # bind the ‘*’ to the type
+ColumnLimit: 80
+PenaltyBreakAssignment: 10000             # de-incentivize break after `=`
 
 SeparateDefinitionBlocks: Always          # always add an empty line after a {} definition block
 PackConstructorInitializers: CurrentLine  # keep constructor initializer on the same line if it fits
