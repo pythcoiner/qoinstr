@@ -38,7 +38,7 @@ private:
 class RadioElement {
 public:
     RadioElement(Send *parent, const QString &label);
-    auto widget() -> QList<QWidget *>;
+    auto widget() -> qontrol::Row *;
     void update();
     auto button() -> QAbstractButton *;
 
@@ -46,7 +46,7 @@ private:
     QRadioButton *m_button = nullptr;
     QLineEdit *m_value = nullptr;
     QLabel *m_label = nullptr;
-    QList<QWidget *> m_widget;
+    qontrol::Row *m_widget;
 };
 
 class Send : public qontrol::Screen {

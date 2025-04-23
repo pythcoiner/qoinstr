@@ -20,7 +20,8 @@ Output::Output(Send *screen, int id) {
     m_address->setPlaceholderText("Address: bc1.....");
 
     m_delete = new QPushButton();
-    QIcon closeIcon = m_delete->style()->standardIcon(QStyle::SP_DialogCloseButton);
+    QIcon closeIcon = m_delete->style()->standardIcon(
+        QStyle::SP_DialogCloseButton);
     m_delete->setIcon(closeIcon);
     m_delete->setFixedWidth(m_address->minimumSizeHint().height());
     m_delete->setFixedHeight(m_address->minimumSizeHint().height());
@@ -70,8 +71,10 @@ Output::Output(Send *screen, int id) {
                     ->push(labelRow)
                     ->pushSpacer(2 * V_SPACER);
 
-    QObject::connect(m_delete, &QPushButton::clicked, screen, [screen, id]() { screen->deleteOutput(id); });
-    QObject::connect(m_max, &QCheckBox::checkStateChanged, screen, [screen, id]() { screen->outputSetMax(id); });
+    QObject::connect(m_delete, &QPushButton::clicked, screen,
+                     [screen, id]() { screen->deleteOutput(id); });
+    QObject::connect(m_max, &QCheckBox::checkStateChanged, screen,
+                     [screen, id]() { screen->outputSetMax(id); });
 
     m_widget = col;
 }
@@ -100,11 +103,17 @@ RadioElement::RadioElement(Send *parent, const QString &label) {
     m_value = new QLineEdit;
     m_value->setFixedWidth(100);
     m_label = new QLabel(label);
-    QObject::connect(m_button, &QAbstractButton::toggled, parent, [parent] { parent->updateRadio(); });
+    QObject::connect(m_button, &QAbstractButton::toggled, parent,
+                     [parent] { parent->updateRadio(); });
 
-    m_widget.append(m_button);
-    m_widget.append(m_value);
-    m_widget.append(m_label);
+    auto *row = (new qontrol::Row)
+                    ->push(m_button)
+                    ->pushSpacer(V_SPACER)
+                    ->push(m_value)
+                    ->pushSpacer(V_SPACER)
+                    ->push(m_label)
+                    ->pushSpacer(4 * V_SPACER);
+    m_widget = row;
 }
 
 auto RadioElement::button() -> QAbstractButton * {
@@ -115,7 +124,7 @@ void RadioElement::update() {
     m_value->setEnabled(m_button->isChecked());
 }
 
-auto RadioElement::widget() -> QList<QWidget *> {
+auto RadioElement::widget() -> qontrol::Row * {
     return m_widget;
 }
 
@@ -176,7 +185,10 @@ void Send::view() {
     }
     delete oldColumn;
 
-    auto *addOutputRow = (new qontrol::Row)->pushSpacer()->push(m_add_btn)->pushSpacer();
+    auto *addOutputRow = (new qontrol::Row)
+                             ->pushSpacer()
+                             ->push(m_add_btn)
+                             ->pushSpacer();
 
     auto *lastRow = (new qontrol::Row)
                         ->pushSpacer()
@@ -189,23 +201,9 @@ void Send::view() {
                         ->pushSpacer();
 
     auto *feeRow = (new qontrol::Row)
-                       ->push(m_fee_sats_vb->widget().at(0))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_sats_vb->widget().at(1))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_sats_vb->widget().at(2))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_sats->widget().at(0))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_sats->widget().at(1))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_sats->widget().at(2))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_blocks->widget().at(0))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_blocks->widget().at(1))
-                       ->pushSpacer(V_SPACER)
-                       ->push(m_fee_blocks->widget().at(2))
+                       ->merge(m_fee_sats_vb->widget())
+                       ->merge(m_fee_sats->widget())
+                       ->merge(m_fee_blocks->widget())
                        ->pushSpacer();
 
     auto *col = (new qontrol::Column)

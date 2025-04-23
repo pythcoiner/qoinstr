@@ -28,7 +28,7 @@ include(FetchContent)
 if(NOT DEFINED ENV{OFFLINE} OR "$ENV{OFFLINE}" STREQUAL "false")
     FetchContent_Declare(qontrol
         GIT_REPOSITORY https://github.com/pythcoiner/qontrol.git
-        GIT_TAG a80e416
+        GIT_TAG 4444fc3
     )
 else()
     FetchContent_Declare(qontrol
