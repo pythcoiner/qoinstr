@@ -19,22 +19,21 @@ struct Pool {
     uint8_t total_peers = 0;
     std::optional<QString> coin;
 
-    static auto dummy() -> Pool*;
-    static auto fromRust(rust::Box<RustPool> rpool) -> Pool*;
-    auto operator==(const Pool& other) const -> bool;
+    static auto dummy() -> Pool *;
+    static auto fromRust(rust::Box<RustPool> rpool) -> Pool *;
+    auto operator==(const Pool &other) const -> bool;
 };
 
 struct Relay {
     QString url;
-    QList<Pool*> pools;
+    QList<Pool *> pools;
 
     Relay() = default;
-    static auto dummy() -> Relay*;
-    static auto dummyRelays() -> QList<Relay*>*;
-    static auto fromRust(rust::Box<RustPools> rpools, const QString &relay_url) -> QList<Relay*>*;
-    auto operator==(const Relay& other) const -> bool;
+    static auto dummy() -> Relay *;
+    static auto dummyRelays() -> QList<Relay *> *;
+    static auto fromRust(rust::Box<RustPools> rpools, const QString &relay_url) -> QList<Relay *> *;
+    auto operator==(const Relay &other) const -> bool;
     void sort();
 };
-
 
 } // namespace payload

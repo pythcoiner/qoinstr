@@ -2,17 +2,9 @@
 #include "Column.h"
 #include "Row.h"
 
-auto margin(QWidget *widget) -> QWidget* {
-    auto *col = ( new qontrol::Column)
-        ->pushSpacer(TOP_MARGIN)
-        ->push(widget)
-        ->pushSpacer(BOTTOM_MARGIN)
-        ;
-    auto *row = (new qontrol::Row)
-        ->pushSpacer(LEFT_MARGIN)
-        ->push(col)
-        ->pushSpacer(RIGHT_MARGIN)
-        ;
+auto margin(QWidget *widget) -> QWidget * {
+    auto *col = (new qontrol::Column)->pushSpacer(TOP_MARGIN)->push(widget)->pushSpacer(BOTTOM_MARGIN);
+    auto *row = (new qontrol::Row)->pushSpacer(LEFT_MARGIN)->push(col)->pushSpacer(RIGHT_MARGIN);
 
     return row;
 }

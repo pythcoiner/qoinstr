@@ -18,12 +18,7 @@ public:
     CreateAccount();
 
 signals:
-    void createAccount(
-        QString name,
-        QString mnemonic,
-        Network network
-    );
-
+    void createAccount(QString name, QString mnemonic, Network network);
 
 public slots:
     void onCreateAccount();
@@ -36,7 +31,6 @@ private:
     widget::ComboLine *m_network = nullptr;
     QPushButton *m_create_btn = nullptr;
     QPushButton *m_generate_btn = nullptr;
-
 };
 
 } // namespace modal

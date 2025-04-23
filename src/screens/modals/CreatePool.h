@@ -17,13 +17,7 @@ public:
     CreatePool(const payload::Coin &coin, AccountController *ctrl);
 
 signals:
-    void createPool(
-        const QString &outpoint,
-        uint64_t denomination,
-        uint32_t fees,
-        uint64_t max_duration,
-        size_t peers
-    );
+    void createPool(const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration, size_t peers);
 
 public slots:
     void onCreatePool();

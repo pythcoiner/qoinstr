@@ -13,12 +13,12 @@ struct Address {
     bool change = false;
     uint64_t index = 0;
 
-    static auto dummy() -> Address*;
-    static auto none() -> Address*;
-    static auto dummyAddresses() -> QList<Address*>*;
-    static auto fromRust(rust::Box<RustAddress>) -> Address*;
+    static auto dummy() -> Address *;
+    static auto none() -> Address *;
+    static auto dummyAddresses() -> QList<Address *> *;
+    static auto fromRust(rust::Box<RustAddress>) -> Address *;
 
-    auto operator==(const Address& other) const -> bool;
+    auto operator==(const Address &other) const -> bool;
 };
 
 } // namespace payload

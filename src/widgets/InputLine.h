@@ -13,8 +13,9 @@ class InputLine : public qontrol::Row {
     Q_OBJECT
 public:
     InputLine(const QString &label, const QString &unit = "", QWidget *parent = nullptr);
-    auto label() -> QLabel*;
-    auto input() -> QLineEdit*;
+    auto label() -> QLabel *;
+    auto input() -> QLineEdit *;
+
 private:
     QLabel *m_label = nullptr;
     QLineEdit *m_input = nullptr;

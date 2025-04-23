@@ -38,12 +38,11 @@ void Coins::recvPayload(payload::Coins *payload) {
 void Coins::doConnect() {
     auto *ctrl = m_controller;
     connect(ctrl, &AccountController::updateCoins, this, &Coins::recvPayload);
-    connect(this, &Coins::coinsUpdated,  []() {
-        AppController::get()->osInfo("Coins updated", "List of coins have been updated");
-    } );
+    connect(this, &Coins::coinsUpdated,
+            []() { AppController::get()->osInfo("Coins updated", "List of coins have been updated"); });
 }
 
-auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count) -> QWidget* {
+auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count) -> QWidget * {
     auto *label = new QLabel(label_str);
     label->setFixedWidth(LABEL_WIDTH);
 
@@ -55,12 +54,7 @@ auto balanceRow(const QString &label_str, uint64_t balance, uint64_t coins_count
     auto *coins = new QLabel(coinStr);
     coins->setFixedWidth(PRICE_WIDTH);
 
-    auto *row = (new qontrol::Row)
-        ->push(label)
-        ->push(price)
-        ->push(coins)
-        ->pushSpacer()
-        ;
+    auto *row = (new qontrol::Row)->push(label)->push(price)->push(coins)->pushSpacer();
 
     return row;
 }
@@ -93,43 +87,21 @@ void insertCoin(AccountController *ctrl, QTableWidget *table, const payload::Coi
     auto ccoin = payload::Coin(*coin);
     auto *create = new QPushButton("Create");
     QObject::connect(create, &QPushButton::clicked, controller,
-            [controller, ccoin]() {controller->actionCreatePool(ccoin);});
-    auto *row = (new qontrol::Row(table))
-        ->pushSpacer()
-        ->push(join)
-        ->pushSpacer()
-        ->push(create)
-        ->pushSpacer()
-        ;
+                     [controller, ccoin]() { controller->actionCreatePool(ccoin); });
+    auto *row = (new qontrol::Row(table))->pushSpacer()->push(join)->pushSpacer()->push(create)->pushSpacer();
     table->setCellWidget(index, 6, row);
 }
 
 void Coins::view() {
 
-    auto *confirmed = balanceRow(
-        "Confirmed:", 
-        m_payload->confirmed_balance, 
-        m_payload->confirmed_coins
-    );
+    auto *confirmed = balanceRow("Confirmed:", m_payload->confirmed_balance, m_payload->confirmed_coins);
 
-    auto *unconfirmed = balanceRow(
-        "Unconfirmed:", 
-        m_payload->unconfirmed_balance, 
-        m_payload->unconfirmed_coins
-    );
+    auto *unconfirmed = balanceRow("Unconfirmed:", m_payload->unconfirmed_balance, m_payload->unconfirmed_coins);
 
     int rowCount = m_payload->coins.size();
     auto *table = new QTableWidget(rowCount, 7);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto headers = QStringList{
-        "Date",
-        "OutPoint",
-        "Address",
-        "Label",
-        "Value",
-        "Depth",
-        "Pool"
-    };
+    auto headers = QStringList{"Date", "OutPoint", "Address", "Label", "Value", "Depth", "Pool"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (auto *coin : m_payload->coins) {
@@ -143,12 +115,11 @@ void Coins::view() {
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     auto *mainLayout = (new qontrol::Column(this))
-        ->push(confirmed)
-        ->pushSpacer(V_SPACER)
-        ->push(unconfirmed)
-        ->pushSpacer(20)
-        ->push(table)
-        ;
+                           ->push(confirmed)
+                           ->pushSpacer(V_SPACER)
+                           ->push(unconfirmed)
+                           ->pushSpacer(20)
+                           ->push(table);
 
     auto *boxed = margin(mainLayout);
     delete m_main_widget;
@@ -160,4 +131,3 @@ void Coins::view() {
 }
 
 } // namespace screen
-

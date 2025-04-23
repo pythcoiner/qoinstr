@@ -19,7 +19,7 @@ class Send;
 class Output {
 public:
     Output(Send *screen, int id);
-    auto widget() -> QWidget*;
+    auto widget() -> QWidget *;
     void setDeletable(bool deletable);
     void enableMax(bool max);
     auto isMax() -> bool;
@@ -38,15 +38,15 @@ private:
 class RadioElement {
 public:
     RadioElement(Send *parent, const QString &label);
-    auto widget() -> QList<QWidget*>;
+    auto widget() -> QList<QWidget *>;
     void update();
-    auto button() -> QAbstractButton*;
+    auto button() -> QAbstractButton *;
 
 private:
     QRadioButton *m_button = nullptr;
     QLineEdit *m_value = nullptr;
     QLabel *m_label = nullptr;
-    QList<QWidget*> m_widget;
+    QList<QWidget *> m_widget;
 };
 
 class Send : public qontrol::Screen {
@@ -65,10 +65,11 @@ protected:
     void init() override;
     void doConnect() override;
     void view() override;
+
 private:
     AccountController *m_controller = nullptr;
     int m_output_id = 0;
-    QHash<int, Output*> m_outputs;
+    QHash<int, Output *> m_outputs;
     qontrol::Column *m_column = nullptr;
     QWidget *m_main_widget = nullptr;
 
@@ -86,7 +87,7 @@ private:
 
     bool m_broadcastable = false;
 
-    auto output() -> QWidget*;
+    auto output() -> QWidget *;
 };
 
 } // namespace screen

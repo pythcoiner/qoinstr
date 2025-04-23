@@ -1,5 +1,5 @@
-#include "AppController.h"
 #include "MainWindow.h"
+#include "AppController.h"
 #include "screens/MenuTab.h"
 #include "screens/modals/Stop.h"
 #include <qcontainerfwd.h>
@@ -15,7 +15,8 @@ MainWindow::MainWindow(QWidget *parent) : Window(parent) {
 }
 
 void MainWindow::initWindow() {
-    if (m_init) return;
+    if (m_init)
+        return;
 
     m_menu_tab = new screen::MenuTab(this);
 
@@ -28,9 +29,11 @@ void MainWindow::initWindow() {
 }
 
 auto MainWindow::accountExists(const QString &name) -> bool {
-    if (m_tabs.isEmpty()) return false;
-    for (const auto& tab : m_tabs) {
-        if (tab.first == name) return true;
+    if (m_tabs.isEmpty())
+        return false;
+    for (const auto &tab : m_tabs) {
+        if (tab.first == name)
+            return true;
     }
     return false;
 }
@@ -48,19 +51,20 @@ void MainWindow::insertAccount(AccountWidget *account, const QString &name) {
 void MainWindow::removeAccount(const QString &name) {
     auto exists = false;
     int index = 0;
-    for (int i=0; i<m_tabs.size(); ++i) {
+    for (int i = 0; i < m_tabs.size(); ++i) {
         if (m_tabs.at(i).first == name) {
             index = i;
             exists = true;
         }
     }
 
-    if (!exists) return;
+    if (!exists)
+        return;
     m_tabs.removeAt(index);
 }
 
 void MainWindow::updateTabs() {
-    for (const auto& tab : m_tabs) {
+    for (const auto &tab : m_tabs) {
         m_tab->addTab(tab.second, tab.first);
     }
     m_tab->addTab(m_menu_tab, "+");
@@ -74,4 +78,3 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 MainWindow::~MainWindow() = default;
-

@@ -10,20 +10,11 @@ namespace modal {
 Stop::Stop() {
     m_count = AppController::get()->accounts();
     setWindowTitle("Stopping");
-    setFixedSize(300,150);
+    setFixedSize(300, 150);
     auto *label = new QLabel("Stopping the service...");
-    auto *col = (new qontrol::Column)
-        ->pushSpacer()
-        ->push(label)
-        ->pushSpacer()
-        ;
-    auto *row = (new qontrol::Row)
-        ->pushSpacer()
-        ->push(col)
-        ->pushSpacer()
-        ;
+    auto *col = (new qontrol::Column)->pushSpacer()->push(label)->pushSpacer();
+    auto *row = (new qontrol::Row)->pushSpacer()->push(col)->pushSpacer();
     setMainWidget(row);
-
 }
 
 void Stop::onStopped() {

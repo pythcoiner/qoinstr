@@ -15,9 +15,9 @@ void AppController::init() {
     Controller::init(new AppController);
 }
 
-auto AppController::get() -> AppController* {
+auto AppController::get() -> AppController * {
     auto *ctrl = Controller::get();
-    auto *controller = dynamic_cast<AppController*>(ctrl);
+    auto *controller = dynamic_cast<AppController *>(ctrl);
     return controller;
 }
 
@@ -31,12 +31,11 @@ void AppController::initState() {
     listAccounts();
 
     connect(this, &AppController::accountCreated, this, &AppController::onAccountCreated, qontrol::UNIQUE);
-
 }
 
 void AppController::addAccount(const QString &name) { // NOLINT(readability-convert-member-functions-to-static)
     auto *window = AppController::window();
-    auto *win = dynamic_cast<MainWindow*>(window);
+    auto *win = dynamic_cast<MainWindow *>(window);
     if (!win->accountExists(name)) {
         auto *acc = new AccountWidget(name);
         win->insertAccount(acc, name);
@@ -48,7 +47,7 @@ void AppController::addAccount(const QString &name) { // NOLINT(readability-conv
 }
 
 void AppController::removeAccount(const QString &account) { // NOLINT(readability-convert-member-functions-to-static)
-    auto *win = dynamic_cast<MainWindow*>(window());
+    auto *win = dynamic_cast<MainWindow *>(window());
     win->removeAccount(account);
     m_accounts.remove(account);
 }
@@ -83,15 +82,18 @@ void AppController::onAccountCreated(const QString &name) {
     addAccount(name);
 }
 
-void AppController::osMessage(QString title, QString msg, int delay) { // NOLINT 
+void AppController::osMessage(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::NoIcon, delay);
 }
+
 void AppController::osInfo(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Information, delay);
 }
+
 void AppController::osWarning(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Warning, delay);
 }
+
 void AppController::osCritical(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Critical, delay);
 }

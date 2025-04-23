@@ -21,7 +21,7 @@ signals:
     void poolsUpdated();
 
 public slots:
-    void recvPayload(QList<payload::Relay*> *payload);
+    void recvPayload(QList<payload::Relay *> *payload);
 
 protected:
     void init() override;
@@ -30,10 +30,10 @@ protected:
 
 private:
     AccountController *m_controller = nullptr;
-    QList<payload::Relay*> *m_payload = nullptr;
+    QList<payload::Relay *> *m_payload = nullptr;
     QWidget *m_main_widget = nullptr;
-    QList<QTableWidget*> *m_tables = nullptr;
-    QList<qontrol::widgets::Collapsible*> *m_collapsibles = nullptr;
+    QList<QTableWidget *> *m_tables = nullptr;
+    QList<qontrol::widgets::Collapsible *> *m_collapsibles = nullptr;
 
     void insertRelay(qontrol::Column *col, const payload::Relay *relay);
 };

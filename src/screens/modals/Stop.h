@@ -16,7 +16,6 @@ public slots:
 private:
     int m_count = 0;
     int m_stopped = 0;
-
 };
 
 } // namespace modal

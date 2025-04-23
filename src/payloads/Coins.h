@@ -18,28 +18,26 @@ struct Coin {
     bool locked = false;
 
     Coin() = default;
-    Coin(const Coin& other);
-    static auto dummy() -> Coin*;
-    static auto fromRust(rust::Box<RustCoin> coin) -> Coin*;
+    Coin(const Coin &other);
+    static auto dummy() -> Coin *;
+    static auto fromRust(rust::Box<RustCoin> coin) -> Coin *;
 
-    auto operator==(const Coin& other) const -> bool;
-}; 
+    auto operator==(const Coin &other) const -> bool;
+};
 
 struct Coins {
     uint64_t confirmed_balance = 0;
     uint64_t unconfirmed_balance = 0;
     uint64_t confirmed_coins = 0;
     uint64_t unconfirmed_coins = 0;
-    QList<Coin*> coins;
+    QList<Coin *> coins;
 
     Coins() = default;
-    static auto dummy() -> Coins*;
-    static auto fromRust(rust::Box<RustCoins> coins) -> Coins*;
+    static auto dummy() -> Coins *;
+    static auto fromRust(rust::Box<RustCoins> coins) -> Coins *;
 
     void update();
-    auto operator==(const Coins& other) const -> bool;
-
+    auto operator==(const Coins &other) const -> bool;
 };
-
 
 } // namespace payload

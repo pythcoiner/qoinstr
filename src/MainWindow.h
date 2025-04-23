@@ -23,8 +23,8 @@ public:
     auto accountExists(const QString &name) -> bool;
     void updateTabs();
 
-    auto tabWidget() -> QTabWidget*;
-    auto tabs() -> QHash<QString, QWidget*>&;
+    auto tabWidget() -> QTabWidget *;
+    auto tabs() -> QHash<QString, QWidget *> &;
 
 signals:
 
@@ -34,7 +34,7 @@ protected:
 private:
     bool m_init = false;
     QTabWidget *m_tab = nullptr;
-    QList<QPair<QString, AccountWidget*>> m_tabs;
+    QList<QPair<QString, AccountWidget *>> m_tabs;
     QWidget *m_menu_tab = nullptr;
 
     void initWindow();

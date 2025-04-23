@@ -28,6 +28,7 @@ protected:
     void init() override;
     void doConnect() override;
     void view() override;
+
 private:
     payload::Coins *m_payload = nullptr;
     QWidget *m_main_widget = nullptr;

@@ -33,7 +33,7 @@ Output::Output(Send *screen, int id) {
     m_amount->setPlaceholderText("0.002 BTC");
 
     m_label = new QLineEdit;
-    m_label->setFixedWidth(2 * INPUT_WIDTH );
+    m_label->setFixedWidth(2 * INPUT_WIDTH);
     m_label->setPlaceholderText("Label");
 
     m_max = new QCheckBox;
@@ -50,43 +50,33 @@ Output::Output(Send *screen, int id) {
     m_max_label->setFont(f);
 
     auto *addrRow = (new qontrol::Row)
-        ->push(m_delete)
-        ->push(m_delete_spacer)
-        ->push(m_address)
-        ->pushSpacer(H_SPACER)
-        ->push(m_amount)
-        ->pushSpacer(H_SPACER)
-        ->push(m_max)
-        ->pushSpacer(H_SPACER)
-        ->push(m_max_label)
-        ->pushSpacer()
-        ;
+                        ->push(m_delete)
+                        ->push(m_delete_spacer)
+                        ->push(m_address)
+                        ->pushSpacer(H_SPACER)
+                        ->push(m_amount)
+                        ->pushSpacer(H_SPACER)
+                        ->push(m_max)
+                        ->pushSpacer(H_SPACER)
+                        ->push(m_max_label)
+                        ->pushSpacer();
 
-    auto *labelRow = (new qontrol::Row)
-        ->push(m_label)
-        ->pushSpacer()
-        ;
+    auto *labelRow = (new qontrol::Row)->push(m_label)->pushSpacer();
 
     auto *col = (new qontrol::Column)
-        ->pushSpacer(V_SPACER)
-        ->push(addrRow)
-        ->pushSpacer(V_SPACER)
-        ->push(labelRow)
-        ->pushSpacer(2 * V_SPACER)
-        ;
+                    ->pushSpacer(V_SPACER)
+                    ->push(addrRow)
+                    ->pushSpacer(V_SPACER)
+                    ->push(labelRow)
+                    ->pushSpacer(2 * V_SPACER);
 
-    QObject::connect(m_delete, &QPushButton::clicked, screen, [screen, id]() {
-        screen->deleteOutput(id);
-    });
-    QObject::connect(m_max, &QCheckBox::checkStateChanged, screen, [screen, id]() {
-        screen->outputSetMax(id);
-    });
+    QObject::connect(m_delete, &QPushButton::clicked, screen, [screen, id]() { screen->deleteOutput(id); });
+    QObject::connect(m_max, &QCheckBox::checkStateChanged, screen, [screen, id]() { screen->outputSetMax(id); });
 
     m_widget = col;
-
 }
 
-auto Output::widget() -> QWidget* {
+auto Output::widget() -> QWidget * {
     return m_widget;
 }
 
@@ -110,15 +100,14 @@ RadioElement::RadioElement(Send *parent, const QString &label) {
     m_value = new QLineEdit;
     m_value->setFixedWidth(100);
     m_label = new QLabel(label);
-    QObject::connect(m_button, &QAbstractButton::toggled, parent, [parent]{parent->updateRadio();});
+    QObject::connect(m_button, &QAbstractButton::toggled, parent, [parent] { parent->updateRadio(); });
 
     m_widget.append(m_button);
     m_widget.append(m_value);
     m_widget.append(m_label);
 }
 
-
-auto RadioElement::button() -> QAbstractButton* {
+auto RadioElement::button() -> QAbstractButton * {
     return m_button;
 }
 
@@ -126,7 +115,7 @@ void RadioElement::update() {
     m_value->setEnabled(m_button->isChecked());
 }
 
-auto RadioElement::widget() -> QList<QWidget*> {
+auto RadioElement::widget() -> QList<QWidget *> {
     return m_widget;
 }
 
@@ -157,7 +146,6 @@ void Send::init() {
     m_clear_btn = new QPushButton("Clear");
     m_export_btn = new QPushButton("Export");
 
-
     m_fee_sats = new RadioElement(this, "sats");
     m_fee_sats_vb = new RadioElement(this, "sats/vb");
     m_fee_blocks = new RadioElement(this, "blocks");
@@ -167,10 +155,10 @@ void Send::init() {
     m_fee_group->addButton(m_fee_blocks->button());
 
     m_fee_sats_vb->button()->setChecked(true);
-
 }
 
-void Send::doConnect() {}
+void Send::doConnect() {
+}
 
 void Send::view() {
     auto *oldColumn = m_column;
@@ -188,53 +176,46 @@ void Send::view() {
     }
     delete oldColumn;
 
-    auto *addOutputRow = (new qontrol::Row)
-        ->pushSpacer()
-        ->push(m_add_btn)
-        ->pushSpacer()
-        ;
+    auto *addOutputRow = (new qontrol::Row)->pushSpacer()->push(m_add_btn)->pushSpacer();
 
     auto *lastRow = (new qontrol::Row)
-        ->pushSpacer()
-        ->push(m_clear_btn)
-        ->pushSpacer()
-        ->push(m_export_btn)
-        ->pushSpacer()
-        ->push(m_sign_btn)
-        ->push(m_broadcast_button)
-        ->pushSpacer()
-        ;
+                        ->pushSpacer()
+                        ->push(m_clear_btn)
+                        ->pushSpacer()
+                        ->push(m_export_btn)
+                        ->pushSpacer()
+                        ->push(m_sign_btn)
+                        ->push(m_broadcast_button)
+                        ->pushSpacer();
 
     auto *feeRow = (new qontrol::Row)
-        ->push(m_fee_sats_vb->widget().at(0))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_sats_vb->widget().at(1))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_sats_vb->widget().at(2))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_sats->widget().at(0))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_sats->widget().at(1))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_sats->widget().at(2))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_blocks->widget().at(0))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_blocks->widget().at(1))
-        ->pushSpacer(V_SPACER)
-        ->push(m_fee_blocks->widget().at(2))
-        ->pushSpacer()
-        ;
+                       ->push(m_fee_sats_vb->widget().at(0))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_sats_vb->widget().at(1))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_sats_vb->widget().at(2))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_sats->widget().at(0))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_sats->widget().at(1))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_sats->widget().at(2))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_blocks->widget().at(0))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_blocks->widget().at(1))
+                       ->pushSpacer(V_SPACER)
+                       ->push(m_fee_blocks->widget().at(2))
+                       ->pushSpacer();
 
     auto *col = (new qontrol::Column)
-        ->push(m_column)
-        ->push(addOutputRow)
-        ->pushSpacer(20)
-        ->push(feeRow)
-        ->pushSpacer(20)
-        ->push(lastRow)
-        ->pushSpacer()
-        ;
+                    ->push(m_column)
+                    ->push(addOutputRow)
+                    ->pushSpacer(20)
+                    ->push(feeRow)
+                    ->pushSpacer(20)
+                    ->push(lastRow)
+                    ->pushSpacer();
 
     auto *oldWidget = m_main_widget;
     m_main_widget = margin(col);
@@ -293,7 +274,6 @@ void Send::outputSetMax(int id) {
             m_outputs.value(key)->enableMax(true);
         }
     }
-
 }
 
 void Send::setBroadcastable(bool broadcastable) {

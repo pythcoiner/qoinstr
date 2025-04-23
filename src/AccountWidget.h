@@ -16,11 +16,11 @@ public:
     AccountWidget(const QString &account, QWidget *parent = nullptr);
     ~AccountWidget() override;
     void loadLayout(QLayout *layout);
-    auto screenContainer() -> QWidget*;
-    auto takeScreen() -> qontrol::Screen*;
-    void setScreen(qontrol::Screen* screen);
-    void loadPanel(qontrol::Panel* layout);
-    auto controller() -> AccountController*;
+    auto screenContainer() -> QWidget *;
+    auto takeScreen() -> qontrol::Screen *;
+    void setScreen(qontrol::Screen *screen);
+    void loadPanel(qontrol::Panel *layout);
+    auto controller() -> AccountController *;
 
 signals:
 

@@ -32,8 +32,8 @@ protected:
 
 private:
     QWidget *m_main_widget = nullptr;
-    QHash<QString, QPushButton*> m_accounts;
+    QHash<QString, QPushButton *> m_accounts;
     QPushButton *m_btn_create = nullptr;
 };
 
-}
+} // namespace screen

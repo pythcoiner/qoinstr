@@ -34,15 +34,15 @@ void MenuTab::doConnect() {
 }
 
 void MenuTab::updateAccounts(QList<QString> accounts) { // NOLINT(performance-unnecessary-value-param)
-    qDebug() << "MenuTab::updateAccounts(" << accounts <<")";
+    qDebug() << "MenuTab::updateAccounts(" << accounts << ")";
 
     // add missing accounts
-    for (const auto& account : accounts) {
+    for (const auto &account : accounts) {
         addAccount(account);
     }
 
     // remove deleted accounts
-    for (const auto& name : m_accounts.keys()) {
+    for (const auto &name : m_accounts.keys()) {
         if (!accounts.contains(name)) {
             m_accounts.remove(name);
         }
@@ -65,34 +65,22 @@ void MenuTab::addAccount(const QString &account) {
         auto font = btn->font();
         font.setPixelSize(30);
         btn->setFont(font);
-        connect(btn, &QPushButton::clicked,  [this, account]() {
-            emit this->openAccount(account);
-        });
+        connect(btn, &QPushButton::clicked, [this, account]() { emit this->openAccount(account); });
         m_accounts.insert(account, btn);
     }
 }
 
 void MenuTab::view() {
 
-    auto *col = (new qontrol::Column)
-        ->pushSpacer()
-        ;
+    auto *col = (new qontrol::Column)->pushSpacer();
 
     for (auto *btn : m_accounts) {
-        col->push(btn)
-            ->pushSpacer(V_SPACER * 2)
-        ;
+        col->push(btn)->pushSpacer(V_SPACER * 2);
     }
 
-    col->push(m_btn_create)
-        -> pushSpacer()
-        ;
+    col->push(m_btn_create)->pushSpacer();
 
-    auto *row = (new qontrol::Row)
-        ->pushSpacer()
-        ->push(col)
-        ->pushSpacer()
-        ;
+    auto *row = (new qontrol::Row)->pushSpacer()->push(col)->pushSpacer();
 
     auto *oldWidget = m_main_widget;
     m_main_widget = margin(row);
@@ -102,5 +90,4 @@ void MenuTab::view() {
     this->setLayout(m_main_widget->layout());
 }
 
-}
-
+} // namespace screen

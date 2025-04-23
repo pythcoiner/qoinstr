@@ -24,26 +24,25 @@ AccountController::AccountController(const QString &account, AccountWidget *widg
     init(account);
 }
 
-void AccountController::init(const QString &account ) {
-    if (m_init) return;
+void AccountController::init(const QString &account) {
+    if (m_init)
+        return;
 
     // init the wallet
-    auto wallet = 
-        new_account( account.toStdString());
+    auto wallet = new_account(account.toStdString());
 
     m_wallet = std::make_optional(std::move(wallet));
 
     // init the timer that poll notifications
-    m_notif_timer =  new QTimer;
+    m_notif_timer = new QTimer;
     connect(m_notif_timer, &QTimer::timeout, this, &AccountController::poll);
     m_notif_timer->start(100); // poll every 100ms
     // init the timer that poll coins
-    m_coins_timer =  new QTimer;
+    m_coins_timer = new QTimer;
     connect(m_coins_timer, &QTimer::timeout, this, &AccountController::pollCoins);
-    m_coins_timer->start(1000); 
+    m_coins_timer->start(1000);
 
     m_init = true;
-
 }
 
 void AccountController::loadPanel(const QString &name) {
@@ -57,7 +56,7 @@ void AccountController::insertPanel(qontrol::Panel *panel) {
     m_panels.insert(panel->name(), panel);
 }
 
-auto AccountController::screen(const QString &screen) -> std::optional<qontrol::Screen*> {
+auto AccountController::screen(const QString &screen) -> std::optional<qontrol::Screen *> {
     auto *panel = m_panels.value(screen);
     if (panel != nullptr) {
         return std::optional(panel->screen());
@@ -74,7 +73,7 @@ void AccountController::pollCoins() {
         m_wallet.value()->generate_coins();
         auto rcoins = m_wallet.value()->spendable_coins();
         if (rcoins->is_ok()) {
-            auto *coins =  payload::Coins::fromRust(std::move(rcoins));
+            auto *coins = payload::Coins::fromRust(std::move(rcoins));
             emit this->updateCoins(coins);
         }
     }
@@ -86,7 +85,7 @@ void AccountController::pollPools() {
         auto rpools = m_wallet.value()->pools();
         if (rpools->is_ok()) {
             auto relay = m_wallet.value()->relay();
-            auto *pools =  payload::Relay::fromRust(std::move(rpools), relay.c_str());
+            auto *pools = payload::Relay::fromRust(std::move(rpools), relay.c_str());
             emit this->updatePools(pools);
         }
     }
@@ -94,7 +93,6 @@ void AccountController::pollPools() {
 
 void AccountController::pollAddresses() {
     qDebug() << "AppController::pollAddresses()";
-
 }
 
 void AccountController::pollNotifications() {
@@ -104,7 +102,7 @@ void AccountController::pollNotifications() {
             auto signal = poll->boxed();
             if (!signal->is_err()) {
                 auto s = signal->unwrap();
-                if ( s == SignalFlag::CoinUpdate) {
+                if (s == SignalFlag::CoinUpdate) {
                 } else if (s == SignalFlag::PoolUpdate) {
                     pollPools();
                 } else if (s == SignalFlag::AddressTipChanged) {
@@ -172,29 +170,28 @@ void AccountController::settingsClicked() {
     this->loadPanel("settings");
 }
 
-
-auto AccountController::coins() -> screen::Coins* {
-    auto *screen = dynamic_cast<screen::Coins*>(this->screen("coins").value());
+auto AccountController::coins() -> screen::Coins * {
+    auto *screen = dynamic_cast<screen::Coins *>(this->screen("coins").value());
     return screen;
 }
 
-auto AccountController::pools() -> screen::Pools* {
-    auto *screen = dynamic_cast<screen::Pools*>(this->screen("pools").value());
+auto AccountController::pools() -> screen::Pools * {
+    auto *screen = dynamic_cast<screen::Pools *>(this->screen("pools").value());
     return screen;
 }
 
-auto AccountController::send() -> screen::Send* {
-    auto *screen = dynamic_cast<screen::Send*>(this->screen("send").value());
+auto AccountController::send() -> screen::Send * {
+    auto *screen = dynamic_cast<screen::Send *>(this->screen("send").value());
     return screen;
 }
 
-auto AccountController::receive() -> screen::Receive* {
-    auto *screen = dynamic_cast<screen::Receive*>(this->screen("receive").value());
+auto AccountController::receive() -> screen::Receive * {
+    auto *screen = dynamic_cast<screen::Receive *>(this->screen("receive").value());
     return screen;
 }
 
-auto AccountController::settings() -> screen::Settings* {
-    auto *screen = dynamic_cast<screen::Settings*>(this->screen("settings").value());
+auto AccountController::settings() -> screen::Settings * {
+    auto *screen = dynamic_cast<screen::Settings *>(this->screen("settings").value());
     return screen;
 }
 
@@ -204,7 +201,6 @@ auto AccountController::relay() -> QString {
     }
     return QString("Unknow relay");
 }
-
 
 void AccountController::actionCreatePool(payload::Coin coin) { // NOLINT
     auto *modal = new modal::CreatePool(coin, this);
@@ -222,12 +218,7 @@ void AccountController::actionCreateNewAddress() {
 
 void AccountController::cmdCreatePool(
     // TODO: pass by value
-    const QString &outpoint,
-    uint64_t denomination,
-    uint32_t fees,
-    uint64_t max_duration,
-    size_t peers
-) {
+    const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration, size_t peers) {
     if (m_wallet.has_value()) {
         m_wallet.value()->create_dummy_pool(denomination, peers, max_duration, fees);
     }
@@ -264,4 +255,3 @@ void AccountController::stop() {
     }
     emit stopped();
 }
-

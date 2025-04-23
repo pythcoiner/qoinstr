@@ -28,7 +28,7 @@ protected:
     void view() override;
 
     void actionSave();
-    
+
 private:
     AccountController *m_controller = nullptr;
     bool m_view_init = false;
@@ -38,7 +38,7 @@ private:
     qontrol::widgets::InputLine *m_nostr_relay = nullptr;
     qontrol::widgets::InputLine *m_nostr_back = nullptr;
     qontrol::widgets::InputLine *m_look_ahead = nullptr;
-    QPushButton *m_btn_save =  nullptr;
+    QPushButton *m_btn_save = nullptr;
 };
 
-}
+} // namespace screen

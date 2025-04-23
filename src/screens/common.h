@@ -18,7 +18,6 @@ const int H_SPACER = 5;
 
 const int SATS = 100000000;
 
-auto margin(QWidget *widget) -> QWidget*;
+auto margin(QWidget *widget) -> QWidget *;
 auto toBitcoin(uint64_t sats, bool with_unit = true) -> QString;
 auto coinsCount(uint64_t count) -> QString;
-

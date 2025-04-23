@@ -9,18 +9,15 @@ ComboLine::ComboLine(const QString &label, const QStringList &values, QWidget *p
     m_label = new QLabel(label);
     m_combo = new QComboBox();
     m_combo->addItems(values);
-    this->push(m_label)
-        ->pushSpacer(H_SPACER)
-        ->push(m_combo)
-        ->pushSpacer()
-        ;
+    this->push(m_label)->pushSpacer(H_SPACER)->push(m_combo)->pushSpacer();
     this->setParent(parent);
 }
 
-auto ComboLine::label() -> QLabel* {
+auto ComboLine::label() -> QLabel * {
     return m_label;
 }
-auto ComboLine::combo() -> QComboBox* {
+
+auto ComboLine::combo() -> QComboBox * {
     return m_combo;
 }
 

@@ -2,12 +2,11 @@
 
 #include "AccountController.h"
 #include "include/cpp_joinstr.h"
+#include "screens/modals/Stop.h"
 #include <QObject>
 #include <Qontrol>
 #include <qobject.h>
 #include <qsystemtrayicon.h>
-#include "screens/modals/Stop.h"
-
 
 namespace screen {
 class Coins;
@@ -18,11 +17,11 @@ class Settings;
 } // namespace screen
 
 class AppController : public qontrol::Controller {
-    Q_OBJECT 
+    Q_OBJECT
 public:
     AppController();
     static void init();
-    static auto get() -> AppController*;
+    static auto get() -> AppController *;
     auto accounts() -> int;
 
 signals:
@@ -37,16 +36,15 @@ public slots:
     void onCreateAccount();
     void createAccount(const QString &name, const QString &mnemonic, Network network);
     void onAccountCreated(const QString &name);
-    void stop(modal::Stop* modal);
+    void stop(modal::Stop *modal);
 
     // OS Notifications
-    void osMessage(QString title, QString msg, int delay=10000);
-    void osInfo(QString title, QString msg, int delay=10000);
-    void osWarning(QString title, QString msg, int delay=10000);
-    void osCritical(QString title, QString msg, int delay=10000);
+    void osMessage(QString title, QString msg, int delay = 10000);
+    void osInfo(QString title, QString msg, int delay = 10000);
+    void osWarning(QString title, QString msg, int delay = 10000);
+    void osCritical(QString title, QString msg, int delay = 10000);
 
 private:
-    QHash<QString, AccountController*> m_accounts;
+    QHash<QString, AccountController *> m_accounts;
     QSystemTrayIcon *m_tray_icon = nullptr;
-
 };

@@ -5,10 +5,8 @@ bool MouseInspector::eventFilter(QObject *obj, QEvent *event) {
         QPoint globalPos = QCursor::pos();
         QWidget *widget = QApplication::widgetAt(globalPos);
         if (widget) {
-            qDebug() << "Mouse click on widget:"
-                     << widget->metaObject()->className()
-                     << "ObjectName:" << widget->objectName()
-                     << "Pos:" << globalPos;
+            qDebug() << "Mouse click on widget:" << widget->metaObject()->className()
+                     << "ObjectName:" << widget->objectName() << "Pos:" << globalPos;
         } else {
             qDebug() << "Mouse click on: No widget found at" << globalPos;
         }

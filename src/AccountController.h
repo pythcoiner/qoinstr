@@ -29,26 +29,26 @@ class Receive;
 class Settings;
 } // namespace screen
 
-class AccountController: public QObject {
-    Q_OBJECT 
+class AccountController : public QObject {
+    Q_OBJECT
 public:
     AccountController(const QString &account, AccountWidget *widget);
     void init(const QString &account);
-    auto screen(const QString &screen) -> std::optional<qontrol::Screen*>;
+    auto screen(const QString &screen) -> std::optional<qontrol::Screen *>;
     void loadPanels();
 
-    auto coins() -> screen::Coins*;
-    auto pools() -> screen::Pools*;
-    auto send() -> screen::Send*;
-    auto receive() -> screen::Receive*;
-    auto settings() -> screen::Settings*;
+    auto coins() -> screen::Coins *;
+    auto pools() -> screen::Pools *;
+    auto send() -> screen::Send *;
+    auto receive() -> screen::Receive *;
+    auto settings() -> screen::Settings *;
     auto relay() -> QString;
 
 signals:
     // Backend => GUI
-    void updateCoins(payload::Coins*);
-    void updatePools(QList<payload::Relay*>* pools);
-    void newAddress(payload::Address*);
+    void updateCoins(payload::Coins *);
+    void updatePools(QList<payload::Relay *> *pools);
+    void newAddress(payload::Address *);
     void loadConfig(payload::Config);
     void stopped();
 
@@ -74,13 +74,8 @@ public slots:
     void actionCreateNewAddress();
 
     // Wallet Commands
-    void cmdCreatePool(
-        const QString &outpoint,
-        uint64_t denomination,
-        uint32_t fees,
-        uint64_t max_duration,
-        size_t peers
-    );
+    void cmdCreatePool(const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration,
+                       size_t peers);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();
 
@@ -90,7 +85,7 @@ public slots:
 
 private:
     QPointer<qontrol::Panel> m_current_panel;
-    QHash<QString, qontrol::Panel*> m_panels;
+    QHash<QString, qontrol::Panel *> m_panels;
     AccountWidget *m_widget;
     std::optional<rust::Box<Account>> m_wallet = std::nullopt;
     QTimer *m_notif_timer = nullptr;
