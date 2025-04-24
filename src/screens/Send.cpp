@@ -214,6 +214,8 @@ void Send::init() {
     connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addInput);
 
     m_clear_inputs_btn = new QPushButton("Clear");
+    connect(m_clear_inputs_btn, &QPushButton::clicked, this,
+            &Send::clearInputs);
 
     m_auto_inputs_btn = new QPushButton("Auto");
 
@@ -223,6 +225,8 @@ void Send::init() {
     m_sign_btn = new QPushButton("Sign");
     m_broadcast_button = new QPushButton("Broadcast");
     m_clear_outputs_btn = new QPushButton("Clear");
+    connect(m_clear_outputs_btn, &QPushButton::clicked, this,
+            &Send::clearOutputs);
     m_export_btn = new QPushButton("Export");
 
     m_fee_sats = new RadioElement(this, "sats");
@@ -428,4 +432,20 @@ void Send::setBroadcastable(bool broadcastable) {
     }
 }
 
+void Send::clearInputs() {
+    for (auto *inp : m_inputs) {
+        delete inp;
+    }
+    m_inputs.clear();
+    view();
+}
+
+void Send::clearOutputs() {
+    for (auto *outp : m_outputs) {
+        delete outp;
+    }
+    m_outputs.clear();
+    addOutput();
+    view();
+}
 } // namespace screen

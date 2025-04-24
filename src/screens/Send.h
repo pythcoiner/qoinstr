@@ -75,6 +75,8 @@ public slots:
     void deleteOutput(int id);
     void addInput();
     void addOutput();
+    void clearInputs();
+    void clearOutputs();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
 
