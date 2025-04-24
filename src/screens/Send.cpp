@@ -1,6 +1,7 @@
 #include "Send.h"
 #include "AccountController.h"
 #include "AppController.h"
+#include "Column.h"
 #include "Row.h"
 #include "common.h"
 #include <Qontrol>
@@ -9,10 +10,68 @@
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qlogging.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 
 namespace screen {
+
+Input::Input(Send *screen, int id) {
+    m_outpoint = new QLineEdit();
+    m_outpoint->setFixedWidth(200);
+    m_outpoint->setEnabled(false);
+    m_outpoint->setPlaceholderText("xxxx....yyyyy:z");
+
+    m_delete = new QPushButton();
+    QIcon closeIcon = m_delete->style()->standardIcon(
+        QStyle::SP_DialogCloseButton);
+    m_delete->setIcon(closeIcon);
+    m_delete->setFixedWidth(m_outpoint->minimumSizeHint().height());
+    m_delete->setFixedHeight(m_outpoint->minimumSizeHint().height());
+
+    m_delete_spacer = new QWidget;
+    m_delete_spacer->setFixedWidth(V_SPACER);
+
+    m_amount = new QLineEdit;
+    m_amount->setFixedWidth(95);
+    m_amount->setEnabled(false);
+    m_amount->setPlaceholderText("0.002 BTC");
+
+    m_label = new QLineEdit;
+    m_label->setFixedWidth(2 * INPUT_WIDTH);
+    m_label->setPlaceholderText("Label");
+
+    auto *outpointRow = (new qontrol::Row)
+                            ->push(m_delete)
+                            ->push(m_delete_spacer)
+                            ->push(m_outpoint)
+                            ->pushSpacer(H_SPACER)
+                            ->push(m_amount)
+                            ->pushSpacer();
+
+    auto *labelRow = (new qontrol::Row)->push(m_label)->pushSpacer();
+
+    auto *col = (new qontrol::Column)
+                    ->pushSpacer(V_SPACER)
+                    ->push(outpointRow)
+                    ->pushSpacer(V_SPACER)
+                    ->push(labelRow)
+                    ->pushSpacer(2 * V_SPACER);
+
+    QObject::connect(m_delete, &QPushButton::clicked, screen,
+                     [screen, id]() { screen->deleteInput(id); });
+
+    m_widget = col;
+}
+
+auto Input::widget() -> QWidget * {
+    return m_widget;
+}
+
+void Input::setDeletable(bool deletable) {
+    m_delete->setVisible(deletable);
+    m_delete_spacer->setVisible(deletable);
+}
 
 Output::Output(Send *screen, int id) {
     m_address = new QLineEdit;
@@ -135,24 +194,35 @@ void Send::updateRadio() {
 }
 
 Send::Send(AccountController *ctrl) {
+    qDebug() << "Send::Send()";
     m_controller = ctrl;
     this->init();
     this->doConnect();
+    this->addOutput();
     this->view();
     this->updateRadio();
     this->setBroadcastable(false);
 }
 
 void Send::init() {
-    m_column = (new qontrol::Column);
-    this->addOutput();
+    qDebug() << "Send::init()";
+    m_outputs_column = (new qontrol::Column);
 
-    m_add_btn = new QPushButton("+ Add an Output");
-    connect(m_add_btn, &QPushButton::clicked, this, &Send::addOutput);
+    m_inputs_column = (new qontrol::Column);
+
+    m_add_input_btn = new QPushButton("+ Add an Input");
+    connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addInput);
+
+    m_clear_inputs_btn = new QPushButton("Clear");
+
+    m_auto_inputs_btn = new QPushButton("Auto");
+
+    m_add_output_btn = new QPushButton("+ Add an Output");
+    connect(m_add_output_btn, &QPushButton::clicked, this, &Send::addOutput);
 
     m_sign_btn = new QPushButton("Sign");
     m_broadcast_button = new QPushButton("Broadcast");
-    m_clear_btn = new QPushButton("Clear");
+    m_clear_outputs_btn = new QPushButton("Clear");
     m_export_btn = new QPushButton("Export");
 
     m_fee_sats = new RadioElement(this, "sats");
@@ -170,9 +240,60 @@ void Send::doConnect() {
 }
 
 void Send::view() {
-    auto *oldColumn = m_column;
+    auto *row = (new qontrol::Row)
+                    ->push(inputsView())
+                    ->pushSpacer(20)
+                    ->push(outputsView());
 
-    m_column = new qontrol::Column;
+    auto *oldWidget = m_main_widget;
+    m_main_widget = margin(row);
+    delete oldWidget;
+    delete this->layout();
+    this->setLayout(m_main_widget->layout());
+}
+
+auto Send::inputsView() -> QWidget * {
+    auto *oldColumn = m_inputs_column;
+
+    m_inputs_column = new qontrol::Column;
+
+    auto keys = QList<int>();
+    for (auto id : m_inputs.keys()) {
+        keys.push_back(id);
+    }
+    std::ranges::sort(keys);
+    for (auto id : keys) {
+        auto *input = m_inputs.value(id);
+        m_inputs_column->push(input->widget());
+    }
+    delete oldColumn;
+
+    auto *addInputRow = (new qontrol::Row)
+                            ->pushSpacer()
+                            ->push(m_add_input_btn)
+                            ->pushSpacer();
+
+    auto *lastRow = (new qontrol::Row)
+                        ->pushSpacer()
+                        ->push(m_clear_inputs_btn)
+                        ->pushSpacer()
+                        ->push(m_auto_inputs_btn)
+                        ->pushSpacer();
+
+    auto *col = (new qontrol::Column)
+                    ->push(m_inputs_column)
+                    ->push(addInputRow)
+                    ->pushSpacer(20)
+                    ->push(lastRow)
+                    ->pushSpacer();
+
+    return col;
+}
+
+auto Send::outputsView() -> QWidget * {
+    auto *oldColumn = m_outputs_column;
+
+    m_outputs_column = new qontrol::Column;
 
     auto keys = QList<int>();
     for (auto id : m_outputs.keys()) {
@@ -181,18 +302,18 @@ void Send::view() {
     std::ranges::sort(keys);
     for (auto id : keys) {
         auto *output = m_outputs.value(id);
-        m_column->push(output->widget());
+        m_outputs_column->push(output->widget());
     }
     delete oldColumn;
 
     auto *addOutputRow = (new qontrol::Row)
                              ->pushSpacer()
-                             ->push(m_add_btn)
+                             ->push(m_add_output_btn)
                              ->pushSpacer();
 
     auto *lastRow = (new qontrol::Row)
                         ->pushSpacer()
-                        ->push(m_clear_btn)
+                        ->push(m_clear_outputs_btn)
                         ->pushSpacer()
                         ->push(m_export_btn)
                         ->pushSpacer()
@@ -207,7 +328,7 @@ void Send::view() {
                        ->pushSpacer();
 
     auto *col = (new qontrol::Column)
-                    ->push(m_column)
+                    ->push(m_outputs_column)
                     ->push(addOutputRow)
                     ->pushSpacer(20)
                     ->push(feeRow)
@@ -215,11 +336,7 @@ void Send::view() {
                     ->push(lastRow)
                     ->pushSpacer();
 
-    auto *oldWidget = m_main_widget;
-    m_main_widget = margin(col);
-    delete oldWidget;
-    delete this->layout();
-    this->setLayout(m_main_widget->layout());
+    return col;
 }
 
 void Send::addOutput() {
@@ -238,8 +355,26 @@ void Send::addOutput() {
         }
     }
     m_outputs.insert(m_output_id, output);
-    m_column->push(output->widget());
+    m_outputs_column->push(output->widget());
     m_output_id++;
+    view();
+}
+
+void Send::addInput() {
+    auto *input = new Input(this, m_input_id);
+    for (auto &out : m_inputs) {
+        out->setDeletable(true);
+    }
+    m_inputs.insert(m_input_id, input);
+    m_inputs_column->push(input->widget());
+    m_input_id++;
+    view();
+}
+
+void Send::deleteInput(int id) {
+    auto *input = m_inputs.take(id);
+    delete input->widget();
+    delete input;
 }
 
 void Send::deleteOutput(int id) {
@@ -249,6 +384,7 @@ void Send::deleteOutput(int id) {
             outp->enableMax(true);
         }
     }
+    delete output->widget();
     delete output;
     if (m_outputs.size() == 1) {
         auto *outp = m_outputs.value(m_outputs.keys().first());

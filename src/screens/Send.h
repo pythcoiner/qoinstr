@@ -16,6 +16,21 @@ class AccountController;
 namespace screen {
 class Send;
 
+class Input {
+public:
+    Input(Send *screen, int id);
+    auto widget() -> QWidget *;
+    void setDeletable(bool deletable);
+
+private:
+    QLineEdit *m_outpoint = nullptr;
+    QLineEdit *m_label = nullptr;
+    QLineEdit *m_amount = nullptr;
+    QPushButton *m_delete = nullptr;
+    QWidget *m_delete_spacer = nullptr;
+    QWidget *m_widget = nullptr;
+};
+
 class Output {
 public:
     Output(Send *screen, int id);
@@ -56,7 +71,9 @@ public:
 
 public slots:
     void outputSetMax(int id);
+    void deleteInput(int id);
     void deleteOutput(int id);
+    void addInput();
     void addOutput();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
@@ -65,12 +82,17 @@ protected:
     void init() override;
     void doConnect() override;
     void view() override;
+    auto inputsView() -> QWidget *;
+    auto outputsView() -> QWidget *;
 
 private:
     AccountController *m_controller = nullptr;
+    int m_input_id = 0;
     int m_output_id = 0;
     QHash<int, Output *> m_outputs;
-    qontrol::Column *m_column = nullptr;
+    QHash<int, Input *> m_inputs;
+    qontrol::Column *m_outputs_column = nullptr;
+    qontrol::Column *m_inputs_column = nullptr;
     QWidget *m_main_widget = nullptr;
 
     RadioElement *m_fee_sats_vb = nullptr;
@@ -78,10 +100,15 @@ private:
     RadioElement *m_fee_blocks = nullptr;
     QButtonGroup *m_fee_group = nullptr;
 
-    QPushButton *m_add_btn = nullptr;
+    QPushButton *m_add_input_btn = nullptr;
+
+    QPushButton *m_clear_inputs_btn = nullptr;
+    QPushButton *m_auto_inputs_btn = nullptr;
+
+    QPushButton *m_add_output_btn = nullptr;
 
     QPushButton *m_export_btn = nullptr;
-    QPushButton *m_clear_btn = nullptr;
+    QPushButton *m_clear_outputs_btn = nullptr;
     QPushButton *m_sign_btn = nullptr;
     QPushButton *m_broadcast_button = nullptr;
 
