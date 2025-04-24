@@ -291,7 +291,19 @@ auto Send::inputsView() -> QWidget * {
                         ->push(m_auto_inputs_btn)
                         ->pushSpacer();
 
+    auto *title = new QLabel("Inputs");
+    auto font = title->font();
+    font.setPointSize(15);
+    title->setFont(font);
+
+    auto *titleRow = (new qontrol::Row)
+                         ->pushSpacer(15)
+                         ->push(title)
+                         ->pushSpacer();
+
     auto *col = (new qontrol::Column)
+                    ->push(titleRow)
+                    ->pushSpacer(20)
                     ->push(m_inputs_column)
                     ->push(addInputRow)
                     ->pushSpacer(20)
@@ -338,7 +350,19 @@ auto Send::outputsView() -> QWidget * {
                        ->merge(m_fee_blocks->widget())
                        ->pushSpacer();
 
+    auto *title = new QLabel("Outputs");
+    auto font = title->font();
+    font.setPointSize(15);
+    title->setFont(font);
+
+    auto *titleRow = (new qontrol::Row)
+                         ->pushSpacer(15)
+                         ->push(title)
+                         ->pushSpacer();
+
     auto *col = (new qontrol::Column)
+                    ->push(titleRow)
+                    ->pushSpacer(20)
                     ->push(m_outputs_column)
                     ->push(addOutputRow)
                     ->pushSpacer(20)
