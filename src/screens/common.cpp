@@ -1,12 +1,38 @@
 #include "common.h"
 #include "Column.h"
 #include "Row.h"
+#include <QPainter>
+#include <QPen>
+#include <qboxlayout.h>
+#include <qframe.h>
+#include <qnamespace.h>
 
 auto margin(QWidget *widget) -> QWidget * {
-    auto *col = (new qontrol::Column)->pushSpacer(TOP_MARGIN)->push(widget)->pushSpacer(BOTTOM_MARGIN);
-    auto *row = (new qontrol::Row)->pushSpacer(LEFT_MARGIN)->push(col)->pushSpacer(RIGHT_MARGIN);
+    return margin(widget, MARGIN);
+}
 
+auto margin(QWidget *widget, int margin) -> QWidget * {
+    auto *col = (new qontrol::Column)
+                    ->pushSpacer(margin)
+                    ->push(widget)
+                    ->pushSpacer(margin);
+    auto *row = (new qontrol::Row)
+                    ->pushSpacer(margin)
+                    ->push(col)
+                    ->pushSpacer(margin);
     return row;
+}
+
+auto frame(QWidget *widget) -> QWidget * {
+    auto *frame = new Frame;
+    frame->setFrameShape(QFrame::Box);     // Or Panel, StyledPanel, etc.
+    frame->setFrameShadow(QFrame::Sunken); // Or Raised, Sunken
+    auto *layout = new QVBoxLayout(frame);
+    layout->addWidget(widget);
+    widget->setParent(frame);
+    int m = 10;
+    layout->setContentsMargins(m, m, m, m);
+    return frame;
 }
 
 auto toBitcoin(uint64_t sats, bool with_unit) -> QString {
@@ -21,4 +47,15 @@ auto toBitcoin(uint64_t sats, bool with_unit) -> QString {
 auto coinsCount(uint64_t count) -> QString {
     auto coinsStr = QString::number(count);
     return coinsStr + " coins";
+}
+
+void Frame::paintEvent(QPaintEvent *event) {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
+    QPen pen(Qt::darkGray, 3);
+    painter.setPen(pen);
+
+    QRectF rect = this->rect();
+    painter.drawRoundedRect(rect, 10, 10);
 }

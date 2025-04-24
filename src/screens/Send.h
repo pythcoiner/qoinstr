@@ -93,7 +93,10 @@ private:
     QHash<int, Input *> m_inputs;
     qontrol::Column *m_outputs_column = nullptr;
     qontrol::Column *m_inputs_column = nullptr;
+
     QWidget *m_main_widget = nullptr;
+    QWidget *m_inputs_frame = nullptr;
+    QWidget *m_outputs_frame = nullptr;
 
     RadioElement *m_fee_sats_vb = nullptr;
     RadioElement *m_fee_sats = nullptr;

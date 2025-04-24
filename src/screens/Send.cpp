@@ -240,13 +240,20 @@ void Send::doConnect() {
 }
 
 void Send::view() {
+    auto *oldInputs = m_inputs_frame;
+    auto *oldOutputs = m_outputs_frame;
+    m_inputs_frame = frame(inputsView());
+    m_outputs_frame = frame(outputsView());
+    delete oldInputs;
+    delete oldOutputs;
+
     auto *row = (new qontrol::Row)
-                    ->push(inputsView())
+                    ->push(m_inputs_frame)
                     ->pushSpacer(20)
-                    ->push(outputsView());
+                    ->push(m_outputs_frame);
 
     auto *oldWidget = m_main_widget;
-    m_main_widget = margin(row);
+    m_main_widget = margin(row, 10);
     delete oldWidget;
     delete this->layout();
     this->setLayout(m_main_widget->layout());
