@@ -3,6 +3,7 @@
 #include "Row.h"
 #include "common.h"
 #include "screens/common.h"
+#include <optional>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcontainerfwd.h>
@@ -66,6 +67,14 @@ void SelectCoins::init(const QList<Coin> &coins) {
     m_value_down->setFixedWidth(60);
     m_value_down->setCheckable(true);
 
+    m_total = new QLineEdit();
+    m_total->setFixedWidth(m_amount_width);
+    m_total->setEnabled(false);
+
+    m_total_label = new QLabel("Total selected: ");
+    m_total_label->setFixedWidth(m_label_width);
+    m_total_label->setAlignment(Qt::AlignRight);
+
     connect(m_value_up, &QPushButton::toggled, [this]() {
         if (this->m_value_up->isChecked()) {
             this->m_value_down->setChecked(false);
@@ -87,7 +96,7 @@ void SelectCoins::init(const QList<Coin> &coins) {
 
     int id = 0;
     for (const auto &coin : coins) {
-        auto *cw = new CoinWidget(coin);
+        auto *cw = new CoinWidget(coin, this);
         m_coins.insert(id, cw);
         id++;
     }
@@ -103,6 +112,10 @@ void SelectCoins::view() {
         cw->outpoint()->setParent(nullptr);
         cw->label()->setParent(nullptr);
     }
+    // same issue with total row that is not always displayed
+    m_total->setParent(nullptr);
+    m_total_label->setParent(nullptr);
+
     auto filtered = filter(getCoins());
     auto sorted = sort(filtered);
 
@@ -145,6 +158,34 @@ void SelectCoins::view() {
     scroll->setHorizontalScrollBarPolicy(
         Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 
+    int selectedAmount = 0;
+
+    for (auto *cw : getCoins()) {
+        if (cw->isChecked()) {
+            selectedAmount += cw->coin().value;
+        }
+    }
+
+    std::optional<QWidget *> totalRow = std::nullopt;
+    if (selectedAmount > 0) {
+        double fValue = selectedAmount;
+        fValue /= SATS;
+        auto btcValue = QString::number(fValue) + " BTC";
+        m_total->setText(btcValue);
+        auto *total = (new qontrol::Row)
+                          ->pushSpacer(spacer)
+                          ->push(m_total_label)
+                          ->pushSpacer(H_SPACER)
+                          ->push(m_total)
+                          ->pushSpacer();
+        totalRow = std::make_optional(total);
+        m_total->setVisible(true);
+        m_total_label->setVisible(true);
+    } else {
+        m_total->setVisible(false);
+        m_total_label->setVisible(false);
+    }
+
     auto *lastRow = (new qontrol::Row)
                         ->pushSpacer()
                         ->push(m_abort)
@@ -156,6 +197,8 @@ void SelectCoins::view() {
                     ->push(firstRow)
                     ->pushSpacer(10)
                     ->push(scroll)
+                    ->pushSpacer(5)
+                    ->push(totalRow)
                     ->pushSpacer(20)
                     ->push(lastRow)
                     ->pushSpacer();
@@ -190,9 +233,11 @@ auto CoinWidget::outpoint() -> QLineEdit * {
     return m_outpoint;
 }
 
-CoinWidget::CoinWidget(const Coin &coin) {
+CoinWidget::CoinWidget(const Coin &coin, SelectCoins *modal) {
     m_coin = coin;
     m_checkbox = new QCheckBox();
+    connect(m_checkbox, &QCheckBox::checkStateChanged, modal,
+            &SelectCoins::view, qontrol::UNIQUE);
 
     m_outpoint = new QLineEdit();
     m_outpoint->setText(m_coin.outpoint);
