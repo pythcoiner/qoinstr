@@ -2,10 +2,12 @@
 #include "Column.h"
 #include "Row.h"
 #include "screens/common.h"
+#include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcontainerfwd.h>
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qlogging.h>
 #include <qnamespace.h>
 #include <qpushbutton.h>
 #include <qscrollarea.h>
@@ -53,11 +55,26 @@ void SelectCoins::init(const QList<Coin> &coins) {
     auto up = m_value_up->style()->standardIcon(QStyle::SP_ArrowUp);
     m_value_up->setIcon(up);
     m_value_up->setFixedWidth(60);
+    m_value_up->setCheckable(true);
 
     m_value_down = new QPushButton();
     auto down = m_value_down->style()->standardIcon(QStyle::SP_ArrowDown);
     m_value_down->setIcon(down);
     m_value_down->setFixedWidth(60);
+    m_value_down->setCheckable(true);
+
+    connect(m_value_up, &QPushButton::toggled, [this]() {
+        if (this->m_value_up->isChecked()) {
+            this->m_value_down->setChecked(false);
+        }
+        this->view();
+    });
+    connect(m_value_down, &QPushButton::toggled, [this]() {
+        if (this->m_value_down->isChecked()) {
+            this->m_value_up->setChecked(false);
+        }
+        this->view();
+    });
 
     m_abort = new QPushButton("Cancel");
     m_abort->setFixedWidth(150);
@@ -181,5 +198,28 @@ CoinWidget::CoinWidget(const Coin &coin) {
     auto btcValue = QString::number(fValue) + " BTC";
     m_value->setText(btcValue);
     m_value->setEnabled(false);
+}
+
+auto SelectCoins::sort(const QList<CoinWidget *> &coins)
+    -> QList<CoinWidget *> {
+    QList<CoinWidget *> sortedCoins = coins;
+
+    bool sortAscendingAmount = m_value_up->isChecked();
+    bool sortDescendingAmount = m_value_down->isChecked();
+
+    if (sortAscendingAmount) {
+        std::ranges::sort(sortedCoins, [](CoinWidget *a, CoinWidget *b) {
+            return a->coin().value < b->coin().value;
+        });
+    } else if (sortDescendingAmount) {
+        std::ranges::sort(sortedCoins, [](CoinWidget *a, CoinWidget *b) {
+            return a->coin().value > b->coin().value;
+        });
+    } else {
+        std::ranges::sort(sortedCoins, [](CoinWidget *a, CoinWidget *b) {
+            return a->coin().outpoint < b->coin().outpoint;
+        });
+    }
+    return sortedCoins;
 }
 } // namespace modal

@@ -5,7 +5,9 @@
 #include "Row.h"
 #include "common.h"
 #include "screens/common.h"
+#include <algorithm>
 #include <cstdint>
+#include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qhash.h>
 #include <qlineedit.h>
@@ -59,10 +61,7 @@ public:
         return coins;
     }
 
-    auto sort(const QList<CoinWidget *> &coins) -> QList<CoinWidget *> {
-        return coins;
-    }
-
+    auto sort(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
     auto getCoins() -> QList<CoinWidget *>;
 
 signals:
@@ -80,6 +79,7 @@ private:
     QLineEdit *m_label_filter = nullptr;
     QPushButton *m_value_up = nullptr;
     QPushButton *m_value_down = nullptr;
+    QButtonGroup *m_value_group = nullptr;
     QPushButton *m_abort = nullptr;
     QPushButton *m_ok = nullptr;
     QHash<int, CoinWidget *> m_coins;

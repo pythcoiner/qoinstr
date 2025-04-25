@@ -7,8 +7,11 @@
 #include "screens/modals/SelectCoins.h"
 #include <Qontrol>
 #include <algorithm>
+#include <cstdint>
+#include <cstdlib>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
+#include <qcontainerfwd.h>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qlogging.h>
@@ -477,11 +480,14 @@ void Send::clearOutputs() {
 void Send::addCoins() {
     // TODO: fetch real coins
     auto dummy = QList<modal::Coin>();
-    for (int i = 0; i < 35; ++i) {
+    for (uint64_t i = 0; i < 5; ++i) {
+        auto ru = static_cast<uint64_t>((std::rand() % (1000000 - 50000 + 1)) +
+                                        50000);
+
         auto coin = modal::Coin{
-            .outpoint = "aaaa....bbbb:0",
+            .outpoint = "aaaa....bbbb:" + QString::number(i),
             .label = "",
-            .value = 100000,
+            .value = ru,
         };
         dummy.append(coin);
     }
