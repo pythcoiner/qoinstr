@@ -1,6 +1,7 @@
 #include "SelectCoins.h"
 #include "Column.h"
 #include "Row.h"
+#include "common.h"
 #include "screens/common.h"
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -50,6 +51,8 @@ void SelectCoins::init(const QList<Coin> &coins) {
 
     m_label_filter = new QLineEdit();
     m_label_filter->setPlaceholderText("label filter...");
+    connect(m_label_filter, &QLineEdit::textEdited, this,
+            &SelectCoins::applyFilter, qontrol::UNIQUE);
 
     m_value_up = new QPushButton();
     auto up = m_value_up->style()->standardIcon(QStyle::SP_ArrowUp);
@@ -91,6 +94,15 @@ void SelectCoins::init(const QList<Coin> &coins) {
 }
 
 void SelectCoins::view() {
+    // NOTE: as when there is some filtering, only filtered CoinWidgets
+    // will be move to a new column/row, the ones filtered out will be removed
+    // with their container, we must reset their parent to avoid this
+    for (auto *cw : getCoins()) {
+        cw->amount()->setParent(nullptr);
+        cw->checkbox()->setParent(nullptr);
+        cw->outpoint()->setParent(nullptr);
+        cw->label()->setParent(nullptr);
+    }
     auto filtered = filter(getCoins());
     auto sorted = sort(filtered);
 
@@ -113,7 +125,6 @@ void SelectCoins::view() {
                          ->pushSpacer();
 
     auto *coinsCol = new qontrol::Column;
-
     for (auto *cw : sorted) {
         cw->outpoint()->setFixedWidth(200);
         cw->label()->setFixedWidth(200);
@@ -221,5 +232,28 @@ auto SelectCoins::sort(const QList<CoinWidget *> &coins)
         });
     }
     return sortedCoins;
+}
+
+auto SelectCoins::filter(const QList<CoinWidget *> &coins)
+    -> QList<CoinWidget *> {
+    if (!m_label_filter->text().isEmpty()) {
+        auto filtered = QList<CoinWidget *>();
+        for (auto *coin : coins) {
+            if (coin->coin().label.contains(m_label_filter->text())) {
+                filtered.append(coin);
+            }
+        }
+        return filtered;
+    }
+    return coins;
+}
+
+void SelectCoins::applyFilter() {
+    int cursorPos = m_label_filter->cursorPosition();
+
+    view();
+
+    m_label_filter->setFocus();
+    m_label_filter->setCursorPosition(cursorPos);
 }
 } // namespace modal

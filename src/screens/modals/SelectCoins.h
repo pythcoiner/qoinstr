@@ -56,13 +56,10 @@ public:
 
     void init(const QList<Coin> &coins);
     void view();
-
-    auto filter(const QList<CoinWidget *> &coins) -> QList<CoinWidget *> {
-        return coins;
-    }
-
+    auto filter(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
     auto sort(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
     auto getCoins() -> QList<CoinWidget *>;
+    void applyFilter();
 
 signals:
     void coinsSelected(QList<Coin> coins);
