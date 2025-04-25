@@ -4,6 +4,7 @@
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
+#include "screens/modals/SelectCoins.h"
 #include <Qontrol>
 #include <algorithm>
 #include <qbuttongroup.h>
@@ -194,7 +195,6 @@ void Send::updateRadio() {
 }
 
 Send::Send(AccountController *ctrl) {
-    qDebug() << "Send::Send()";
     m_controller = ctrl;
     this->init();
     this->doConnect();
@@ -205,28 +205,29 @@ Send::Send(AccountController *ctrl) {
 }
 
 void Send::init() {
-    qDebug() << "Send::init()";
     m_outputs_column = (new qontrol::Column);
 
     m_inputs_column = (new qontrol::Column);
 
     m_add_input_btn = new QPushButton("+ Add an Input");
-    connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addInput);
+    connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addCoins,
+            qontrol::UNIQUE);
 
     m_clear_inputs_btn = new QPushButton("Clear");
-    connect(m_clear_inputs_btn, &QPushButton::clicked, this,
-            &Send::clearInputs);
+    connect(m_clear_inputs_btn, &QPushButton::clicked, this, &Send::clearInputs,
+            qontrol::UNIQUE);
 
     m_auto_inputs_btn = new QPushButton("Auto");
 
     m_add_output_btn = new QPushButton("+ Add an Output");
-    connect(m_add_output_btn, &QPushButton::clicked, this, &Send::addOutput);
+    connect(m_add_output_btn, &QPushButton::clicked, this, &Send::addOutput,
+            qontrol::UNIQUE);
 
     m_sign_btn = new QPushButton("Sign");
     m_broadcast_button = new QPushButton("Broadcast");
     m_clear_outputs_btn = new QPushButton("Clear");
     connect(m_clear_outputs_btn, &QPushButton::clicked, this,
-            &Send::clearOutputs);
+            &Send::clearOutputs, qontrol::UNIQUE);
     m_export_btn = new QPushButton("Export");
 
     m_fee_sats = new RadioElement(this, "sats");
@@ -471,5 +472,22 @@ void Send::clearOutputs() {
     m_outputs.clear();
     addOutput();
     view();
+}
+
+void Send::addCoins() {
+    // TODO: fetch real coins
+    auto dummy = QList<modal::Coin>();
+    for (int i = 0; i < 35; ++i) {
+        auto coin = modal::Coin{
+            .outpoint = "aaaa....bbbb:0",
+            .label = "",
+            .value = 100000,
+        };
+        dummy.append(coin);
+    }
+    auto *modal = new modal::SelectCoins(dummy);
+    connect(modal, &modal::SelectCoins::coinsSelected, this,
+            &Send::onCoinsSelected, qontrol::UNIQUE);
+    AppController::execModal(modal);
 }
 } // namespace screen

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "payloads/Send.h"
+#include "screens/modals/SelectCoins.h"
 #include <Qontrol>
 #include <qabstractbutton.h>
 #include <qbuttongroup.h>
@@ -69,6 +70,8 @@ class Send : public qontrol::Screen {
 public:
     Send(AccountController *ctrl);
 
+signals:
+
 public slots:
     void outputSetMax(int id);
     void deleteInput(int id);
@@ -79,6 +82,11 @@ public slots:
     void clearOutputs();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
+    void addCoins();
+
+    void onCoinsSelected(const QList<modal::Coin> &coins) {
+        // TODO:
+    }
 
 protected:
     void init() override;
