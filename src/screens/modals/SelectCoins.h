@@ -24,7 +24,7 @@ class SelectCoins;
 struct Coin {
     QString outpoint;
     QString label;
-    uint64_t value{};
+    uint64_t value;
 };
 
 class CoinWidget : public QObject {
@@ -52,10 +52,7 @@ private:
 class SelectCoins : public qontrol::Modal {
     Q_OBJECT
 public:
-    SelectCoins(const QList<Coin> &coins) {
-        init(coins);
-        view();
-    }
+    SelectCoins(const QList<Coin> &coins);
 
     void init(const QList<Coin> &coins);
     void view();

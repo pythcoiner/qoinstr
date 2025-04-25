@@ -35,7 +35,7 @@ struct Coins {
     Coins() = default;
     static auto dummy() -> Coins *;
     static auto fromRust(rust::Box<RustCoins> coins) -> Coins *;
-
+    auto getCoins() -> QList<Coin>;
     void update();
     auto operator==(const Coins &other) const -> bool;
 };

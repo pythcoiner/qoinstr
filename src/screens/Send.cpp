@@ -399,17 +399,6 @@ void Send::addOutput() {
     view();
 }
 
-void Send::addInput() {
-    auto *input = new Input(this, m_input_id);
-    for (auto &out : m_inputs) {
-        out->setDeletable(true);
-    }
-    m_inputs.insert(m_input_id, input);
-    m_inputs_column->push(input->widget());
-    m_input_id++;
-    view();
-}
-
 void Send::deleteInput(int id) {
     auto *input = m_inputs.take(id);
     delete input->widget();
@@ -478,22 +467,60 @@ void Send::clearOutputs() {
 }
 
 void Send::addCoins() {
-    // TODO: fetch real coins
-    auto dummy = QList<modal::Coin>();
-    for (uint64_t i = 0; i < 5; ++i) {
-        auto ru = static_cast<uint64_t>((std::rand() % (1000000 - 50000 + 1)) +
-                                        50000);
+    auto optCoins = dynamic_cast<screen::Coins *>(m_controller->coins())
+                        ->getCoins();
+    QList<modal::Coin> coins;
+    if (optCoins.has_value() && !optCoins.value().isEmpty()) {
+        for (const auto &c : optCoins.value()) {
+            auto mc = modal::Coin();
+            mc.outpoint = c.outpoint;
+            mc.label = c.label;
+            mc.value = c.value;
+            coins.append(mc);
+        }
+        auto *modal = new modal::SelectCoins(coins);
+        connect(modal, &modal::SelectCoins::coinsSelected, this,
+                &Send::onCoinsSelected, qontrol::UNIQUE);
+        AppController::execModal(modal);
 
-        auto coin = modal::Coin{
-            .outpoint = "aaaa....bbbb:" + QString::number(i),
-            .label = "",
-            .value = ru,
-        };
-        dummy.append(coin);
+    } else {
+        auto *modal = new qontrol::Modal("No coins!",
+                                         "There is no coins to select!");
+        AppController::execModal(modal);
     }
-    auto *modal = new modal::SelectCoins(dummy);
-    connect(modal, &modal::SelectCoins::coinsSelected, this,
-            &Send::onCoinsSelected, qontrol::UNIQUE);
-    AppController::execModal(modal);
+}
+
+void Input::setOutpoint(const QString &outpoint) {
+    m_outpoint->setText(outpoint);
+}
+
+void Input::setLabel(const QString &label) {
+    m_label->setText(label);
+}
+
+void Input::setAmount(uint64_t amount) {
+    double btcAmount = amount;
+    btcAmount = btcAmount / SATS;
+    m_amount->setText(QString::number(btcAmount) + " BTC");
+}
+
+void Send::addInput(const modal::Coin &coin) {
+    auto *input = new Input(this, m_input_id);
+    input->setOutpoint(coin.outpoint);
+    input->setLabel(coin.label);
+    input->setAmount(coin.value);
+    for (auto &out : m_inputs) {
+        out->setDeletable(true);
+    }
+    m_inputs.insert(m_input_id, input);
+    m_inputs_column->push(input->widget());
+    m_input_id++;
+    view();
+}
+
+void Send::onCoinsSelected(const QList<modal::Coin> &coins) {
+    for (const auto &coin : coins) {
+        addInput(coin);
+    }
 }
 } // namespace screen

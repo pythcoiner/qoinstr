@@ -3,6 +3,7 @@
 #include "payloads/Send.h"
 #include "screens/modals/SelectCoins.h"
 #include <Qontrol>
+#include <cstdint>
 #include <qabstractbutton.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -22,6 +23,9 @@ public:
     Input(Send *screen, int id);
     auto widget() -> QWidget *;
     void setDeletable(bool deletable);
+    void setOutpoint(const QString &outpoint);
+    void setLabel(const QString &label);
+    void setAmount(uint64_t amount);
 
 private:
     QLineEdit *m_outpoint = nullptr;
@@ -76,17 +80,14 @@ public slots:
     void outputSetMax(int id);
     void deleteInput(int id);
     void deleteOutput(int id);
-    void addInput();
+    void addInput(const modal::Coin &coin);
     void addOutput();
     void clearInputs();
     void clearOutputs();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
     void addCoins();
-
-    void onCoinsSelected(const QList<modal::Coin> &coins) {
-        // TODO:
-    }
+    void onCoinsSelected(const QList<modal::Coin> &coins);
 
 protected:
     void init() override;

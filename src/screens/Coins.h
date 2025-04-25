@@ -4,6 +4,7 @@
 #include "AccountController.h"
 #include <Qontrol>
 #include <cstdint>
+#include <optional>
 #include <qpushbutton.h>
 #include <qtablewidget.h>
 #include <qtmetamacros.h>
@@ -17,6 +18,7 @@ class Coins : public qontrol::Screen {
     Q_OBJECT
 public:
     Coins(AccountController *ctrl);
+    auto getCoins() -> std::optional<QList<payload::Coin>>;
 
 signals:
     void coinsUpdated();

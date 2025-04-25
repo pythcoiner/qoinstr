@@ -8,7 +8,8 @@ Coin::Coin(const Coin &other) = default;
 auto Coin::dummy() -> Coin * {
     auto *coin = new Coin();
     coin->date = QDateTime::currentDateTime();
-    coin->outpoint = "3b0e62c4136a43c0030bfaff5296658961fd18eced81abdd3a2ecdc7ccef6fa0:0";
+    coin->outpoint = "3b0e62c4136a43c0030bfaff5296658961fd18eced81abdd3a2ecdc7c"
+                     "cef6fa0:0";
     coin->address = *Address::dummy();
     coin->label = "label _____";
     coin->value = 10000000;
@@ -79,8 +80,10 @@ void Coins::update() {
 }
 
 auto Coins::operator==(const Coins &other) const -> bool {
-    if (confirmed_balance != other.confirmed_balance || unconfirmed_balance != other.unconfirmed_balance ||
-        confirmed_coins != other.confirmed_coins || unconfirmed_coins != other.unconfirmed_coins ||
+    if (confirmed_balance != other.confirmed_balance ||
+        unconfirmed_balance != other.unconfirmed_balance ||
+        confirmed_coins != other.confirmed_coins ||
+        unconfirmed_coins != other.unconfirmed_coins ||
         coins.size() != other.coins.size()) {
         return false;
     }
@@ -94,4 +97,11 @@ auto Coins::operator==(const Coins &other) const -> bool {
     return true;
 }
 
+auto Coins::getCoins() -> QList<Coin> {
+    auto out = QList<Coin>();
+    for (const auto &c : coins) {
+        out.append(*c);
+    }
+    return out;
+}
 } // namespace payload

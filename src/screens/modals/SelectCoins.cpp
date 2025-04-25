@@ -39,11 +39,11 @@ void SelectCoins::onOk() {
         }
     }
     emit coinsSelected(coins);
-    close();
+    accept();
 }
 
 void SelectCoins::onAbort() {
-    close();
+    reject();
 }
 
 void SelectCoins::init(const QList<Coin> &coins) {
@@ -90,9 +90,13 @@ void SelectCoins::init(const QList<Coin> &coins) {
 
     m_abort = new QPushButton("Cancel");
     m_abort->setFixedWidth(150);
+    connect(m_abort, &QPushButton::clicked, this, &SelectCoins::onAbort,
+            qontrol::UNIQUE);
 
     m_ok = new QPushButton("Ok");
     m_ok->setFixedWidth(150);
+    connect(m_ok, &QPushButton::clicked, this, &SelectCoins::onOk,
+            qontrol::UNIQUE);
 
     int id = 0;
     for (const auto &coin : coins) {
@@ -300,5 +304,10 @@ void SelectCoins::applyFilter() {
 
     m_label_filter->setFocus();
     m_label_filter->setCursorPosition(cursorPos);
+}
+
+SelectCoins::SelectCoins(const QList<Coin> &coins) {
+    init(coins);
+    view();
 }
 } // namespace modal

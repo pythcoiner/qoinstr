@@ -130,4 +130,7 @@ void Coins::view() {
     this->setLayout(boxed->layout());
 }
 
+auto Coins::getCoins() -> std::optional<QList<payload::Coin>> {
+    return m_payload->getCoins();
+}
 } // namespace screen
