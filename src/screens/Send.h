@@ -20,7 +20,9 @@ class Send;
 struct Coin {
     QString outpoint;
     QString label;
-    uint64_t value;
+    uint64_t value = 0;
+    
+    auto operator==(const Coin &other) const -> bool;
 };
 
 class Input {
@@ -31,6 +33,7 @@ public:
     void setOutpoint(const QString &outpoint);
     void setLabel(const QString &label);
     void setAmount(uint64_t amount);
+    auto coin() -> Coin;
 
 private:
     QLineEdit *m_outpoint = nullptr;
@@ -39,6 +42,7 @@ private:
     QPushButton *m_delete = nullptr;
     QWidget *m_delete_spacer = nullptr;
     QWidget *m_widget = nullptr;
+    uint64_t m_value = 0;
 };
 
 class Output {
@@ -100,6 +104,7 @@ protected:
     void view() override;
     auto inputsView() -> QWidget *;
     auto outputsView() -> QWidget *;
+    auto selectedCoins() -> QList<Coin>;
 
     auto isTransactionReady() -> bool {
         // TODO: call rust  tx "validator"

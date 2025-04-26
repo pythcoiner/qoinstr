@@ -470,13 +470,16 @@ void Send::addCoins() {
     auto optCoins = dynamic_cast<screen::Coins *>(m_controller->coins())
                         ->getCoins();
     QList<screen::Coin> coins;
+    auto selected = selectedCoins();
     if (optCoins.has_value() && !optCoins.value().isEmpty()) {
         for (const auto &c : optCoins.value()) {
             auto mc = screen::Coin();
             mc.outpoint = c.outpoint;
             mc.label = c.label;
             mc.value = c.value;
-            coins.append(mc);
+            if (!selected.contains(mc)) {
+                coins.append(mc);
+            }
         }
         auto *modal = new modal::SelectCoins(coins);
         connect(modal, &modal::SelectCoins::coinsSelected, this,
@@ -499,6 +502,7 @@ void Input::setLabel(const QString &label) {
 }
 
 void Input::setAmount(uint64_t amount) {
+    m_value = amount;
     double btcAmount = amount;
     btcAmount = btcAmount / SATS;
     m_amount->setText(QString::number(btcAmount) + " BTC");
@@ -522,5 +526,25 @@ void Send::onCoinsSelected(const QList<screen::Coin> &coins) {
     for (const auto &coin : coins) {
         addInput(coin);
     }
+}
+
+auto Input::coin() -> Coin {
+    auto c = Coin();
+    c.label = m_label->text();
+    c.outpoint = m_outpoint->text();
+    c.value = m_value;
+    return c;
+}
+
+auto Send::selectedCoins() -> QList<Coin> {
+    auto output = QList<Coin>();
+    for (auto *c : m_inputs) {
+        output.append(c->coin());
+    }
+    return output;
+}
+
+auto Coin::operator==(const Coin &other) const -> bool {
+    return this->outpoint == other.outpoint;
 }
 } // namespace screen
