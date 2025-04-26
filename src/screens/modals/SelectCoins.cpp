@@ -26,12 +26,12 @@ auto CoinWidget::isChecked() -> bool {
     return m_checkbox->isChecked();
 }
 
-auto CoinWidget::coin() -> Coin {
+auto CoinWidget::coin() -> screen::Coin {
     return m_coin;
 }
 
 void SelectCoins::onOk() {
-    auto coins = QList<Coin>();
+    auto coins = QList<screen::Coin>();
     for (auto id : m_coins.keys()) {
         auto *cw = m_coins.value(id);
         if (cw->isChecked()) {
@@ -46,7 +46,7 @@ void SelectCoins::onAbort() {
     reject();
 }
 
-void SelectCoins::init(const QList<Coin> &coins) {
+void SelectCoins::init(const QList<screen::Coin> &coins) {
     setWindowTitle("Select coin(s)");
     setFixedSize(700, 400);
 
@@ -237,7 +237,7 @@ auto CoinWidget::outpoint() -> QLineEdit * {
     return m_outpoint;
 }
 
-CoinWidget::CoinWidget(const Coin &coin, SelectCoins *modal) {
+CoinWidget::CoinWidget(const screen::Coin &coin, SelectCoins *modal) {
     m_coin = coin;
     m_checkbox = new QCheckBox();
     connect(m_checkbox, &QCheckBox::checkStateChanged, modal,
@@ -306,7 +306,7 @@ void SelectCoins::applyFilter() {
     m_label_filter->setCursorPosition(cursorPos);
 }
 
-SelectCoins::SelectCoins(const QList<Coin> &coins) {
+SelectCoins::SelectCoins(const QList<screen::Coin> &coins) {
     init(coins);
     view();
 }

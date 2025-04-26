@@ -1,12 +1,7 @@
 #pragma once
 
-#include "Column.h"
 #include "Modal.h"
-#include "Row.h"
-#include "common.h"
-#include "screens/common.h"
-#include <algorithm>
-#include <cstdint>
+#include "screens/Send.h"
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qhash.h>
@@ -21,18 +16,12 @@ namespace modal {
 
 class SelectCoins;
 
-struct Coin {
-    QString outpoint;
-    QString label;
-    uint64_t value;
-};
-
 class CoinWidget : public QObject {
     Q_OBJECT
 public:
-    CoinWidget(const Coin &coin, SelectCoins *modal);
+    CoinWidget(const screen::Coin &coin, SelectCoins *modal);
     auto isChecked() -> bool;
-    auto coin() -> Coin;
+    auto coin() -> screen::Coin;
     auto checkbox() -> QCheckBox *;
     auto outpoint() -> QLineEdit *;
     auto label() -> QLineEdit *;
@@ -42,7 +31,7 @@ public slots:
     void updateLabel();
 
 private:
-    Coin m_coin;
+    screen::Coin m_coin;
     QCheckBox *m_checkbox = nullptr;
     QLineEdit *m_outpoint = nullptr;
     QLineEdit *m_label = nullptr;
@@ -52,9 +41,9 @@ private:
 class SelectCoins : public qontrol::Modal {
     Q_OBJECT
 public:
-    SelectCoins(const QList<Coin> &coins);
+    SelectCoins(const QList<screen::Coin> &coins);
 
-    void init(const QList<Coin> &coins);
+    void init(const QList<screen::Coin> &coins);
     void view();
     auto filter(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
     auto sort(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
@@ -62,7 +51,7 @@ public:
     void applyFilter();
 
 signals:
-    void coinsSelected(QList<Coin> coins);
+    void coinsSelected(QList<screen::Coin> coins);
 
 public slots:
     void onAbort();

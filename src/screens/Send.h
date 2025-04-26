@@ -1,7 +1,6 @@
 #pragma once
 
 #include "payloads/Send.h"
-#include "screens/modals/SelectCoins.h"
 #include <Qontrol>
 #include <cstdint>
 #include <qabstractbutton.h>
@@ -17,6 +16,12 @@ class AccountController;
 
 namespace screen {
 class Send;
+
+struct Coin {
+    QString outpoint;
+    QString label;
+    uint64_t value;
+};
 
 class Input {
 public:
@@ -80,14 +85,14 @@ public slots:
     void outputSetMax(int id);
     void deleteInput(int id);
     void deleteOutput(int id);
-    void addInput(const modal::Coin &coin);
+    void addInput(const screen::Coin &coin);
     void addOutput();
     void clearInputs();
     void clearOutputs();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
     void addCoins();
-    void onCoinsSelected(const QList<modal::Coin> &coins);
+    void onCoinsSelected(const QList<screen::Coin> &coins);
 
 protected:
     void init() override;
@@ -95,6 +100,25 @@ protected:
     void view() override;
     auto inputsView() -> QWidget *;
     auto outputsView() -> QWidget *;
+
+    auto isTransactionReady() -> bool {
+        // TODO: call rust  tx "validator"
+        //   - check parsing of all fields
+        //   - chek that transaction hvae valis structure:
+        //     - inputs != 0
+        //     - sum(outputs) < sum(inputs)
+        return false;
+    }
+
+    auto prepareTransaction() -> QString {
+        // TODO: prepare PSBT on rust side
+        // - add a change output if needed
+        // - sanitize the transaction
+        // - craft PSBT
+        // - populate PSBT w/ signing infos
+        // -> return PSBT string
+        return QString();
+    };
 
 private:
     AccountController *m_controller = nullptr;

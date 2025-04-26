@@ -469,10 +469,10 @@ void Send::clearOutputs() {
 void Send::addCoins() {
     auto optCoins = dynamic_cast<screen::Coins *>(m_controller->coins())
                         ->getCoins();
-    QList<modal::Coin> coins;
+    QList<screen::Coin> coins;
     if (optCoins.has_value() && !optCoins.value().isEmpty()) {
         for (const auto &c : optCoins.value()) {
-            auto mc = modal::Coin();
+            auto mc = screen::Coin();
             mc.outpoint = c.outpoint;
             mc.label = c.label;
             mc.value = c.value;
@@ -504,7 +504,7 @@ void Input::setAmount(uint64_t amount) {
     m_amount->setText(QString::number(btcAmount) + " BTC");
 }
 
-void Send::addInput(const modal::Coin &coin) {
+void Send::addInput(const screen::Coin &coin) {
     auto *input = new Input(this, m_input_id);
     input->setOutpoint(coin.outpoint);
     input->setLabel(coin.label);
@@ -518,7 +518,7 @@ void Send::addInput(const modal::Coin &coin) {
     view();
 }
 
-void Send::onCoinsSelected(const QList<modal::Coin> &coins) {
+void Send::onCoinsSelected(const QList<screen::Coin> &coins) {
     for (const auto &coin : coins) {
         addInput(coin);
     }
