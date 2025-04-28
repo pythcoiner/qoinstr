@@ -34,6 +34,8 @@ protected:
 private:
     payload::Coins *m_payload = nullptr;
     QWidget *m_main_widget = nullptr;
+    QWidget *m_confirmed_row = nullptr;
+    QWidget *m_unconfirmed_row = nullptr;
     QTableWidget *m_table = nullptr;
     QList<QString /*outpoint*/> m_selected_coins;
     uint64_t m_amount_selected = 0;
