@@ -14,14 +14,21 @@
 
 class AccountController;
 
+namespace payload {
+class Coin;
+}
+
 namespace screen {
 class Send;
 
 struct Coin {
+    Coin() = default;
+    Coin(const Coin &other);
+    Coin(const payload::Coin &other);
     QString outpoint;
     QString label;
     uint64_t value = 0;
-    
+
     auto operator==(const Coin &other) const -> bool;
 };
 

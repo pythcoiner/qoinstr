@@ -2,6 +2,7 @@
 
 #include "Modal.h"
 #include "screens/Send.h"
+#include <optional>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qhash.h>
@@ -21,6 +22,7 @@ class CoinWidget : public QObject {
 public:
     CoinWidget(const screen::Coin &coin, SelectCoins *modal);
     auto isChecked() -> bool;
+    auto setCheckable(bool checkable);
     auto coin() -> screen::Coin;
     auto checkbox() -> QCheckBox *;
     auto outpoint() -> QLineEdit *;
@@ -42,6 +44,7 @@ class SelectCoins : public qontrol::Modal {
     Q_OBJECT
 public:
     SelectCoins(const QList<screen::Coin> &coins);
+    SelectCoins(const QList<screen::Coin> &coins, const QString &relay_url);
 
     void init(const QList<screen::Coin> &coins);
     void view();
@@ -52,12 +55,15 @@ public:
 
 signals:
     void coinsSelected(QList<screen::Coin> coins);
+    void coinSelectedForPool(screen::Coin coin, QString relay_url);
 
 public slots:
+    void checked();
     void onAbort();
     void onOk();
 
 private:
+    std::optional<QString> m_relay_url;
     int m_amount_width = 150;
     int m_label_width = 200;
     int m_outpoint_width = 200;

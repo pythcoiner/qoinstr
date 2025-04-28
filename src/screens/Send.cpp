@@ -473,17 +473,15 @@ void Send::addCoins() {
     auto selected = selectedCoins();
     if (optCoins.has_value() && !optCoins.value().isEmpty()) {
         for (const auto &c : optCoins.value()) {
-            auto mc = screen::Coin();
-            mc.outpoint = c.outpoint;
-            mc.label = c.label;
-            mc.value = c.value;
+            auto mc = screen::Coin(c);
             if (!selected.contains(mc)) {
                 coins.append(mc);
             }
         }
         auto *modal = new modal::SelectCoins(coins);
-        connect(modal, &modal::SelectCoins::coinsSelected, this,
-                &Send::onCoinsSelected, qontrol::UNIQUE);
+        connect(modal, &modal::SelectCoins::coinSelectedForPool,
+                this->m_controller, &AccountController::actionCreatePool,
+                qontrol::UNIQUE);
         AppController::execModal(modal);
 
     } else {
@@ -546,5 +544,17 @@ auto Send::selectedCoins() -> QList<Coin> {
 
 auto Coin::operator==(const Coin &other) const -> bool {
     return this->outpoint == other.outpoint;
+}
+
+Coin::Coin(const Coin &other) {
+    this->value = other.value;
+    this->label = other.label;
+    this->outpoint = other.outpoint;
+}
+
+Coin::Coin(const payload::Coin &other) {
+    this->outpoint = other.outpoint;
+    this->label = other.label;
+    this->value = other.value;
 }
 } // namespace screen

@@ -20,7 +20,8 @@ Pools::Pools(AccountController *ctrl) {
     this->view();
 }
 
-auto relaysEquals(const QList<payload::Relay *> &a, const QList<payload::Relay *> &b) -> bool {
+auto relaysEquals(const QList<payload::Relay *> &a,
+                  const QList<payload::Relay *> &b) -> bool {
     if (a.size() != b.size()) {
         return false;
     }
@@ -65,8 +66,10 @@ void Pools::init() {
 void Pools::doConnect() {
     auto *ctrl = m_controller;
     connect(ctrl, &AccountController::updatePools, this, &Pools::recvPayload);
-    connect(this, &Pools::poolsUpdated, ctrl,
-            []() { AppController::get()->osInfo("Pools updated", "List of pools have been updated"); });
+    connect(this, &Pools::poolsUpdated, ctrl, []() {
+        AppController::get()->osInfo("Pools updated",
+                                     "List of pools have been updated");
+    });
 }
 
 auto remainingTime(const QDateTime &timeout) -> QString {
@@ -79,12 +82,14 @@ auto peersCount(uint8_t peers, uint8_t total) -> QString {
     return "0/0";
 }
 
-void insertPool(AccountController *ctrl, QTableWidget *table, const payload::Pool *pool, int index) {
+void insertPool(AccountController *ctrl, QTableWidget *table,
+                const payload::Pool *pool, int index) {
     auto *id = new QTableWidgetItem(pool->id);
     id->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 0, id);
 
-    auto *denomination = new QTableWidgetItem(toBitcoin(pool->denomination, false));
+    auto *denomination = new QTableWidgetItem(
+        toBitcoin(pool->denomination, false));
     denomination->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 1, denomination);
 
@@ -96,7 +101,8 @@ void insertPool(AccountController *ctrl, QTableWidget *table, const payload::Poo
     remains->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 3, remains);
 
-    auto *peers = new QTableWidgetItem(peersCount(pool->current_peers, pool->total_peers));
+    auto *peers = new QTableWidgetItem(
+        peersCount(pool->current_peers, pool->total_peers));
     peers->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 4, peers);
 
@@ -110,7 +116,12 @@ void insertPool(AccountController *ctrl, QTableWidget *table, const payload::Poo
     auto *details = new QPushButton("Details");
     // QObject::connect(details, &QPushButton::clicked, controller,
     //         [controller, poolId]() {controller->poolDetails(poolId);});
-    auto *row = (new qontrol::Row(table))->pushSpacer()->push(join)->pushSpacer()->push(details)->pushSpacer();
+    auto *row = (new qontrol::Row(table))
+                    ->pushSpacer()
+                    ->push(join)
+                    ->pushSpacer()
+                    ->push(details)
+                    ->pushSpacer();
     table->setCellWidget(index, 5, row);
 }
 
@@ -124,7 +135,8 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     auto *table = new QTableWidget(rowCount, c_table_width);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     table->setMinimumHeight((rowCount + 1) * 30);
-    auto headers = QStringList{"Id", "Denomination", "Fee", "Remaining time", "Peers", "Action"};
+    auto headers = QStringList{"Id",    "Denomination", "Fee", "Remaining time",
+                               "Peers", "Action"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (auto *pool : relay->pools) {
@@ -136,10 +148,14 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
     table->setSpan(index, 0, 6, c_table_width);
 
     auto *create = new QPushButton("Create pool");
-    // auto *controller = m_controller;
-    // connect(create, &QPushButton::clicked, controller,
-    //         [relay, controller]() {controller->createPoolOnRelay(relay->url);});
-    auto *row = (new qontrol::Row(table))->pushSpacer()->push(create)->pushSpacer();
+    auto *controller = m_controller;
+    connect(create, &QPushButton::clicked, controller, [relay, controller]() {
+        controller->actionCreatePoolForRelay(relay->url);
+    });
+    auto *row = (new qontrol::Row(table))
+                    ->pushSpacer()
+                    ->push(create)
+                    ->pushSpacer();
     table->setCellWidget(index, 0, row);
 
     table->resizeColumnsToContents();

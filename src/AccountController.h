@@ -5,6 +5,8 @@
 #include "payloads/Config.h"
 #include "payloads/Receive.h"
 #include "screens/Coins.h"
+#include "screens/Send.h"
+#include "screens/modals/SelectCoins.h"
 #include <QObject>
 #include <Qontrol>
 #include <cmath>
@@ -70,7 +72,8 @@ public slots:
     void settingsClicked();
 
     // User Actions handlers
-    void actionCreatePool(payload::Coin coin);
+    void actionCreatePoolForRelay(const QString &relay_url);
+    void actionCreatePool(const screen::Coin &coin, const QString &relay_url);
     void actionCreateNewAddress();
 
     // Wallet Commands

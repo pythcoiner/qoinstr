@@ -31,15 +31,25 @@ auto CoinWidget::coin() -> screen::Coin {
 }
 
 void SelectCoins::onOk() {
-    auto coins = QList<screen::Coin>();
-    for (auto id : m_coins.keys()) {
-        auto *cw = m_coins.value(id);
-        if (cw->isChecked()) {
-            coins.append(cw->coin());
+    if (!m_relay_url.has_value()) {
+        auto coins = QList<screen::Coin>();
+        for (auto id : m_coins.keys()) {
+            auto *cw = m_coins.value(id);
+            if (cw->isChecked()) {
+                coins.append(cw->coin());
+            }
+        }
+        emit coinsSelected(coins);
+        accept();
+    } else {
+        for (auto id : m_coins.keys()) {
+            auto *cw = m_coins.value(id);
+            if (cw->isChecked()) {
+                emit coinSelectedForPool(cw->coin(), m_relay_url.value());
+                accept();
+            }
         }
     }
-    emit coinsSelected(coins);
-    accept();
 }
 
 void SelectCoins::onAbort() {
@@ -95,6 +105,7 @@ void SelectCoins::init(const QList<screen::Coin> &coins) {
 
     m_ok = new QPushButton("Ok");
     m_ok->setFixedWidth(150);
+    m_ok->setEnabled(false);
     connect(m_ok, &QPushButton::clicked, this, &SelectCoins::onOk,
             qontrol::UNIQUE);
 
@@ -241,7 +252,7 @@ CoinWidget::CoinWidget(const screen::Coin &coin, SelectCoins *modal) {
     m_coin = coin;
     m_checkbox = new QCheckBox();
     connect(m_checkbox, &QCheckBox::checkStateChanged, modal,
-            &SelectCoins::view, qontrol::UNIQUE);
+            &SelectCoins::checked, qontrol::UNIQUE);
 
     m_outpoint = new QLineEdit();
     m_outpoint->setText(m_coin.outpoint);
@@ -308,6 +319,45 @@ void SelectCoins::applyFilter() {
 
 SelectCoins::SelectCoins(const QList<screen::Coin> &coins) {
     init(coins);
+    view();
+}
+
+SelectCoins::SelectCoins(const QList<screen::Coin> &coins,
+                         const QString &relay_url) {
+    m_relay_url = relay_url;
+    init(coins);
+    view();
+}
+
+auto CoinWidget::setCheckable(bool checkable) {
+    m_checkbox->setCheckable(checkable);
+}
+
+void SelectCoins::checked() {
+    int checked = 0;
+    for (auto *cw : m_coins) {
+        if (cw->isChecked()) {
+            checked++;
+        }
+    }
+
+    if (checked > 0 && m_relay_url.has_value()) {
+        for (auto *cw : m_coins) {
+            if (!cw->isChecked()) {
+                cw->setCheckable(false);
+            }
+        }
+    } else if (checked == 0 && m_relay_url.has_value()) {
+        for (auto *cw : m_coins) {
+            cw->setCheckable(true);
+        }
+    }
+
+    if (checked > 0) {
+        m_ok->setEnabled(true);
+    } else {
+        m_ok->setEnabled(false);
+    }
     view();
 }
 } // namespace modal

@@ -9,15 +9,21 @@
 #include <qtmetamacros.h>
 #include <qvalidator.h>
 
+namespace screen {
+struct Coin;
+}
+
 namespace modal {
 
 class CreatePool : public qontrol::Modal {
     Q_OBJECT
 public:
-    CreatePool(const payload::Coin &coin, AccountController *ctrl);
+    CreatePool(const screen::Coin &coin, const QString &relay_url,
+               AccountController *ctrl);
 
 signals:
-    void createPool(const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration, size_t peers);
+    void createPool(const QString &outpoint, uint64_t denomination,
+                    uint32_t fees, uint64_t max_duration, size_t peers);
 
 public slots:
     void onCreatePool();
@@ -27,7 +33,7 @@ private:
     auto fetch() -> bool;
 
 private:
-    payload::Coin m_coin;
+    screen::Coin m_coin;
     QString m_relay;
     AccountController *m_controller = nullptr;
 

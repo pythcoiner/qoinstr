@@ -215,9 +215,25 @@ auto AccountController::relay() -> QString {
     return QString("Unknow relay");
 }
 
-void AccountController::actionCreatePool(payload::Coin coin) { // NOLINT
-    auto *modal = new modal::CreatePool(coin, this);
-    AppController::execModal(modal);
+void AccountController::actionCreatePoolForRelay(const QString &relay_url) {
+
+    auto optCoins = this->coins()->getCoins();
+    QList<screen::Coin> coins;
+    if (optCoins.has_value() && !optCoins.value().isEmpty()) {
+        for (const auto &c : optCoins.value()) {
+            auto mc = screen::Coin(c);
+            coins.append(mc);
+        }
+        auto *modal = new modal::SelectCoins(coins, relay_url);
+        connect(modal, &modal::SelectCoins::coinSelectedForPool, this,
+                &AccountController::actionCreatePool, qontrol::UNIQUE);
+        AppController::execModal(modal);
+
+    } else {
+        auto *modal = new qontrol::Modal("No coins!",
+                                         "There is no coins to select!");
+        AppController::execModal(modal);
+    }
 }
 
 void AccountController::actionCreateNewAddress() {
@@ -272,4 +288,10 @@ void AccountController::stop() {
         m_wallet.value()->stop();
     }
     emit stopped();
+}
+
+void AccountController::actionCreatePool(const screen::Coin &coin,
+                                         const QString &relay_url) {
+    auto *modal = new modal::CreatePool(coin, relay_url, this);
+    AppController::execModal(modal);
 }
