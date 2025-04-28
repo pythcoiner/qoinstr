@@ -74,8 +74,8 @@ public slots:
     void actionCreateNewAddress();
 
     // Wallet Commands
-    void cmdCreatePool(const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration,
-                       size_t peers);
+    void cmdCreatePool(const QString &outpoint, uint64_t denomination,
+                       uint32_t fees, uint64_t max_duration, size_t peers);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();
 
@@ -91,4 +91,5 @@ private:
     QTimer *m_notif_timer = nullptr;
     QTimer *m_coins_timer = nullptr;
     bool m_init = false;
+    bool m_first_poll = false;
 };

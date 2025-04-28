@@ -19,7 +19,8 @@
 #include <string>
 #include <utility>
 
-AccountController::AccountController(const QString &account, AccountWidget *widget) {
+AccountController::AccountController(const QString &account,
+                                     AccountWidget *widget) {
     m_widget = widget;
     init(account);
 }
@@ -39,7 +40,8 @@ void AccountController::init(const QString &account) {
     m_notif_timer->start(100); // poll every 100ms
     // init the timer that poll coins
     m_coins_timer = new QTimer;
-    connect(m_coins_timer, &QTimer::timeout, this, &AccountController::pollCoins);
+    connect(m_coins_timer, &QTimer::timeout, this,
+            &AccountController::pollCoins);
     m_coins_timer->start(1000);
 
     m_init = true;
@@ -56,7 +58,8 @@ void AccountController::insertPanel(qontrol::Panel *panel) {
     m_panels.insert(panel->name(), panel);
 }
 
-auto AccountController::screen(const QString &screen) -> std::optional<qontrol::Screen *> {
+auto AccountController::screen(const QString &screen)
+    -> std::optional<qontrol::Screen *> {
     auto *panel = m_panels.value(screen);
     if (panel != nullptr) {
         return std::optional(panel->screen());
@@ -65,6 +68,10 @@ auto AccountController::screen(const QString &screen) -> std::optional<qontrol::
 }
 
 void AccountController::poll() {
+    if (!m_first_poll) {
+        m_first_poll = true;
+        pollPools();
+    }
     pollNotifications();
 }
 
@@ -85,7 +92,8 @@ void AccountController::pollPools() {
         auto rpools = m_wallet.value()->pools();
         if (rpools->is_ok()) {
             auto relay = m_wallet.value()->relay();
-            auto *pools = payload::Relay::fromRust(std::move(rpools), relay.c_str());
+            auto *pools = payload::Relay::fromRust(std::move(rpools),
+                                                   relay.c_str());
             emit this->updatePools(pools);
         }
     }
@@ -110,13 +118,16 @@ void AccountController::pollNotifications() {
                 } else if (s == SignalFlag::Stopped) {
                     emit stopped();
                 } else {
-                    auto signalStr = QString(signal_flag_to_string(signal->unwrap()).c_str());
-                    qDebug() << "AppController::pollNotification() signal: " << signalStr;
+                    auto signalStr = QString(
+                        signal_flag_to_string(signal->unwrap()).c_str());
+                    qDebug() << "AppController::pollNotification() signal: "
+                             << signalStr;
                     AppController::get()->osInfo("Info", signalStr);
                 }
             } else if (signal->is_err()) {
                 auto error = QString(std::string(signal->error()).c_str());
-                qDebug() << "AppController::pollNotification() error: " << error;
+                qDebug() << "AppController::pollNotification() error: "
+                         << error;
                 AppController::get()->osCritical("Error", error, 5000);
             } else {
                 qDebug() << "AppController::pollNotification() empty: ";
@@ -186,12 +197,14 @@ auto AccountController::send() -> screen::Send * {
 }
 
 auto AccountController::receive() -> screen::Receive * {
-    auto *screen = dynamic_cast<screen::Receive *>(this->screen("receive").value());
+    auto *screen = dynamic_cast<screen::Receive *>(
+        this->screen("receive").value());
     return screen;
 }
 
 auto AccountController::settings() -> screen::Settings * {
-    auto *screen = dynamic_cast<screen::Settings *>(this->screen("settings").value());
+    auto *screen = dynamic_cast<screen::Settings *>(
+        this->screen("settings").value());
     return screen;
 }
 
@@ -218,17 +231,22 @@ void AccountController::actionCreateNewAddress() {
 
 void AccountController::cmdCreatePool(
     // TODO: pass by value
-    const QString &outpoint, uint64_t denomination, uint32_t fees, uint64_t max_duration, size_t peers) {
+    const QString &outpoint, uint64_t denomination, uint32_t fees,
+    uint64_t max_duration, size_t peers) {
     if (m_wallet.has_value()) {
-        m_wallet.value()->create_dummy_pool(denomination, peers, max_duration, fees);
+        m_wallet.value()->create_dummy_pool(denomination, peers, max_duration,
+                                            fees);
     }
 }
 
-void AccountController::cmdSaveConfig(payload::Config payload) { // NOLINT(performance-unnecessary-value-param)
+void AccountController::cmdSaveConfig(
+    payload::Config payload) { // NOLINT(performance-unnecessary-value-param)
     qDebug() << "AppController::cmdSaveConfig()";
     if (m_wallet.has_value()) {
-        m_wallet.value()->set_electrum(payload.electrum_url.toStdString(), payload.electrum_port.toStdString());
-        m_wallet.value()->set_nostr(payload.nostr_relay.toStdString(), payload.nostr_back.toStdString());
+        m_wallet.value()->set_electrum(payload.electrum_url.toStdString(),
+                                       payload.electrum_port.toStdString());
+        m_wallet.value()->set_nostr(payload.nostr_relay.toStdString(),
+                                    payload.nostr_back.toStdString());
         m_wallet.value()->set_look_ahead(payload.look_ahead.toStdString());
     }
 }
