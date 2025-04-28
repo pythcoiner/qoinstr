@@ -84,26 +84,6 @@ void insertCoin(AccountController *ctrl, QTableWidget *table,
     table->setItem(index, 3, new QTableWidgetItem(coin->label));
     table->setItem(index, 4, value);
     table->setItem(index, 5, depth);
-
-    auto outpoint = coin->outpoint;
-    auto *controller = ctrl;
-
-    auto *join = new QPushButton("Join");
-    // QObject::connect(join, &QPushButton::clicked, controller,
-    //         [controller, outpoint]() {controller->joinPool(outpoint);});
-
-    auto ccoin = payload::Coin(*coin);
-    auto *create = new QPushButton("Create");
-    QObject::connect(
-        create, &QPushButton::clicked, controller,
-        [controller, ccoin]() { controller->actionCreatePool(ccoin); });
-    auto *row = (new qontrol::Row(table))
-                    ->pushSpacer()
-                    ->push(join)
-                    ->pushSpacer()
-                    ->push(create)
-                    ->pushSpacer();
-    table->setCellWidget(index, 6, row);
 }
 
 void Coins::view() {
@@ -120,10 +100,10 @@ void Coins::view() {
     delete oldUR;
 
     int rowCount = m_payload->coins.size();
-    auto *table = new QTableWidget(rowCount, 7);
+    auto *table = new QTableWidget(rowCount, 6);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto headers = QStringList{"Date",  "OutPoint", "Address", "Label",
-                               "Value", "Depth",    "Pool"};
+    auto headers = QStringList{"Date",  "OutPoint", "Address",
+                               "Label", "Value",    "Depth"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (auto *coin : m_payload->coins) {
