@@ -3,7 +3,6 @@
 #include "AccountWidget.h"
 #include "Screen.h"
 #include "payloads/Config.h"
-#include "payloads/Receive.h"
 #include "screens/Coins.h"
 #include "screens/Send.h"
 #include <QObject>
@@ -45,7 +44,7 @@ signals:
     // Backend => GUI
     void updateCoins(CoinState coins);
     void updatePools(QList<RustPool> pools, QString relay);
-    void newAddress(payload::Address *);
+    void newAddress(RustAddress addr);
     void loadConfig(payload::Config);
     void stopped();
 

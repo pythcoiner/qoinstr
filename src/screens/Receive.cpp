@@ -4,7 +4,7 @@
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
-#include "payloads/Receive.h"
+#include "include/cpp_joinstr.h"
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qlist.h>
@@ -23,13 +23,11 @@ void Receive::init() {
 }
 
 void Receive::doConnect() {
-    connect(m_controller, &AccountController::newAddress, this, &Receive::onNewAddress);
+    connect(m_controller, &AccountController::newAddress, this,
+            &Receive::onNewAddress);
 }
 
 void Receive::onUnload() {
-    for (auto *item : m_addresses) {
-        delete item;
-    }
     for (auto *widget : m_widgets) {
         delete widget;
     }
@@ -38,16 +36,17 @@ void Receive::onUnload() {
     m_label_inputs.clear();
 }
 
-void Receive::onNewAddress(payload::Address *addr) {
-    m_addresses.push_back(addr);
+void Receive::onNewAddress(const RustAddress &addr) {
+    m_addresses.append(addr);
     view();
 }
 
-auto Receive::addressWidget(const payload::Address *address) -> QWidget * {
+auto Receive::addressWidget(const RustAddress &address) -> QWidget * {
     auto *addr = new QLabel("Address:");
     addr->setFixedWidth(LABEL_WIDTH);
 
-    auto *addrStr = new QLabel(address->address);
+    auto addrQStr = address.address;
+    auto *addrStr = new QLabel(QString(addrQStr.c_str()));
     addrStr->setFixedWidth(3 * INPUT_WIDTH);
 
     // auto *qrBtn = new QPushButton("QR Code");
@@ -59,7 +58,7 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget * {
 
     auto *labelInput = new QLineEdit;
     labelInput->setFixedWidth(3 * INPUT_WIDTH);
-    m_label_inputs.insert(address->address, labelInput);
+    m_label_inputs.insert(QString(addrQStr.c_str()), labelInput);
 
     // auto *saveBtn = new QPushButton("Save");
 
@@ -91,17 +90,20 @@ auto Receive::addressWidget(const payload::Address *address) -> QWidget * {
     auto *controller = m_controller;
     // connect(qrBtn, &QPushButton::clicked, controller,
     //         [address, controller]() {
-    //             controller->showAddressQr(address->address, address->index, address->change);
+    //             controller->showAddressQr(address->address, address->index,
+    //             address->change);
     //         });
     //
+    auto text = QString(addrQStr.c_str());
     connect(copyBtn, &QPushButton::clicked, controller,
-            [address]() { QApplication::clipboard()->setText(address->address); });
+            [text]() { QApplication::clipboard()->setText(text); });
 
     // connect(saveBtn, &QPushButton::clicked, controller,
     //         [this, address, controller]() {
     //             auto *label = m_label_inputs.value(address->address);
     //             if (label != nullptr) {
-    //                 controller->saveAddressLabel(address->address, label->text());
+    //                 controller->saveAddressLabel(address->address,
+    //                 label->text());
     //             }
     //         });
 
@@ -112,13 +114,14 @@ void Receive::view() {
     auto *col = new qontrol::Column;
     m_label_inputs.clear();
 
-    for (const auto *addr : m_addresses) {
+    for (const auto &addr : m_addresses) {
         col->push(addressWidget(addr));
     }
 
     if (m_btn_generate == nullptr) {
         m_btn_generate = new QPushButton("Generate new address");
-        connect(m_btn_generate, &QPushButton::clicked, m_controller, &AccountController::actionCreateNewAddress);
+        connect(m_btn_generate, &QPushButton::clicked, m_controller,
+                &AccountController::actionCreateNewAddress);
     }
     auto *row = (new qontrol::Row)->push(m_btn_generate)->pushSpacer();
 
