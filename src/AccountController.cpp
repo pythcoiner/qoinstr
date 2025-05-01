@@ -106,7 +106,7 @@ void AccountController::pollNotifications() {
     if (m_wallet.has_value()) {
         auto poll = m_wallet.value()->try_recv();
         while (poll->is_ok()) {
-            auto signal = poll->boxed();
+            auto signal = poll->signal();
             if (!signal->is_err()) {
                 auto s = signal->unwrap();
                 if (s == SignalFlag::CoinUpdate) {
