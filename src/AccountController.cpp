@@ -9,6 +9,7 @@
 #include "screens/Send.h"
 #include "screens/Settings.h"
 #include "screens/modals/CreatePool.h"
+#include "screens/modals/SelectCoins.h"
 #include <cstdint>
 #include <include/cxx.h>
 #include <optional>
@@ -80,10 +81,7 @@ void AccountController::pollCoins() {
     if (m_wallet.has_value()) {
         m_wallet.value()->generate_coins();
         auto rcoins = m_wallet.value()->spendable_coins();
-        if (rcoins->is_ok()) {
-            auto *coins = payload::Coins::fromRust(std::move(rcoins));
-            emit this->updateCoins(coins);
-        }
+        emit this->updateCoins(rcoins);
     }
 }
 
@@ -220,10 +218,10 @@ auto AccountController::relay() -> QString {
 void AccountController::actionCreatePoolForRelay(const QString &relay_url) {
 
     auto optCoins = this->coins()->getCoins();
-    QList<screen::Coin> coins;
+    QList<RustCoin> coins;
     if (optCoins.has_value() && !optCoins.value().isEmpty()) {
         for (const auto &c : optCoins.value()) {
-            auto mc = screen::Coin(c);
+            auto mc = RustCoin(c);
             coins.append(mc);
         }
         auto *modal = new modal::SelectCoins(coins, relay_url);
@@ -249,7 +247,7 @@ void AccountController::actionCreateNewAddress() {
 
 void AccountController::cmdCreatePool(
     // TODO: pass by value
-    const QString &outpoint, uint64_t denomination, uint32_t fees,
+    const rust::String &outpoint, uint64_t denomination, uint32_t fees,
     uint64_t max_duration, size_t peers) {
     if (m_wallet.has_value()) {
         m_wallet.value()->create_dummy_pool(denomination, peers, max_duration,
@@ -292,7 +290,7 @@ void AccountController::stop() {
     emit stopped();
 }
 
-void AccountController::actionCreatePool(const screen::Coin &coin,
+void AccountController::actionCreatePool(const RustCoin &coin,
                                          const QString &relay_url) {
     auto *modal = new modal::CreatePool(coin, relay_url, this);
     AppController::execModal(modal);

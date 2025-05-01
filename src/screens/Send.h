@@ -1,6 +1,6 @@
 #pragma once
 
-#include "payloads/Send.h"
+#include "include/cpp_joinstr.h"
 #include <Qontrol>
 #include <cstdint>
 #include <qabstractbutton.h>
@@ -14,33 +14,18 @@
 
 class AccountController;
 
-namespace payload {
-class Coin;
-}
-
 namespace screen {
 class Send;
 
-struct Coin {
-    Coin() = default;
-    Coin(const Coin &other);
-    Coin(const payload::Coin &other);
-    QString outpoint;
-    QString label;
-    uint64_t value = 0;
-
-    auto operator==(const Coin &other) const -> bool;
-};
-
 class Input {
 public:
-    Input(Send *screen, int id);
+    Input(const RustCoin &coin, Send *screen, int id);
     auto widget() -> QWidget *;
     void setDeletable(bool deletable);
     void setOutpoint(const QString &outpoint);
     void setLabel(const QString &label);
     void setAmount(uint64_t amount);
-    auto coin() -> Coin;
+    auto coin() -> RustCoin;
 
 private:
     QLineEdit *m_outpoint = nullptr;
@@ -49,7 +34,7 @@ private:
     QPushButton *m_delete = nullptr;
     QWidget *m_delete_spacer = nullptr;
     QWidget *m_widget = nullptr;
-    uint64_t m_value = 0;
+    RustCoin m_coin;
 };
 
 class Output {
@@ -96,14 +81,14 @@ public slots:
     void outputSetMax(int id);
     void deleteInput(int id);
     void deleteOutput(int id);
-    void addInput(const screen::Coin &coin);
+    void addInput(const RustCoin &coin);
     void addOutput();
     void clearInputs();
     void clearOutputs();
     void updateRadio();
     void setBroadcastable(bool broadcastable);
     void addCoins();
-    void onCoinsSelected(const QList<screen::Coin> &coins);
+    void onCoinsSelected(const QList<RustCoin> &coins);
 
 protected:
     void init() override;
@@ -111,7 +96,7 @@ protected:
     void view() override;
     auto inputsView() -> QWidget *;
     auto outputsView() -> QWidget *;
-    auto selectedCoins() -> QList<Coin>;
+    auto selectedCoins() -> QList<RustCoin>;
 
     auto isTransactionReady() -> bool {
         // TODO: call rust  tx "validator"

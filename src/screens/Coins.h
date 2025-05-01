@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../payloads/Coins.h"
 #include "AccountController.h"
 #include <Qontrol>
 #include <cstdint>
@@ -18,13 +17,13 @@ class Coins : public qontrol::Screen {
     Q_OBJECT
 public:
     Coins(AccountController *ctrl);
-    auto getCoins() -> std::optional<QList<payload::Coin>>;
+    auto getCoins() -> std::optional<QList<RustCoin>>;
 
 signals:
     void coinsUpdated();
 
 public slots:
-    void recvPayload(payload::Coins *payload);
+    void recvPayload(const CoinState &coins);
 
 protected:
     void init() override;
@@ -32,7 +31,7 @@ protected:
     void view() override;
 
 private:
-    payload::Coins *m_payload = nullptr;
+    CoinState m_state;
     QWidget *m_main_widget = nullptr;
     QWidget *m_confirmed_row = nullptr;
     QWidget *m_unconfirmed_row = nullptr;

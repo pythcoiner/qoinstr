@@ -2,6 +2,7 @@
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
+#include "include/cpp_joinstr.h"
 #include "screens/common.h"
 #include <optional>
 #include <qbuttongroup.h>
@@ -19,20 +20,21 @@ namespace modal {
 
 void CoinWidget::updateLabel() {
     // TODO: update label on backend
-    m_coin.label = m_label->text();
+    auto stdStr = m_label->text().toStdString();
+    m_coin.label = rust::String(stdStr);
 }
 
 auto CoinWidget::isChecked() -> bool {
     return m_checkbox->isChecked();
 }
 
-auto CoinWidget::coin() -> screen::Coin {
+auto CoinWidget::coin() -> RustCoin {
     return m_coin;
 }
 
 void SelectCoins::onOk() {
     if (!m_relay_url.has_value()) {
-        auto coins = QList<screen::Coin>();
+        auto coins = QList<RustCoin>();
         for (auto id : m_coins.keys()) {
             auto *cw = m_coins.value(id);
             if (cw->isChecked()) {
@@ -56,7 +58,7 @@ void SelectCoins::onAbort() {
     reject();
 }
 
-void SelectCoins::init(const QList<screen::Coin> &coins) {
+void SelectCoins::init(const QList<RustCoin> &coins) {
     setWindowTitle("Select coin(s)");
     setFixedSize(700, 400);
 
@@ -248,18 +250,20 @@ auto CoinWidget::outpoint() -> QLineEdit * {
     return m_outpoint;
 }
 
-CoinWidget::CoinWidget(const screen::Coin &coin, SelectCoins *modal) {
+CoinWidget::CoinWidget(const RustCoin &coin, SelectCoins *modal) {
     m_coin = coin;
     m_checkbox = new QCheckBox();
     connect(m_checkbox, &QCheckBox::checkStateChanged, modal,
             &SelectCoins::checked, qontrol::UNIQUE);
 
     m_outpoint = new QLineEdit();
-    m_outpoint->setText(m_coin.outpoint);
+    auto op = m_coin.outpoint;
+    m_outpoint->setText(QString(op.c_str()));
     m_outpoint->setEnabled(false);
 
     m_label = new QLineEdit();
-    m_label->setText(m_coin.label);
+    auto label = m_coin.label;
+    m_label->setText(QString(label.c_str()));
     connect(m_label, &QLineEdit::textEdited, this, &CoinWidget::updateLabel,
             qontrol::UNIQUE);
 
@@ -299,7 +303,8 @@ auto SelectCoins::filter(const QList<CoinWidget *> &coins)
     if (!m_label_filter->text().isEmpty()) {
         auto filtered = QList<CoinWidget *>();
         for (auto *coin : coins) {
-            if (coin->coin().label.contains(m_label_filter->text())) {
+            auto label = QString(coin->coin().label.c_str());
+            if (label.contains(m_label_filter->text())) {
                 filtered.append(coin);
             }
         }
@@ -317,12 +322,12 @@ void SelectCoins::applyFilter() {
     m_label_filter->setCursorPosition(cursorPos);
 }
 
-SelectCoins::SelectCoins(const QList<screen::Coin> &coins) {
+SelectCoins::SelectCoins(const QList<RustCoin> &coins) {
     init(coins);
     view();
 }
 
-SelectCoins::SelectCoins(const QList<screen::Coin> &coins,
+SelectCoins::SelectCoins(const QList<RustCoin> &coins,
                          const QString &relay_url) {
     m_relay_url = relay_url;
     init(coins);

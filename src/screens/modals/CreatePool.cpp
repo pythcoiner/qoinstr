@@ -26,14 +26,14 @@ const int VB_FEE = 150;
 
 namespace modal {
 
-CreatePool::CreatePool(const screen::Coin &coin, const QString &relay_url,
+CreatePool::CreatePool(const RustCoin &coin, const QString &relay_url,
                        AccountController *ctrl) {
     this->setWindowTitle("Create Pool");
     this->setFixedSize(680, 400);
 
     m_relay = relay_url;
 
-    m_coin = screen::Coin(coin);
+    m_coin = RustCoin(coin);
     m_controller = ctrl;
 
     m_peers_validator = new QIntValidator(2, 10, this);
@@ -55,7 +55,8 @@ CreatePool::CreatePool(const screen::Coin &coin, const QString &relay_url,
     // Coin
     auto *outpoint = new QLineEdit();
     outpoint->setFixedWidth(500);
-    outpoint->setText(m_coin.outpoint);
+    auto op = m_coin.outpoint;
+    outpoint->setText(QString(op.c_str()));
     outpoint->setEnabled(false);
 
     double btcAmount = coin.value;

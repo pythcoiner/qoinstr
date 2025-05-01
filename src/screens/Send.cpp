@@ -4,6 +4,7 @@
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
+#include "include/cpp_joinstr.h"
 #include "screens/modals/SelectCoins.h"
 #include <Qontrol>
 #include <algorithm>
@@ -20,7 +21,8 @@
 
 namespace screen {
 
-Input::Input(Send *screen, int id) {
+Input::Input(const RustCoin &coin, Send *screen, int id) {
+    m_coin = coin;
     m_outpoint = new QLineEdit();
     m_outpoint->setFixedWidth(200);
     m_outpoint->setEnabled(false);
@@ -469,11 +471,11 @@ void Send::clearOutputs() {
 void Send::addCoins() {
     auto optCoins = dynamic_cast<screen::Coins *>(m_controller->coins())
                         ->getCoins();
-    QList<screen::Coin> coins;
+    QList<RustCoin> coins;
     auto selected = selectedCoins();
     if (optCoins.has_value() && !optCoins.value().isEmpty()) {
         for (const auto &c : optCoins.value()) {
-            auto mc = screen::Coin(c);
+            auto mc = RustCoin(c);
             if (!selected.contains(mc)) {
                 coins.append(mc);
             }
@@ -500,16 +502,18 @@ void Input::setLabel(const QString &label) {
 }
 
 void Input::setAmount(uint64_t amount) {
-    m_value = amount;
+    m_coin.value = amount;
     double btcAmount = amount;
     btcAmount = btcAmount / SATS;
     m_amount->setText(QString::number(btcAmount) + " BTC");
 }
 
-void Send::addInput(const screen::Coin &coin) {
-    auto *input = new Input(this, m_input_id);
-    input->setOutpoint(coin.outpoint);
-    input->setLabel(coin.label);
+void Send::addInput(const RustCoin &coin) {
+    auto *input = new Input(coin, this, m_input_id);
+    auto op = coin.outpoint;
+    input->setOutpoint(QString(op.c_str()));
+    auto label = coin.label;
+    input->setLabel(QString(label.c_str()));
     input->setAmount(coin.value);
     for (auto &out : m_inputs) {
         out->setDeletable(true);
@@ -520,41 +524,22 @@ void Send::addInput(const screen::Coin &coin) {
     view();
 }
 
-void Send::onCoinsSelected(const QList<screen::Coin> &coins) {
+void Send::onCoinsSelected(const QList<RustCoin> &coins) {
     for (const auto &coin : coins) {
         addInput(coin);
     }
 }
 
-auto Input::coin() -> Coin {
-    auto c = Coin();
-    c.label = m_label->text();
-    c.outpoint = m_outpoint->text();
-    c.value = m_value;
-    return c;
+auto Input::coin() -> RustCoin {
+    return m_coin;
 }
 
-auto Send::selectedCoins() -> QList<Coin> {
-    auto output = QList<Coin>();
+auto Send::selectedCoins() -> QList<RustCoin> {
+    auto output = QList<RustCoin>();
     for (auto *c : m_inputs) {
         output.append(c->coin());
     }
     return output;
 }
 
-auto Coin::operator==(const Coin &other) const -> bool {
-    return this->outpoint == other.outpoint;
-}
-
-Coin::Coin(const Coin &other) {
-    this->value = other.value;
-    this->label = other.label;
-    this->outpoint = other.outpoint;
-}
-
-Coin::Coin(const payload::Coin &other) {
-    this->outpoint = other.outpoint;
-    this->label = other.label;
-    this->value = other.value;
-}
 } // namespace screen

@@ -6,7 +6,6 @@
 #include "payloads/Receive.h"
 #include "screens/Coins.h"
 #include "screens/Send.h"
-#include "screens/modals/SelectCoins.h"
 #include <QObject>
 #include <Qontrol>
 #include <cmath>
@@ -44,7 +43,7 @@ public:
 
 signals:
     // Backend => GUI
-    void updateCoins(payload::Coins *);
+    void updateCoins(CoinState coins);
     void updatePools(QList<RustPool> pools, QString relay);
     void newAddress(payload::Address *);
     void loadConfig(payload::Config);
@@ -69,11 +68,11 @@ public slots:
 
     // User Actions handlers
     void actionCreatePoolForRelay(const QString &relay_url);
-    void actionCreatePool(const screen::Coin &coin, const QString &relay_url);
+    void actionCreatePool(const RustCoin &coin, const QString &relay_url);
     void actionCreateNewAddress();
 
     // Wallet Commands
-    void cmdCreatePool(const QString &outpoint, uint64_t denomination,
+    void cmdCreatePool(const rust::String &outpoint, uint64_t denomination,
                        uint32_t fees, uint64_t max_duration, size_t peers);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();

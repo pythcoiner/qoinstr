@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountController.h"
+#include "include/cpp_joinstr.h"
 #include "screens/Coins.h"
 #include <cstdint>
 #include <qdialog.h>
@@ -18,11 +19,11 @@ namespace modal {
 class CreatePool : public qontrol::Modal {
     Q_OBJECT
 public:
-    CreatePool(const screen::Coin &coin, const QString &relay_url,
+    CreatePool(const RustCoin &coin, const QString &relay_url,
                AccountController *ctrl);
 
 signals:
-    void createPool(const QString &outpoint, uint64_t denomination,
+    void createPool(const rust::String &outpoint, uint64_t denomination,
                     uint32_t fees, uint64_t max_duration, size_t peers);
 
 public slots:
@@ -33,7 +34,7 @@ private:
     auto fetch() -> bool;
 
 private:
-    screen::Coin m_coin;
+    RustCoin m_coin;
     QString m_relay;
     AccountController *m_controller = nullptr;
 

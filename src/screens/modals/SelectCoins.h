@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Modal.h"
+#include "include/cpp_joinstr.h"
 #include "screens/Send.h"
 #include <optional>
 #include <qbuttongroup.h>
@@ -20,10 +21,10 @@ class SelectCoins;
 class CoinWidget : public QObject {
     Q_OBJECT
 public:
-    CoinWidget(const screen::Coin &coin, SelectCoins *modal);
+    CoinWidget(const RustCoin &coin, SelectCoins *modal);
     auto isChecked() -> bool;
     auto setCheckable(bool checkable);
-    auto coin() -> screen::Coin;
+    auto coin() -> RustCoin;
     auto checkbox() -> QCheckBox *;
     auto outpoint() -> QLineEdit *;
     auto label() -> QLineEdit *;
@@ -33,7 +34,7 @@ public slots:
     void updateLabel();
 
 private:
-    screen::Coin m_coin;
+    RustCoin m_coin;
     QCheckBox *m_checkbox = nullptr;
     QLineEdit *m_outpoint = nullptr;
     QLineEdit *m_label = nullptr;
@@ -43,10 +44,10 @@ private:
 class SelectCoins : public qontrol::Modal {
     Q_OBJECT
 public:
-    SelectCoins(const QList<screen::Coin> &coins);
-    SelectCoins(const QList<screen::Coin> &coins, const QString &relay_url);
+    SelectCoins(const QList<RustCoin> &coins);
+    SelectCoins(const QList<RustCoin> &coins, const QString &relay_url);
 
-    void init(const QList<screen::Coin> &coins);
+    void init(const QList<RustCoin> &coins);
     void view();
     auto filter(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
     auto sort(const QList<CoinWidget *> &coins) -> QList<CoinWidget *>;
@@ -54,8 +55,8 @@ public:
     void applyFilter();
 
 signals:
-    void coinsSelected(QList<screen::Coin> coins);
-    void coinSelectedForPool(screen::Coin coin, QString relay_url);
+    void coinsSelected(QList<RustCoin> coins);
+    void coinSelectedForPool(RustCoin coin, QString relay_url);
 
 public slots:
     void checked();

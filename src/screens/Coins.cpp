@@ -4,6 +4,7 @@
 #include "Row.h"
 #include "common.h"
 #include <cstdint>
+#include <optional>
 #include <qcontainerfwd.h>
 #include <qlabel.h>
 #include <qnamespace.h>
@@ -20,17 +21,14 @@ Coins::Coins(AccountController *ctrl) {
 }
 
 void Coins::init() {
-    m_payload = new payload::Coins();
 }
 
-void Coins::recvPayload(payload::Coins *payload) {
-    if (*m_payload == *payload) {
-        // if payload content is unchanged, do not update
+void Coins::recvPayload(const CoinState &coins) {
+    if (m_state == coins) {
+        // if state content is unchanged, do not update
         return;
     }
-    auto *old = m_payload;
-    m_payload = payload;
-    delete old;
+    m_state = coins;
     this->view();
     emit coinsUpdated();
 }
@@ -66,22 +64,25 @@ auto balanceRow(const QString &label_str, uint64_t balance,
     return row;
 }
 
-void insertCoin(AccountController *ctrl, QTableWidget *table,
-                const payload::Coin *coin, int index) {
-    QString date;
-    if (coin->date.has_value()) {
-        date = coin->date.value().toString();
+void insertCoin(QTableWidget *table, const RustCoin &coin, int index) {
+    QString blockHeight;
+    if (coin.confirmed) {
+        blockHeight = QString::number(coin.height);
     } else {
-        date = "";
+        blockHeight = "";
     }
-    auto *value = new QTableWidgetItem(toBitcoin(coin->value, false));
+    auto *value = new QTableWidgetItem(toBitcoin(coin.value, false));
     value->setTextAlignment(Qt::AlignCenter);
-    auto *depth = new QTableWidgetItem(QString::number(coin->depth));
+    // TODO: populate depth on rust side
+    auto *depth = new QTableWidgetItem(QString::number(0));
     depth->setTextAlignment(Qt::AlignCenter);
-    table->setItem(index, 0, new QTableWidgetItem(date));
-    table->setItem(index, 1, new QTableWidgetItem(coin->outpoint));
-    table->setItem(index, 2, new QTableWidgetItem(coin->address.address));
-    table->setItem(index, 3, new QTableWidgetItem(coin->label));
+    table->setItem(index, 0, new QTableWidgetItem(blockHeight));
+    auto op = coin.outpoint;
+    table->setItem(index, 1, new QTableWidgetItem(QString(op.c_str())));
+    auto addr = coin.address.address;
+    table->setItem(index, 2, new QTableWidgetItem(QString(addr.c_str())));
+    auto label = coin.label;
+    table->setItem(index, 3, new QTableWidgetItem(QString(label.c_str())));
     table->setItem(index, 4, value);
     table->setItem(index, 5, depth);
 }
@@ -89,25 +90,24 @@ void insertCoin(AccountController *ctrl, QTableWidget *table,
 void Coins::view() {
 
     auto *oldCR = m_confirmed_row;
-    m_confirmed_row = balanceRow("Confirmed:", m_payload->confirmed_balance,
-                                 m_payload->confirmed_coins);
+    m_confirmed_row = balanceRow("Confirmed:", m_state.confirmed_balance,
+                                 m_state.confirmed_coins);
     delete oldCR;
 
     auto *oldUR = m_unconfirmed_row;
-    m_unconfirmed_row = balanceRow(
-        "Unconfirmed:", m_payload->unconfirmed_balance,
-        m_payload->unconfirmed_coins);
+    m_unconfirmed_row = balanceRow("Unconfirmed:", m_state.unconfirmed_balance,
+                                   m_state.unconfirmed_coins);
     delete oldUR;
 
-    int rowCount = m_payload->coins.size();
+    int rowCount = m_state.coins.size();
     auto *table = new QTableWidget(rowCount, 6);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    auto headers = QStringList{"Date",  "OutPoint", "Address",
-                               "Label", "Value",    "Depth"};
+    auto headers = QStringList{"Block Height", "OutPoint", "Address",
+                               "Label",        "Value",    "Depth"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
-    for (auto *coin : m_payload->coins) {
-        insertCoin(m_controller, table, coin, index);
+    for (const auto &coin : m_state.coins) {
+        insertCoin(table, coin, index);
         index++;
     }
     auto *oldTable = m_table;
@@ -132,7 +132,11 @@ void Coins::view() {
     this->setLayout(boxed->layout());
 }
 
-auto Coins::getCoins() -> std::optional<QList<payload::Coin>> {
-    return m_payload->getCoins();
+auto Coins::getCoins() -> std::optional<QList<RustCoin>> {
+    auto coins = QList<RustCoin>();
+    for (const auto &coin : m_state.coins) {
+        coins.append(coin);
+    }
+    return std::make_optional(coins);
 }
 } // namespace screen
