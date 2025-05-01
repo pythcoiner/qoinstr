@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../payloads/Pools.h"
 #include "AccountController.h"
 #include <Qontrol>
 #include <qhash.h>
@@ -21,7 +20,7 @@ signals:
     void poolsUpdated();
 
 public slots:
-    void recvPayload(QList<payload::Relay *> *payload);
+    void recvPayload(const QList<RustPool> &pools, const QString &relay);
 
 protected:
     void init() override;
@@ -30,12 +29,12 @@ protected:
 
 private:
     AccountController *m_controller = nullptr;
-    QList<payload::Relay *> *m_payload = nullptr;
+    QPair<QList<RustPool>, QString> m_state;
     QWidget *m_main_widget = nullptr;
     QList<QTableWidget *> *m_tables = nullptr;
     QList<qontrol::widgets::Collapsible *> *m_collapsibles = nullptr;
 
-    void insertRelay(qontrol::Column *col, const payload::Relay *relay);
+    void insertRelay(qontrol::Column *col);
 };
 
 } // namespace screen

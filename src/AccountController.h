@@ -19,10 +19,6 @@
 
 class AccountWidget;
 
-namespace payload {
-class Relay;
-}
-
 namespace screen {
 class Coins;
 class Pools;
@@ -49,7 +45,7 @@ public:
 signals:
     // Backend => GUI
     void updateCoins(payload::Coins *);
-    void updatePools(QList<payload::Relay *> *pools);
+    void updatePools(QList<RustPool> pools, QString relay);
     void newAddress(payload::Address *);
     void loadConfig(payload::Config);
     void stopped();

@@ -3,6 +3,7 @@
 #include "AppController.h"
 #include "Row.h"
 #include "common.h"
+#include "include/cpp_joinstr.h"
 #include "widgets/Collapsible.h"
 #include <Qontrol>
 #include <cstdint>
@@ -20,47 +21,14 @@ Pools::Pools(AccountController *ctrl) {
     this->view();
 }
 
-auto relaysEquals(const QList<payload::Relay *> &a,
-                  const QList<payload::Relay *> &b) -> bool {
-    if (a.size() != b.size()) {
-        return false;
-    }
-
-    for (int i = 0; i < a.size(); ++i) {
-        const payload::Relay *lhs = a[i];
-        const payload::Relay *rhs = b[i];
-
-        if ((lhs == nullptr) || (rhs == nullptr)) {
-            if (lhs != rhs)
-                return false; // one is null, one is not
-            continue;         // both are null, consider equal
-        }
-
-        if (!(*lhs == *rhs)) {
-            return false; // value mismatch
-        }
-    }
-
-    return true;
-}
-
-void Pools::recvPayload(QList<payload::Relay *> *payload) {
-    if (relaysEquals(*m_payload, *payload)) {
-        return;
-    }
+void Pools::recvPayload(const QList<RustPool> &pools, const QString &relay) {
     emit poolsUpdated();
 
-    auto *old = m_payload;
-    m_payload = payload;
-    for (auto *relay : *old) {
-        delete relay;
-    }
-    delete old;
+    m_state = QPair<QList<RustPool>, QString>(pools, relay);
     this->view();
 }
 
 void Pools::init() {
-    m_payload = new QList<payload::Relay *>;
 }
 
 void Pools::doConnect() {
@@ -82,31 +50,32 @@ auto peersCount(uint8_t peers, uint8_t total) -> QString {
     return "0/0";
 }
 
-void insertPool(AccountController *ctrl, QTableWidget *table,
-                const payload::Pool *pool, int index) {
-    auto *id = new QTableWidgetItem(pool->id);
+void insertPool(QTableWidget *table, const RustPool &pool, int index) {
+    auto idStr = pool.id;
+    auto *id = new QTableWidgetItem(QString(idStr.c_str()));
     id->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 0, id);
 
     auto *denomination = new QTableWidgetItem(
-        toBitcoin(pool->denomination, false));
+        toBitcoin(pool.denomination, false));
     denomination->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 1, denomination);
 
-    auto *fees = new QTableWidgetItem(QString::number(pool->fees));
+    auto *fees = new QTableWidgetItem(QString::number(pool.fees));
     fees->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 2, fees);
 
-    auto *remains = new QTableWidgetItem(remainingTime(pool->timeout));
+    auto timeout = QDateTime::fromMSecsSinceEpoch(pool.timeout);
+    auto *remains = new QTableWidgetItem(remainingTime(timeout));
     remains->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 3, remains);
 
     auto *peers = new QTableWidgetItem(
-        peersCount(pool->current_peers, pool->total_peers));
+        peersCount(pool.current_peers, pool.total_peers));
     peers->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 4, peers);
 
-    auto poolId = pool->id;
+    auto poolId = pool.id;
     // auto *controller = ctrl;
 
     auto *join = new QPushButton("Join");
@@ -125,12 +94,12 @@ void insertPool(AccountController *ctrl, QTableWidget *table,
     table->setCellWidget(index, 5, row);
 }
 
-void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
-    auto *collapsible = new qontrol::widgets::Collapsible(relay->url, col);
+void Pools::insertRelay(qontrol::Column *col) {
+    auto *collapsible = new qontrol::widgets::Collapsible(m_state.second, col);
 
     m_collapsibles->push_back(collapsible);
 
-    int rowCount = relay->pools.size() + 1;
+    int rowCount = m_state.first.size() + 1;
     const int c_table_width = 6;
     auto *table = new QTableWidget(rowCount, c_table_width);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -139,8 +108,8 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
                                "Peers", "Action"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
-    for (auto *pool : relay->pools) {
-        insertPool(m_controller, table, pool, index);
+    for (const auto &pool : m_state.first) {
+        insertPool(table, pool, index);
         index++;
     }
 
@@ -149,8 +118,9 @@ void Pools::insertRelay(qontrol::Column *col, const payload::Relay *relay) {
 
     auto *create = new QPushButton("Create pool");
     auto *controller = m_controller;
+    auto relay = m_state.second;
     connect(create, &QPushButton::clicked, controller, [relay, controller]() {
-        controller->actionCreatePoolForRelay(relay->url);
+        controller->actionCreatePoolForRelay(relay);
     });
     auto *row = (new qontrol::Row(table))
                     ->pushSpacer()
@@ -191,9 +161,7 @@ void Pools::view() {
     }
     delete oldCollapsibles;
 
-    for (const auto *relay : *m_payload) {
-        insertRelay(col, relay);
-    }
+    insertRelay(col);
 
     col->pushSpacer();
 

@@ -13,6 +13,7 @@
 #include <include/cxx.h>
 #include <optional>
 #include <qcontainerfwd.h>
+#include <qlist.h>
 #include <qlogging.h>
 #include <qsystemtrayicon.h>
 #include <qtimer.h>
@@ -91,10 +92,11 @@ void AccountController::pollPools() {
     if (m_wallet.has_value()) {
         auto rpools = m_wallet.value()->pools();
         if (rpools->is_ok()) {
-            auto relay = m_wallet.value()->relay();
-            auto *pools = payload::Relay::fromRust(std::move(rpools),
-                                                   relay.c_str());
-            emit this->updatePools(pools);
+            auto pools = QList<RustPool>();
+            for (const auto &p : rpools->value()) {
+                pools.append(p);
+            }
+            emit this->updatePools(pools, rpools->relay().c_str());
         }
     }
 }

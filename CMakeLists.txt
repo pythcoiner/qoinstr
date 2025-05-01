@@ -62,7 +62,6 @@ set(SOURCES
     src/screens/modals/SelectCoins.cpp
     src/payloads/Coins.cpp
     src/payloads/Receive.cpp
-    src/payloads/Pools.cpp
     src/payloads/Config.cpp
 )
 
