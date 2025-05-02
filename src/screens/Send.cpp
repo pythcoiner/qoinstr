@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <optional>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcontainerfwd.h>
@@ -21,7 +22,7 @@
 
 namespace screen {
 
-Input::Input(const RustCoin &coin, Send *screen, int id) {
+InputW::InputW(const RustCoin &coin, Send *screen, int id) {
     m_coin = coin;
     m_outpoint = new QLineEdit();
     m_outpoint->setFixedWidth(200);
@@ -70,16 +71,16 @@ Input::Input(const RustCoin &coin, Send *screen, int id) {
     m_widget = col;
 }
 
-auto Input::widget() -> QWidget * {
+auto InputW::widget() -> QWidget * {
     return m_widget;
 }
 
-void Input::setDeletable(bool deletable) {
+void InputW::setDeletable(bool deletable) {
     m_delete->setVisible(deletable);
     m_delete_spacer->setVisible(deletable);
 }
 
-Output::Output(Send *screen, int id) {
+OutputW::OutputW(Send *screen, int id) {
     m_address = new QLineEdit;
     m_address->setFixedWidth(300);
     m_address->setPlaceholderText("Address: bc1.....");
@@ -144,22 +145,22 @@ Output::Output(Send *screen, int id) {
     m_widget = col;
 }
 
-auto Output::widget() -> QWidget * {
+auto OutputW::widget() -> QWidget * {
     return m_widget;
 }
 
-void Output::setDeletable(bool deletable) {
+void OutputW::setDeletable(bool deletable) {
     m_delete->setVisible(deletable);
     m_delete_spacer->setVisible(deletable);
 }
 
-void Output::enableMax(bool max) {
+void OutputW::enableMax(bool max) {
     m_max->setChecked(false);
     m_max->setVisible(max);
     m_max_label->setVisible(max);
 }
 
-auto Output::isMax() -> bool {
+auto OutputW::isMax() -> bool {
     return m_max->isChecked();
 }
 
@@ -381,7 +382,7 @@ auto Send::outputsView() -> QWidget * {
 }
 
 void Send::addOutput() {
-    auto *output = new Output(this, m_output_id);
+    auto *output = new OutputW(this, m_output_id);
     if (m_outputs.size() == 0) {
         output->setDeletable(false);
     } else {
@@ -492,15 +493,15 @@ void Send::addCoins() {
     }
 }
 
-void Input::setOutpoint(const QString &outpoint) {
+void InputW::setOutpoint(const QString &outpoint) {
     m_outpoint->setText(outpoint);
 }
 
-void Input::setLabel(const QString &label) {
+void InputW::setLabel(const QString &label) {
     m_label->setText(label);
 }
 
-void Input::setAmount(uint64_t amount) {
+void InputW::setAmount(uint64_t amount) {
     m_coin.value = amount;
     double btcAmount = amount;
     btcAmount = btcAmount / SATS;
@@ -508,7 +509,7 @@ void Input::setAmount(uint64_t amount) {
 }
 
 void Send::addInput(const RustCoin &coin) {
-    auto *input = new Input(coin, this, m_input_id);
+    auto *input = new InputW(coin, this, m_input_id);
     auto op = coin.outpoint;
     input->setOutpoint(QString(op.c_str()));
     auto label = coin.label;
@@ -529,7 +530,7 @@ void Send::onCoinsSelected(const QList<RustCoin> &coins) {
     }
 }
 
-auto Input::coin() -> RustCoin {
+auto InputW::coin() -> RustCoin {
     return m_coin;
 }
 
@@ -541,4 +542,30 @@ auto Send::selectedCoins() -> QList<RustCoin> {
     return output;
 }
 
+auto RadioElement::text() -> QString {
+    return m_value->text();
+}
+
+auto InputW::label() -> QString {
+    return m_label->text();
+}
+
+auto OutputW::address() -> QString {
+    return m_address->text();
+}
+
+auto OutputW::amount() -> std::optional<uint64_t> {
+    auto amountStr = m_amount->text();
+    bool ok = false;
+    auto amountBtc = amountStr.toDouble(&ok);
+    if (!ok) {
+        qDebug() << "Output::amount() m_amount value is not a valid double";
+        return std::nullopt;
+    }
+    return static_cast<uint64_t>(amountBtc * SATS);
+}
+
+auto OutputW::label() -> QString {
+    return m_label->text();
+}
 } // namespace screen

@@ -3,6 +3,7 @@
 #include "include/cpp_joinstr.h"
 #include <Qontrol>
 #include <cstdint>
+#include <optional>
 #include <qabstractbutton.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -17,15 +18,16 @@ class AccountController;
 namespace screen {
 class Send;
 
-class Input {
+class InputW {
 public:
-    Input(const RustCoin &coin, Send *screen, int id);
+    InputW(const RustCoin &coin, Send *screen, int id);
     auto widget() -> QWidget *;
     void setDeletable(bool deletable);
     void setOutpoint(const QString &outpoint);
     void setLabel(const QString &label);
     void setAmount(uint64_t amount);
     auto coin() -> RustCoin;
+    auto label() -> QString;
 
 private:
     QLineEdit *m_outpoint = nullptr;
@@ -37,13 +39,16 @@ private:
     RustCoin m_coin;
 };
 
-class Output {
+class OutputW {
 public:
-    Output(Send *screen, int id);
+    OutputW(Send *screen, int id);
     auto widget() -> QWidget *;
     void setDeletable(bool deletable);
     void enableMax(bool max);
     auto isMax() -> bool;
+    auto address() -> QString;
+    auto amount() -> std::optional<uint64_t>;
+    auto label() -> QString;
 
 private:
     QLineEdit *m_address = nullptr;
@@ -62,6 +67,7 @@ public:
     auto widget() -> qontrol::Row *;
     void update();
     auto button() -> QAbstractButton *;
+    auto text() -> QString;
 
 private:
     QRadioButton *m_button = nullptr;
@@ -97,6 +103,7 @@ protected:
     auto inputsView() -> QWidget *;
     auto outputsView() -> QWidget *;
     auto selectedCoins() -> QList<RustCoin>;
+    auto txTemplate() -> std::optional<TransactionTemplate>;
 
     auto isTransactionReady() -> bool {
         // TODO: call rust  tx "validator"
@@ -121,8 +128,8 @@ private:
     AccountController *m_controller = nullptr;
     int m_input_id = 0;
     int m_output_id = 0;
-    QHash<int, Output *> m_outputs;
-    QHash<int, Input *> m_inputs;
+    QHash<int, OutputW *> m_outputs;
+    QHash<int, InputW *> m_inputs;
     qontrol::Column *m_outputs_column = nullptr;
     qontrol::Column *m_inputs_column = nullptr;
 
