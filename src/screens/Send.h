@@ -114,15 +114,7 @@ protected:
         return false;
     }
 
-    auto prepareTransaction() -> QString {
-        // TODO: prepare PSBT on rust side
-        // - add a change output if needed
-        // - sanitize the transaction
-        // - craft PSBT
-        // - populate PSBT w/ signing infos
-        // -> return PSBT string
-        return QString();
-    };
+    auto prepareTransaction() -> std::optional<QString>;
 
 private:
     AccountController *m_controller = nullptr;

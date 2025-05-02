@@ -11,9 +11,11 @@
 #include <cstdint>
 #include <include/cpp_joinstr.h>
 #include <optional>
+#include <qcontainerfwd.h>
 #include <qdialog.h>
 #include <qsystemtrayicon.h>
 #include <qtimer.h>
+#include <utility>
 
 class AccountWidget;
 
@@ -75,6 +77,8 @@ public slots:
                        uint32_t fees, uint64_t max_duration, size_t peers);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();
+    auto cmdPrepareTx(TransactionTemplate tx_template)
+        -> std::optional<QString /* PSBT */>;
 
     void listpools();
 

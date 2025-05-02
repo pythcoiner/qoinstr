@@ -568,4 +568,53 @@ auto OutputW::amount() -> std::optional<uint64_t> {
 auto OutputW::label() -> QString {
     return m_label->text();
 }
+
+auto Send::txTemplate() -> std::optional<TransactionTemplate> {
+    auto txTemplate = TransactionTemplate();
+
+    // fees
+    bool ok = false;
+    auto fee = m_fee_sats->text().toInt(&ok);
+    if (!ok) {
+        qDebug() << "Send::txTemplate() m_fee_sats is not a valid int";
+        return std::nullopt;
+    }
+    txTemplate.fee = fee;
+
+    // inputs
+    for (auto *inp : m_inputs) {
+        auto coin = inp->coin();
+        coin.label = rust::String(inp->label().toStdString());
+        txTemplate.inputs.push_back(coin);
+    }
+
+    // outputs
+    for (auto *out : m_outputs) {
+        auto output = Output();
+        output.address = rust::String(out->address().toStdString());
+        auto amount = out->amount();
+        if (!amount.has_value()) {
+            return std::nullopt;
+        }
+        output.amount = amount.value();
+        output.label = rust::String(out->label().toStdString());
+        output.max = out->isMax();
+        txTemplate.outputs.push_back(output);
+    }
+
+    return txTemplate;
+}
+
+auto Send::prepareTransaction() -> std::optional<QString> {
+    if (m_controller == nullptr) {
+        return std::nullopt;
+    }
+    auto txTemp = txTemplate();
+    if (txTemp.has_value()) {
+        return m_controller->cmdPrepareTx(txTemp.value());
+    }
+    return std::nullopt;
+
+    return QString();
+};
 } // namespace screen

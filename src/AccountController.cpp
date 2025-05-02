@@ -293,3 +293,20 @@ void AccountController::actionCreatePool(const RustCoin &coin,
     auto *modal = new modal::CreatePool(coin, relay_url, this);
     AppController::execModal(modal);
 }
+
+auto AccountController::cmdPrepareTx(TransactionTemplate tx_template)
+    -> std::optional<QString /* PSBT */> {
+    if (!m_wallet.has_value()) {
+        return std::nullopt;
+    }
+    auto psbt = m_wallet.value()->prepare_transaction(std::move(tx_template));
+    if (psbt->is_ok()) {
+        auto psbtStr = psbt->value();
+        return QString(psbtStr.c_str());
+    }
+    auto error = psbt->error();
+    qDebug() << "AccountController::cmdPrepareTx() Fail to prepare "
+                "transaction(): "
+             << error.c_str();
+    return std::nullopt;
+}
