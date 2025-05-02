@@ -481,9 +481,8 @@ void Send::addCoins() {
             }
         }
         auto *modal = new modal::SelectCoins(coins);
-        connect(modal, &modal::SelectCoins::coinSelectedForPool,
-                this->m_controller, &AccountController::actionCreatePool,
-                qontrol::UNIQUE);
+        connect(modal, &modal::SelectCoins::coinsSelected, this,
+                &Send::onCoinsSelected, qontrol::UNIQUE);
         AppController::execModal(modal);
 
     } else {
