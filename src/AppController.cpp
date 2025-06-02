@@ -1,5 +1,6 @@
 #include "AppController.h"
 #include "MainWindow.h"
+#include "Modal.h"
 #include "common.h"
 #include "include/cpp_joinstr.h"
 #include "screens/modals/CreateAccount.h"
@@ -25,15 +26,19 @@ void AppController::initState() {
     init_rust_logger(LogLevel::Debug);
 
     m_tray_icon = new QSystemTrayIcon;
-    m_tray_icon->setIcon(QIcon::fromTheme("dialog-information")); // required on Linux!
+    m_tray_icon->setIcon(
+        QIcon::fromTheme("dialog-information")); // required on Linux!
     m_tray_icon->setVisible(true);
 
     listAccounts();
 
-    connect(this, &AppController::accountCreated, this, &AppController::onAccountCreated, qontrol::UNIQUE);
+    connect(this, &AppController::accountCreated, this,
+            &AppController::onAccountCreated, qontrol::UNIQUE);
 }
 
-void AppController::addAccount(const QString &name) { // NOLINT(readability-convert-member-functions-to-static)
+void AppController::addAccount(
+    const QString
+        &name) { // NOLINT(readability-convert-member-functions-to-static)
     auto *window = AppController::window();
     auto *win = dynamic_cast<MainWindow *>(window);
     if (!win->accountExists(name)) {
@@ -46,7 +51,9 @@ void AppController::addAccount(const QString &name) { // NOLINT(readability-conv
     }
 }
 
-void AppController::removeAccount(const QString &account) { // NOLINT(readability-convert-member-functions-to-static)
+void AppController::removeAccount(
+    const QString
+        &account) { // NOLINT(readability-convert-member-functions-to-static)
     auto *win = dynamic_cast<MainWindow *>(window());
     win->removeAccount(account);
     m_accounts.remove(account);
@@ -67,14 +74,25 @@ void AppController::onCreateAccount() {
     AppController::execModal(modal);
 }
 
-void AppController::createAccount(const QString &name, const QString &mnemonic, Network network) {
-    auto config = config_from_file(name.toStdString());
-    config->set_account(name.toStdString());
-    config->set_mnemonic(mnemonic.toStdString());
-    config->set_network(network);
-    config->to_file();
+void AppController::createAccount(const QString &name, const QString &mnemonic,
+                                  Network network) {
+    if (!config_exists(name.toStdString())) {
+        auto config = new_config(mnemonic.toStdString(), name.toStdString(),
+                                 network);
+        config->set_nostr_relay("ws://127.0.0.1:8181");
+        config->set_nostr_back("10000");
+        config->set_electrum_url("127.0.0.1");
+        config->set_electrum_port("50001");
+        config->to_file();
 
-    emit accountCreated(name);
+        emit accountCreated(name);
+    } else {
+
+        auto *modal = new qontrol::Modal(
+            "Account already exists!",
+            "An account file with the same name already exists!");
+        AppController::execModal(modal);
+    }
 }
 
 void AppController::onAccountCreated(const QString &name) {
@@ -94,7 +112,8 @@ void AppController::osWarning(QString title, QString msg, int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Warning, delay);
 }
 
-void AppController::osCritical(QString title, QString msg, int delay) { // NOLINT
+void AppController::osCritical(QString title, QString msg,
+                               int delay) { // NOLINT
     m_tray_icon->showMessage(title, msg, QSystemTrayIcon::Critical, delay);
 }
 
@@ -104,7 +123,8 @@ auto AppController::accounts() -> int {
 
 void AppController::stop(modal::Stop *modal) {
     for (auto *account : m_accounts) {
-        connect(account, &AccountController::stopped, modal, &modal::Stop::onStopped, qontrol::UNIQUE);
+        connect(account, &AccountController::stopped, modal,
+                &modal::Stop::onStopped, qontrol::UNIQUE);
         account->stop();
     }
     m_tray_icon->hide();
