@@ -44,14 +44,20 @@ CreateAccount::CreateAccount() {
     m_mnemonic->label()->setFixedWidth(LABEL_WIDTH);
     m_mnemonic->input()->setFixedWidth(INPUT_WIDTH);
     m_generate_btn = new QPushButton("Generate");
-    connect(m_generate_btn, &QPushButton::clicked, this, &CreateAccount::onGenerateMnemonic, qontrol::UNIQUE);
+    connect(m_generate_btn, &QPushButton::clicked, this,
+            &CreateAccount::onGenerateMnemonic, qontrol::UNIQUE);
     m_mnemonic->pushSpacer(H_SPACER)->push(m_generate_btn);
 
     // Create btn
     m_create_btn = new QPushButton("Create wallet");
-    connect(m_create_btn, &QPushButton::clicked, this, &CreateAccount::onCreateAccount, qontrol::UNIQUE);
-    connect(this, &CreateAccount::createAccount, AppController::get(), &AppController::createAccount, qontrol::UNIQUE);
-    auto *btn = (new qontrol::Row)->pushSpacer()->push(m_create_btn)->pushSpacer();
+    connect(m_create_btn, &QPushButton::clicked, this,
+            &CreateAccount::onCreateAccount, qontrol::UNIQUE);
+    connect(this, &CreateAccount::createAccount, AppController::get(),
+            &AppController::createAccount, qontrol::UNIQUE);
+    auto *btn = (new qontrol::Row)
+                    ->pushSpacer()
+                    ->push(m_create_btn)
+                    ->pushSpacer();
 
     auto *col = (new qontrol::Column)
                     ->pushSpacer(40)
@@ -70,9 +76,12 @@ CreateAccount::CreateAccount() {
 
 void CreateAccount::onCreateAccount() {
     // check mnemonic is a valid bip39 mnemonic
-    auto mnemo = mnemonic_from_string(m_mnemonic->input()->text().toStdString());
+    auto mnemo = mnemonic_from_string(
+        m_mnemonic->input()->text().toStdString());
     if (!mnemo->is_ok()) {
-        auto *modal = new qontrol::Modal("Your mnemonic is not a valid BIP39 mnemonic!", "Invalid mnemonic!");
+        auto *modal = new qontrol::Modal(
+            "Invalid mnemonic!",
+            "Your mnemonic is not a valid BIP39 mnemonic!");
         AppController::execModal(modal);
         return;
     }
@@ -80,14 +89,17 @@ void CreateAccount::onCreateAccount() {
     // TODO: check the no account w/ this name already exists
     auto name = m_name->input()->text();
     if (name.contains(" ")) {
-        auto *modal = new qontrol::Modal("The name of the wallet must not contains any space!", "Invalid Name!");
+        auto *modal = new qontrol::Modal(
+            "Invalid Name!",
+            "The name of the wallet must not contains any space!");
         AppController::execModal(modal);
         return;
     }
 
     if (config_exists(name.toStdString())) {
-        auto *modal = new qontrol::Modal("There is an existing configuration file for a wallet with the same name!",
-                                         "Wallet already exists!");
+        auto *modal = new qontrol::Modal(
+            "Wallet already exists!", "There is an existing configuration file "
+                                      "for a wallet with the same name!");
         AppController::execModal(modal);
         return;
     }
@@ -105,12 +117,13 @@ void CreateAccount::onCreateAccount() {
     } else {
 
         auto comment = QString("%1 is not a valid network!").arg(networkStr);
-        auto *modal = new qontrol::Modal(comment, "Invalid network!");
+        auto *modal = new qontrol::Modal("Invalid network!", comment);
         AppController::execModal(modal);
         return;
     }
 
-    emit createAccount(m_name->input()->text(), m_mnemonic->input()->text(), network);
+    emit createAccount(m_name->input()->text(), m_mnemonic->input()->text(),
+                       network);
     close();
 }
 
