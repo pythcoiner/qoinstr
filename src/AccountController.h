@@ -7,7 +7,6 @@
 #include "screens/Send.h"
 #include <QObject>
 #include <Qontrol>
-#include <cmath>
 #include <cstdint>
 #include <include/cpp_joinstr.h>
 #include <optional>
@@ -15,7 +14,6 @@
 #include <qdialog.h>
 #include <qsystemtrayicon.h>
 #include <qtimer.h>
-#include <utility>
 
 class AccountWidget;
 

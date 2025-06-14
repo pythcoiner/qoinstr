@@ -243,13 +243,12 @@ void AccountController::actionCreateNewAddress() {
     }
 }
 
-void AccountController::cmdCreatePool(
-    // TODO: pass by value
-    const rust::String &outpoint, uint64_t denomination, uint32_t fees,
-    uint64_t max_duration, size_t peers) {
+void AccountController::cmdCreatePool(const rust::String &outpoint,
+                                      uint64_t denomination, uint32_t fees,
+                                      uint64_t max_duration, size_t peers) {
     if (m_wallet.has_value()) {
-        m_wallet.value()->create_dummy_pool(denomination, peers, max_duration,
-                                            fees);
+        m_wallet.value()->create_pool(outpoint, denomination, fees,
+                                      max_duration, peers);
     }
 }
 
