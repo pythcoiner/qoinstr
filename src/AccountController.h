@@ -73,6 +73,7 @@ public slots:
     // Wallet Commands
     void cmdCreatePool(const rust::String &outpoint, uint64_t denomination,
                        uint32_t fees, uint64_t max_duration, size_t peers);
+    void cmdJoinPool(const rust::String &outpoint, const rust::String &pool_id);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();
     auto cmdPrepareTx(TransactionTemplate tx_template)
