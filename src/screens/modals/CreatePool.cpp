@@ -252,7 +252,7 @@ void CreatePool::process(bool force_denom) {
                                         10 * 24 * 60 * 60);           // 10 days
     m_max_duration = std::max<uint64_t>(m_max_duration, 1 * 60 * 60); // 1H
 
-    auto denom = m_denomination / SATS;
+    auto denom = static_cast<double>(m_denomination) / SATS;
     m_w_denomination->setText(
         QString::number(denom, 'f', 8)); // 8 decimal places
     m_w_fee->setText(QString::number(m_fees));
