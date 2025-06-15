@@ -27,6 +27,7 @@ if [ -d "cpp_joinstr" ]; then
         git fetch --all
         git pull origin "$JOINSTR_BRANCH" --force --rebase
         git checkout "$JOINSTR_BRANCH"
+        cargo update
     else
         echo "Running in offline mode. Skipping fetch."
     fi
