@@ -23,7 +23,14 @@ auto AppController::get() -> AppController * {
 }
 
 void AppController::initState() {
-    init_rust_logger(LogLevel::Debug);
+    auto logger = new_logger(LogLevel::Debug);
+    logger->module("simple_nostr_client", LogLevel::Info);
+    logger->module("simple_electrum_client", LogLevel::Info);
+    logger->module("joinstr::electrum", LogLevel::Info);
+    logger->module("cpp_joinstr::account", LogLevel::Info);
+    logger->module("joinstr::nostr::sync", LogLevel::Info);
+    // logger->module("joinstr::joinstr", LogLevel::Info);
+    logger->init();
 
     m_tray_icon = new QSystemTrayIcon;
     m_tray_icon->setIcon(

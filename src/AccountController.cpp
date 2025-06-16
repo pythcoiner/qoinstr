@@ -216,21 +216,11 @@ auto AccountController::relay() -> QString {
 
 void AccountController::actionCreatePoolForRelay(const QString &relay_url) {
 
-    auto optCoins = this->coins()->getCoins();
-    QList<RustCoin> coins;
-    if (optCoins.has_value() && !optCoins.value().isEmpty()) {
-        for (const auto &c : optCoins.value()) {
-            auto mc = RustCoin(c);
-            coins.append(mc);
-        }
+    auto coins = selectableCoins();
+    if (!coins.isEmpty()) {
         auto *modal = new modal::SelectCoins(coins, relay_url);
-        connect(modal, &modal::SelectCoins::coinSelectedForPool, this,
+        connect(modal, &modal::SelectCoins::coinSelectedForCreatePool, this,
                 &AccountController::actionCreatePool, qontrol::UNIQUE);
-        AppController::execModal(modal);
-
-    } else {
-        auto *modal = new qontrol::Modal("No coins!",
-                                         "There is no coins to select!");
         AppController::execModal(modal);
     }
 }
@@ -247,8 +237,9 @@ void AccountController::cmdCreatePool(const rust::String &outpoint,
                                       uint64_t denomination, uint32_t fees,
                                       uint64_t max_duration, size_t peers) {
     if (m_wallet.has_value()) {
-        m_wallet.value()->create_pool(outpoint, denomination, fees,
-                                      max_duration, peers);
+        // FIXME: its a hack in order to wait the fee calculation to be fixed
+        m_wallet.value()->create_pool(outpoint, denomination, 1, max_duration,
+                                      peers);
     }
 }
 
@@ -309,3 +300,40 @@ auto AccountController::cmdPrepareTx(TransactionTemplate tx_template)
              << error.c_str();
     return std::nullopt;
 }
+
+void AccountController::cmdJoinPool(const RustCoin &coin,
+                                    const QString &pool_id,
+                                    const QString &relay_url) {
+    auto outpoint = coin.outpoint;
+    auto poolId = rust::String(pool_id.toStdString());
+    if (m_wallet.has_value()) {
+        m_wallet.value()->join_pool(outpoint, poolId);
+    }
+};
+
+void AccountController::actionJoinPool(const QString &relay_url,
+                                       const QString &pool_id) {
+    auto coins = selectableCoins();
+    if (!coins.isEmpty()) {
+        auto *modal = new modal::SelectCoins(coins, relay_url, pool_id);
+        connect(modal, &modal::SelectCoins::coinSelectedForJoinPool, this,
+                &AccountController::cmdJoinPool, qontrol::UNIQUE);
+        AppController::execModal(modal);
+    }
+};
+
+auto AccountController::selectableCoins() -> QList<RustCoin> {
+    auto optCoins = this->coins()->getCoins();
+    QList<RustCoin> coins;
+    if (optCoins.has_value() && !optCoins.value().isEmpty()) {
+        for (const auto &c : optCoins.value()) {
+            auto mc = RustCoin(c);
+            coins.append(mc);
+        }
+    } else {
+        auto *modal = new qontrol::Modal("No coins!",
+                                         "There is no coins to select!");
+        AppController::execModal(modal);
+    }
+    return coins;
+};

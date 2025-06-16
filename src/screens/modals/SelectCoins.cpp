@@ -1,4 +1,5 @@
 #include "SelectCoins.h"
+#include "AppController.h"
 #include "Column.h"
 #include "Row.h"
 #include "common.h"
@@ -33,24 +34,39 @@ auto CoinWidget::coin() -> RustCoin {
 }
 
 void SelectCoins::onOk() {
-    if (!m_relay_url.has_value()) {
-        auto coins = QList<RustCoin>();
-        for (auto id : m_coins.keys()) {
-            auto *cw = m_coins.value(id);
-            if (cw->isChecked()) {
-                coins.append(cw->coin());
-            }
+
+    auto selectedCoins = QList<RustCoin>();
+    for (auto id : m_coins.keys()) {
+        auto *cw = m_coins.value(id);
+        if (cw->isChecked()) {
+            selectedCoins.append(cw->coin());
         }
-        emit coinsSelected(coins);
+    }
+
+    if (m_relay_url.has_value()) {
+        if (selectedCoins.size() == 0) {
+            auto *modal = new qontrol::Modal(
+                "Wrong coins amount",
+                "A single coin must be selected for join or ceate a pool!");
+            AppController::execModal(modal);
+            return;
+        }
+
+        const auto &coin = selectedCoins.first();
+        if (m_pool_id.has_value()) {
+            // Join pool case
+            emit coinSelectedForJoinPool(coin, m_pool_id.value(),
+                                         m_relay_url.value());
+
+        } else {
+            // Create pool case
+            emit coinSelectedForCreatePool(coin, m_relay_url.value());
+        }
         accept();
+
     } else {
-        for (auto id : m_coins.keys()) {
-            auto *cw = m_coins.value(id);
-            if (cw->isChecked()) {
-                emit coinSelectedForPool(cw->coin(), m_relay_url.value());
-                accept();
-            }
-        }
+        emit coinsSelected(selectedCoins);
+        accept();
     }
 }
 
@@ -330,6 +346,14 @@ SelectCoins::SelectCoins(const QList<RustCoin> &coins) {
 SelectCoins::SelectCoins(const QList<RustCoin> &coins,
                          const QString &relay_url) {
     m_relay_url = relay_url;
+    init(coins);
+    view();
+}
+
+SelectCoins::SelectCoins(const QList<RustCoin> &coins, const QString &relay_url,
+                         const QString &pool_id) {
+    m_relay_url = relay_url;
+    m_pool_id = pool_id;
     init(coins);
     view();
 }

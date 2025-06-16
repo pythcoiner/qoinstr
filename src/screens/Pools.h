@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountController.h"
+#include "include/cpp_joinstr.h"
 #include <Qontrol>
 #include <qhash.h>
 #include <qpushbutton.h>
@@ -34,7 +35,7 @@ private:
     QList<QTableWidget *> *m_tables = nullptr;
     QList<qontrol::widgets::Collapsible *> *m_collapsibles = nullptr;
 
-    void insertRelay(qontrol::Column *col);
+    void insertRelay(qontrol::Column *col, AccountController *ctrl);
 };
 
 } // namespace screen

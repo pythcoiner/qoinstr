@@ -1,10 +1,13 @@
 #pragma once
 
 #include "AccountWidget.h"
+#include "AppController.h"
 #include "Screen.h"
+#include "common.h"
 #include "payloads/Config.h"
 #include "screens/Coins.h"
 #include "screens/Send.h"
+#include "screens/modals/SelectCoins.h"
 #include <QObject>
 #include <Qontrol>
 #include <cstdint>
@@ -69,17 +72,21 @@ public slots:
     void actionCreatePoolForRelay(const QString &relay_url);
     void actionCreatePool(const RustCoin &coin, const QString &relay_url);
     void actionCreateNewAddress();
+    void actionJoinPool(const QString &relay_url, const QString &pool_id);
 
     // Wallet Commands
     void cmdCreatePool(const rust::String &outpoint, uint64_t denomination,
                        uint32_t fees, uint64_t max_duration, size_t peers);
-    void cmdJoinPool(const rust::String &outpoint, const rust::String &pool_id);
+    void cmdJoinPool(const RustCoin &coin, const QString &pool_id,
+                     const QString &relay_url);
     void cmdSaveConfig(payload::Config payload);
     void cmdLoadConfig();
     auto cmdPrepareTx(TransactionTemplate tx_template)
         -> std::optional<QString /* PSBT */>;
 
     void listpools();
+
+    auto selectableCoins() -> QList<RustCoin>;
 
     void stop();
 

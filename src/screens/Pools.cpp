@@ -50,66 +50,87 @@ auto peersCount(uint8_t peers, uint8_t total) -> QString {
     return "0/0";
 }
 
-void insertPool(QTableWidget *table, const RustPool &pool, int index) {
+void insertPool(QTableWidget *table, const RustPool &pool, int index,
+                AccountController *ctrl) {
     auto idStr = pool.id;
+    auto statusStr = pool_status_to_string(pool.status);
+    auto roleStr = pool_role_to_string(pool.role);
     auto *id = new QTableWidgetItem(QString(idStr.c_str()));
     id->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 0, id);
 
+    auto *status = new QTableWidgetItem(statusStr.c_str());
+    status->setTextAlignment(Qt::AlignCenter);
+    table->setItem(index, 1, status);
+
+    auto *role = new QTableWidgetItem(roleStr.c_str());
+    role->setTextAlignment(Qt::AlignCenter);
+    table->setItem(index, 2, role);
+
     auto *denomination = new QTableWidgetItem(
         toBitcoin(pool.denomination, false));
     denomination->setTextAlignment(Qt::AlignCenter);
-    table->setItem(index, 1, denomination);
+    table->setItem(index, 3, denomination);
 
     auto *fees = new QTableWidgetItem(QString::number(pool.fees));
     fees->setTextAlignment(Qt::AlignCenter);
-    table->setItem(index, 2, fees);
+    table->setItem(index, 4, fees);
 
     auto timeout = QDateTime::fromMSecsSinceEpoch(pool.timeout);
     auto *remains = new QTableWidgetItem(remainingTime(timeout));
     remains->setTextAlignment(Qt::AlignCenter);
-    table->setItem(index, 3, remains);
+    table->setItem(index, 5, remains);
 
     auto *peers = new QTableWidgetItem(
         peersCount(pool.current_peers, pool.total_peers));
     peers->setTextAlignment(Qt::AlignCenter);
-    table->setItem(index, 4, peers);
+    table->setItem(index, 6, peers);
 
-    auto poolId = pool.id;
-    // auto *controller = ctrl;
+    auto poolId = QString::fromStdString(std::string(pool.id));
+    auto relayUrl = QString::fromStdString(std::string(pool.relay));
 
     auto *join = new QPushButton("Join");
-    // QObject::connect(join, &QPushButton::clicked, controller,
-    //         [controller, poolId]() {controller->joinPoolById(poolId);});
+
+    bool joinVisible = (pool.status == PoolStatus::Available) &&
+                       (pool.role == PoolRole::None);
+    bool detailsVisible = pool.role != PoolRole::None;
+
+    QObject::connect(join, &QPushButton::clicked, [ctrl, poolId, relayUrl]() {
+        ctrl->actionJoinPool(relayUrl, poolId);
+    });
 
     auto *details = new QPushButton("Details");
     // QObject::connect(details, &QPushButton::clicked, controller,
     //         [controller, poolId]() {controller->poolDetails(poolId);});
+
+    join->setVisible(joinVisible);
+    details->setVisible(detailsVisible);
+
     auto *row = (new qontrol::Row(table))
                     ->pushSpacer()
                     ->push(join)
                     ->pushSpacer()
                     ->push(details)
                     ->pushSpacer();
-    table->setCellWidget(index, 5, row);
+    table->setCellWidget(index, 7, row);
 }
 
-void Pools::insertRelay(qontrol::Column *col) {
+void Pools::insertRelay(qontrol::Column *col, AccountController *ctrl) {
     auto *collapsible = new qontrol::widgets::Collapsible(m_state.second, col);
 
     m_collapsibles->push_back(collapsible);
 
     int rowCount = m_state.first.size() + 1;
-    const int c_table_width = 6;
+    const int c_table_width = 8;
     auto *table = new QTableWidget(rowCount, c_table_width);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     table->setMinimumHeight((rowCount + 1) * 30);
-    auto headers = QStringList{"Id",    "Denomination", "Fee", "Remaining time",
-                               "Peers", "Action"};
+    auto headers = QStringList{"Id",  "Status",         "Role",  "Denomination",
+                               "Fee", "Remaining time", "Peers", "Action"};
     table->setHorizontalHeaderLabels(headers);
     int index = 0;
     for (const auto &pool : m_state.first) {
-        insertPool(table, pool, index);
+        insertPool(table, pool, index, ctrl);
         index++;
     }
 
@@ -161,7 +182,7 @@ void Pools::view() {
     }
     delete oldCollapsibles;
 
-    insertRelay(col);
+    insertRelay(col, m_controller);
 
     col->pushSpacer();
 

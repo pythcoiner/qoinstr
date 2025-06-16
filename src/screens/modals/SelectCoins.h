@@ -2,7 +2,6 @@
 
 #include "Modal.h"
 #include "include/cpp_joinstr.h"
-#include "screens/Send.h"
 #include <optional>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -10,6 +9,7 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qlist.h>
+#include <qobject.h>
 #include <qpushbutton.h>
 #include <qstyle.h>
 #include <qtmetamacros.h>
@@ -46,6 +46,8 @@ class SelectCoins : public qontrol::Modal {
 public:
     SelectCoins(const QList<RustCoin> &coins);
     SelectCoins(const QList<RustCoin> &coins, const QString &relay_url);
+    SelectCoins(const QList<RustCoin> &coins, const QString &relay_url,
+                const QString &pool_id);
 
     void init(const QList<RustCoin> &coins);
     void view();
@@ -56,7 +58,9 @@ public:
 
 signals:
     void coinsSelected(QList<RustCoin> coins);
-    void coinSelectedForPool(RustCoin coin, QString relay_url);
+    void coinSelectedForCreatePool(RustCoin coin, QString relay_url);
+    void coinSelectedForJoinPool(RustCoin coin, QString pool_id,
+                                 QString relay_url);
 
 public slots:
     void checked();
@@ -65,9 +69,12 @@ public slots:
 
 private:
     std::optional<QString> m_relay_url;
+    std::optional<QString> m_pool_id;
+
     int m_amount_width = 150;
     int m_label_width = 200;
     int m_outpoint_width = 200;
+
     QWidget *m_widget = nullptr;
     QLineEdit *m_label_filter = nullptr;
     QLineEdit *m_total = nullptr;
