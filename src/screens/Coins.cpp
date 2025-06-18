@@ -36,10 +36,6 @@ void Coins::recvPayload(const CoinState &coins) {
 void Coins::doConnect() {
     auto *ctrl = m_controller;
     connect(ctrl, &AccountController::updateCoins, this, &Coins::recvPayload);
-    connect(this, &Coins::coinsUpdated, []() {
-        AppController::get()->osInfo("Coins updated",
-                                     "List of coins have been updated");
-    });
 }
 
 auto balanceRow(const QString &label_str, uint64_t balance,

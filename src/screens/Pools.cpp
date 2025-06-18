@@ -34,10 +34,6 @@ void Pools::init() {
 void Pools::doConnect() {
     auto *ctrl = m_controller;
     connect(ctrl, &AccountController::updatePools, this, &Pools::recvPayload);
-    connect(this, &Pools::poolsUpdated, ctrl, []() {
-        AppController::get()->osInfo("Pools updated",
-                                     "List of pools have been updated");
-    });
 }
 
 auto remainingTime(const QDateTime &timeout) -> QString {
