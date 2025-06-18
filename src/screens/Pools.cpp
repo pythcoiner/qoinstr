@@ -45,9 +45,17 @@ auto remainingTime(const QDateTime &timeout) -> QString {
     return "< 1 hour";
 }
 
-auto peersCount(uint8_t peers, uint8_t total) -> QString {
-    // TODO:
-    return "0/0";
+auto peersCount(uint8_t peers, uint8_t total, PoolRole role, PoolStatus status)
+    -> QString {
+    if (role == PoolRole::Initiator || role == PoolRole::Peer) {
+        if (status == PoolStatus::RegisterInputs ||
+            status == PoolStatus::RegisterOutputs) {
+            auto count = QString::number(peers) + "/" + QString::number(total);
+            return count;
+        }
+        return "-";
+    }
+    return "?";
 }
 
 void insertPool(QTableWidget *table, const RustPool &pool, int index,
@@ -81,8 +89,8 @@ void insertPool(QTableWidget *table, const RustPool &pool, int index,
     remains->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 5, remains);
 
-    auto *peers = new QTableWidgetItem(
-        peersCount(pool.current_peers, pool.total_peers));
+    auto *peers = new QTableWidgetItem(peersCount(
+        pool.current_peers, pool.total_peers, pool.role, pool.status));
     peers->setTextAlignment(Qt::AlignCenter);
     table->setItem(index, 6, peers);
 
