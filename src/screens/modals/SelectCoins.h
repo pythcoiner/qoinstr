@@ -24,6 +24,7 @@ public:
     CoinWidget(const RustCoin &coin, SelectCoins *modal);
     auto isChecked() -> bool;
     auto setCheckable(bool checkable);
+    void setChecked(bool checked);
     auto coin() -> RustCoin;
     auto checkbox() -> QCheckBox *;
     auto outpoint() -> QLineEdit *;

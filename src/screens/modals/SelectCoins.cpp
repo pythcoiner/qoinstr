@@ -133,6 +133,11 @@ void SelectCoins::init(const QList<RustCoin> &coins) {
         m_coins.insert(id, cw);
         id++;
     }
+
+    if (m_coins.size() == 1) {
+        auto k = m_coins.keys().first();
+        m_coins.find(k).value()->setChecked(true);
+    }
 }
 
 void SelectCoins::view() {
@@ -389,4 +394,8 @@ void SelectCoins::checked() {
     }
     view();
 }
+
+void CoinWidget::setChecked(bool checked) {
+    m_checkbox->setChecked(checked);
+};
 } // namespace modal
