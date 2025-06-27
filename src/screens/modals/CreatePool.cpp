@@ -4,6 +4,7 @@
 #include "Column.h"
 #include "Modal.h"
 #include "Row.h"
+#include "include/cpp_joinstr.h"
 #include "screens/common.h"
 
 #include <Qontrol>
@@ -14,6 +15,7 @@
 #include <qcontainerfwd.h>
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qlogging.h>
 #include <qpushbutton.h>
 #include <qvalidator.h>
 #include <qwidget.h>
@@ -22,7 +24,6 @@ const int CP_LABEL_WIDTH = 120;
 const int CP_INPUT_WIDTH = 100;
 const int CP_V_SPACER = 5;
 const int CP_L_SPACER = 205;
-const int VB_FEE = 150;
 
 namespace modal {
 
@@ -37,9 +38,10 @@ CreatePool::CreatePool(const RustCoin &coin, const QString &relay_url,
     m_controller = ctrl;
 
     m_peers_validator = new QIntValidator(2, 10, this);
-    m_fees_validator = new QIntValidator(1, 1000, this);
+    m_fees_validator = new QIntValidator(1, 1000000, this);
     m_timeout_validator = new QIntValidator(1, 240, this);
     m_denom_validator = new QDoubleValidator(0.0001, 10.0, 5, this);
+    m_pool_fee_validator = new QIntValidator(1, 1000, this);
 
     // Title
     auto titleStr = QString("Create a new Joinstr Pool on ");
@@ -112,14 +114,14 @@ CreatePool::CreatePool(const RustCoin &coin, const QString &relay_url,
     connect(m_w_fee, &QLineEdit::editingFinished, this,
             [this]() { this->process(); });
 
-    auto *satLabel = new QLabel("sats/Vb");
+    m_w_percent_fees = new QLabel("sats (0% target)");
 
     auto *feeRow = (new qontrol::Row)
                        ->pushSpacer(CP_L_SPACER)
                        ->push(feesLabel)
                        ->push(m_w_fee)
                        ->pushSpacer(10)
-                       ->push(satLabel)
+                       ->push(m_w_percent_fees)
                        ->pushSpacer();
 
     // Peers
@@ -138,6 +140,27 @@ CreatePool::CreatePool(const RustCoin &coin, const QString &relay_url,
                          ->push(peersLabel)
                          ->push(m_w_peers)
                          ->pushSpacer();
+
+    // Pool fees
+    auto *poolFeesLabel = new QLabel("Pool fees");
+    poolFeesLabel->setFixedWidth(CP_LABEL_WIDTH);
+
+    m_w_pool_fees = new QLineEdit();
+    m_w_pool_fees->setFixedWidth(CP_INPUT_WIDTH);
+    m_w_pool_fees->setValidator(m_pool_fee_validator);
+    m_w_pool_fees->setText("1");
+    connect(m_w_pool_fees, &QLineEdit::textEdited, this,
+            [this]() { this->process(); });
+
+    auto *satsVbLabel = new QLabel("sats/vb");
+
+    auto *poolFeesRow = (new qontrol::Row)
+                            ->pushSpacer(CP_L_SPACER)
+                            ->push(poolFeesLabel)
+                            ->push(m_w_pool_fees)
+                            ->pushSpacer(10)
+                            ->push(satsVbLabel)
+                            ->pushSpacer();
 
     // Timeout
     auto *timeoutLabel = new QLabel("Max duration");
@@ -188,6 +211,8 @@ CreatePool::CreatePool(const RustCoin &coin, const QString &relay_url,
                     ->pushSpacer(CP_V_SPACER)
                     ->push(peersRow)
                     ->pushSpacer(CP_V_SPACER)
+                    ->push(poolFeesRow)
+                    ->pushSpacer(CP_V_SPACER)
                     ->push(timeoutRow)
                     ->pushSpacer()
                     ->push(btnRow)
@@ -205,6 +230,10 @@ auto CreatePool::fetch() -> bool {
     m_denomination = std::floor(doubleDenom * SATS);
 
     m_fees = m_w_fee->text().toUInt(&ok);
+    if (!ok)
+        return false;
+
+    m_pool_fees = m_w_pool_fees->text().toUInt(&ok);
     if (!ok)
         return false;
 
@@ -226,27 +255,31 @@ void CreatePool::process(bool force_denom) {
         return;
     }
 
+    // keep 2 < m_peers < 10
+    m_peers = std::max<size_t>(m_peers, 2);
+    m_peers = std::min<size_t>(m_peers, 10);
+
+    m_estimated_fees = estimate_weight(m_peers) * m_pool_fees;
+
+    auto percent = 0;
+    if (m_estimated_fees > 0) {
+        percent = (m_fees * 100) / (m_estimated_fees);
+    }
+    auto lbl = QString("sats (") + QString::number(percent) + "% target)";
+    m_w_percent_fees->setText(lbl);
+
     if (force_denom) {
-        int maxDenomination = m_coin.value - VB_FEE;
-        if (m_denomination > maxDenomination) {
-            m_denomination = maxDenomination;
-            m_fees = 1;
-        } else {
-            m_fees = std::floor((m_coin.value - m_denomination) / VB_FEE);
-        }
+        int maxDenomination = m_coin.value;
+        m_fees = std::floor((m_coin.value - m_denomination));
     } else {
         m_fees = std::max<uint32_t>(m_fees, 1);
-        auto fees = m_fees * VB_FEE;
         if (m_fees > m_coin.value) {
             m_fees = m_coin.value;
             m_denomination = 0;
         } else {
-            m_denomination = m_coin.value - fees;
+            m_denomination = m_coin.value - m_fees;
         }
     }
-
-    m_peers = std::max<size_t>(m_peers, 2);
-    m_peers = std::min<size_t>(m_peers, 10);
 
     m_max_duration = std::min<uint64_t>(m_max_duration,
                                         10 * 24 * 60 * 60);           // 10 days
@@ -269,7 +302,7 @@ void CreatePool::onCreatePool() {
             &AccountController::cmdCreatePool);
     connect(this, &CreatePool::createPool, this, [this]() { this->close(); });
 
-    emit this->createPool(m_coin.outpoint, m_denomination, m_fees,
+    emit this->createPool(m_coin.outpoint, m_denomination, m_pool_fees,
                           m_max_duration, m_peers);
 }
 

@@ -40,21 +40,28 @@ private:
 
     // Processed values
     uint64_t m_denomination = 0;
-    uint32_t m_fees = 0;
+    uint32_t m_pool_fees = 0;
     uint64_t m_max_duration = 0;
     size_t m_peers = 0;
+
+    uint32_t m_fees = 0;
+    uint32_t m_estimated_fees = 0;
+    uint32_t m_percent_fees = 0;
 
     // Widgets
     QLineEdit *m_w_denomination = nullptr;
     QLineEdit *m_w_fee = nullptr;
+    QLineEdit *m_w_pool_fees = nullptr;
     QLineEdit *m_w_peers = nullptr;
     QLineEdit *m_w_timeout = nullptr;
     QPushButton *m_create_btn = nullptr;
+    QLabel *m_w_percent_fees = nullptr;
 
     // Input validators
     QIntValidator *m_fees_validator = nullptr;
     QIntValidator *m_peers_validator = nullptr;
     QIntValidator *m_timeout_validator = nullptr;
+    QIntValidator *m_pool_fee_validator = nullptr;
     QDoubleValidator *m_denom_validator = nullptr;
 };
 
