@@ -84,6 +84,8 @@ OutputW::OutputW(Send *screen, int id) {
     m_address = new QLineEdit;
     m_address->setFixedWidth(300);
     m_address->setPlaceholderText("Address: bc1.....");
+    QObject::connect(m_address, &QLineEdit::editingFinished, screen,
+                     &Send::process);
 
     m_delete = new QPushButton();
     QIcon closeIcon = m_delete->style()->standardIcon(
@@ -98,6 +100,8 @@ OutputW::OutputW(Send *screen, int id) {
     m_amount = new QLineEdit;
     m_amount->setFixedWidth(95);
     m_amount->setPlaceholderText("0.002 BTC");
+    QObject::connect(m_amount, &QLineEdit::editingFinished, screen,
+                     &Send::process);
 
     m_label = new QLineEdit;
     m_label->setFixedWidth(2 * INPUT_WIDTH);
@@ -110,6 +114,8 @@ OutputW::OutputW(Send *screen, int id) {
         height: 28px;
       }
     )");
+    QObject::connect(m_max, &QCheckBox::toggled, screen, &Send::process,
+                     qontrol::UNIQUE);
 
     m_max_label = new QLabel("MAX");
     QFont f = m_max_label->font();
@@ -166,11 +172,13 @@ auto OutputW::isMax() -> bool {
 
 RadioElement::RadioElement(Send *parent, const QString &label) {
     m_button = new QRadioButton(parent);
+    QObject::connect(m_button, &QAbstractButton::toggled, parent,
+                     &Send::process);
     m_value = new QLineEdit;
     m_value->setFixedWidth(100);
+    QObject::connect(m_value, &QLineEdit::editingFinished, parent,
+                     &Send::process);
     m_label = new QLabel(label);
-    QObject::connect(m_button, &QAbstractButton::toggled, parent,
-                     [parent] { parent->updateRadio(); });
 
     auto *row = (new qontrol::Row)
                     ->push(m_button)
@@ -198,6 +206,7 @@ void Send::updateRadio() {
     m_fee_sats_vb->update();
     m_fee_sats->update();
     m_fee_blocks->update();
+    process();
 }
 
 Send::Send(AccountController *ctrl) {
@@ -216,33 +225,37 @@ void Send::init() {
     m_inputs_column = (new qontrol::Column);
 
     m_add_input_btn = new QPushButton("+ Add an Input");
-    connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addCoins,
-            qontrol::UNIQUE);
+    connect(m_add_input_btn, &QPushButton::clicked, this, &Send::addCoins);
 
     m_clear_inputs_btn = new QPushButton("Clear");
-    connect(m_clear_inputs_btn, &QPushButton::clicked, this, &Send::clearInputs,
-            qontrol::UNIQUE);
+    connect(m_clear_inputs_btn, &QPushButton::clicked, this,
+            &Send::clearInputs);
 
     m_auto_inputs_btn = new QPushButton("Auto");
 
     m_add_output_btn = new QPushButton("+ Add an Output");
-    connect(m_add_output_btn, &QPushButton::clicked, this, &Send::addOutput,
-            qontrol::UNIQUE);
+    connect(m_add_output_btn, &QPushButton::clicked, this, &Send::addOutput);
 
     m_sign_btn = new QPushButton("Sign");
+    m_sign_btn->setEnabled(false);
     m_broadcast_button = new QPushButton("Broadcast");
     m_clear_outputs_btn = new QPushButton("Clear");
     connect(m_clear_outputs_btn, &QPushButton::clicked, this,
             &Send::clearOutputs, qontrol::UNIQUE);
     m_export_btn = new QPushButton("Export");
+    m_export_btn->setEnabled(false);
 
     m_fee_sats = new RadioElement(this, "sats");
     m_fee_sats_vb = new RadioElement(this, "sats/vb");
     m_fee_blocks = new RadioElement(this, "blocks");
+    m_fee_blocks->setEnabled(false);
     m_fee_group = new QButtonGroup;
     m_fee_group->addButton(m_fee_sats->button());
     m_fee_group->addButton(m_fee_sats_vb->button());
     m_fee_group->addButton(m_fee_blocks->button());
+
+    m_warning_label = new QLabel();
+    m_warning_label->setVisible(false);
 
     m_fee_sats_vb->button()->setChecked(true);
 }
@@ -357,6 +370,8 @@ auto Send::outputsView() -> QWidget * {
                        ->merge(m_fee_blocks->widget())
                        ->pushSpacer();
 
+    auto *warningRow = (new qontrol::Row)->push(m_warning_label)->pushSpacer();
+
     auto *title = new QLabel("Outputs");
     auto font = title->font();
     font.setPointSize(15);
@@ -374,6 +389,8 @@ auto Send::outputsView() -> QWidget * {
                     ->push(addOutputRow)
                     ->pushSpacer(20)
                     ->push(feeRow)
+                    ->pushSpacer(20)
+                    ->push(warningRow)
                     ->pushSpacer(20)
                     ->push(lastRow)
                     ->pushSpacer();
@@ -399,6 +416,7 @@ void Send::addOutput() {
     m_outputs.insert(m_output_id, output);
     m_outputs_column->push(output->widget());
     m_output_id++;
+    process();
     view();
 }
 
@@ -406,6 +424,7 @@ void Send::deleteInput(int id) {
     auto *input = m_inputs.take(id);
     delete input->widget();
     delete input;
+    process();
 }
 
 void Send::deleteOutput(int id) {
@@ -424,7 +443,8 @@ void Send::deleteOutput(int id) {
             outp->enableMax(true);
         }
     }
-    this->view();
+    process();
+    view();
 }
 
 void Send::outputSetMax(int id) {
@@ -439,6 +459,7 @@ void Send::outputSetMax(int id) {
             m_outputs.value(key)->enableMax(true);
         }
     }
+    process();
 }
 
 void Send::setBroadcastable(bool broadcastable) {
@@ -457,6 +478,7 @@ void Send::clearInputs() {
         delete inp;
     }
     m_inputs.clear();
+    process();
     view();
 }
 
@@ -466,6 +488,7 @@ void Send::clearOutputs() {
     }
     m_outputs.clear();
     addOutput();
+    process();
     view();
 }
 
@@ -521,6 +544,7 @@ void Send::addInput(const RustCoin &coin) {
     m_inputs.insert(m_input_id, input);
     m_inputs_column->push(input->widget());
     m_input_id++;
+    process();
     view();
 }
 
@@ -571,15 +595,28 @@ auto OutputW::label() -> QString {
 
 auto Send::txTemplate() -> std::optional<TransactionTemplate> {
     auto txTemplate = TransactionTemplate();
+    bool ok = false;
 
     // fees
-    bool ok = false;
-    auto fee = m_fee_sats->text().toInt(&ok);
-    if (!ok) {
-        qDebug() << "Send::txTemplate() m_fee_sats is not a valid int";
-        return std::nullopt;
+    if (m_fee_sats->checked()) {
+        auto fee = m_fee_sats->text().toInt(&ok);
+        if (!ok) {
+            qDebug() << "Send::txTemplate() m_fee_sats is not a valid int";
+            return std::nullopt;
+        }
+        txTemplate.fee_sats = fee;
+
+    } else if (m_fee_sats_vb->checked()) {
+        auto fee = m_fee_sats_vb->text().toDouble(&ok);
+        if (!ok) {
+            qDebug()
+                << "Send::txTemplate() m_fee_sats_vb is not a valid double";
+            return std::nullopt;
+        }
+        txTemplate.fee_sats_vb = fee;
     }
-    txTemplate.fee = fee;
+
+    // TODO: handle block target fees
 
     // inputs
     for (auto *inp : m_inputs) {
@@ -617,4 +654,43 @@ auto Send::prepareTransaction() -> std::optional<QString> {
 
     return QString();
 };
+
+void RadioElement::setEnabled(bool enabled) {
+    m_button->setEnabled(enabled);
+    m_value->setEnabled(enabled);
+}
+
+auto RadioElement::checked() -> bool {
+    return m_button->isChecked();
+}
+
+void Send::setSpendable(bool spendable) {
+    m_sign_btn->setEnabled(spendable);
+    m_export_btn->setEnabled(spendable);
+}
+
+void Send::process() {
+    qDebug() << "Send::progress()";
+    auto txTemp = txTemplate();
+    if (!txTemp.has_value()) {
+        setSpendable(false);
+        return;
+    }
+    auto simu = m_controller->simulateTx(txTemp.value());
+    if (simu.error.empty()) {
+        if (simu.spendable) {
+            setSpendable(true);
+            m_warning_label->setVisible(false);
+        } else if (simu.has_change) {
+            m_warning_label->setText(
+                "A change output will be automatically added.");
+            m_warning_label->setVisible(true);
+            setSpendable(false);
+        }
+    } else {
+        setSpendable(false);
+        m_warning_label->setText(simu.error.c_str());
+        m_warning_label->setVisible(true);
+    }
+}
 } // namespace screen

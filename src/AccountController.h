@@ -17,6 +17,7 @@
 #include <qdialog.h>
 #include <qsystemtrayicon.h>
 #include <qtimer.h>
+#include <utility>
 
 class AccountWidget;
 
@@ -60,6 +61,8 @@ public slots:
     void pollPools();
     void pollAddresses();
     void pollNotifications();
+
+    auto simulateTx(TransactionTemplate tx_template) -> TransactionSimulation;
 
     // Main buttons actions
     void coinsClicked();

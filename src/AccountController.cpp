@@ -337,3 +337,11 @@ auto AccountController::selectableCoins() -> QList<RustCoin> {
     }
     return coins;
 };
+
+auto AccountController::simulateTx(TransactionTemplate tx_template)
+    -> TransactionSimulation {
+    if (m_wallet.has_value()) {
+        return m_wallet.value()->simulate_transaction(std::move(tx_template));
+    }
+    qDebug() << "AccountController::simulateTx() m_wallet is None!";
+};

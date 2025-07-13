@@ -68,6 +68,8 @@ public:
     void update();
     auto button() -> QAbstractButton *;
     auto text() -> QString;
+    void setEnabled(bool enabled);
+    auto checked() -> bool;
 
 private:
     QRadioButton *m_button = nullptr;
@@ -95,6 +97,8 @@ public slots:
     void setBroadcastable(bool broadcastable);
     void addCoins();
     void onCoinsSelected(const QList<RustCoin> &coins);
+    void setSpendable(bool spendable);
+    void process();
 
 protected:
     void init() override;
@@ -104,15 +108,6 @@ protected:
     auto outputsView() -> QWidget *;
     auto selectedCoins() -> QList<RustCoin>;
     auto txTemplate() -> std::optional<TransactionTemplate>;
-
-    auto isTransactionReady() -> bool {
-        // TODO: call rust  tx "validator"
-        //   - check parsing of all fields
-        //   - chek that transaction hvae valis structure:
-        //     - inputs != 0
-        //     - sum(outputs) < sum(inputs)
-        return false;
-    }
 
     auto prepareTransaction() -> std::optional<QString>;
 
@@ -133,6 +128,8 @@ private:
     RadioElement *m_fee_sats = nullptr;
     RadioElement *m_fee_blocks = nullptr;
     QButtonGroup *m_fee_group = nullptr;
+
+    QLabel *m_warning_label = nullptr;
 
     QPushButton *m_add_input_btn = nullptr;
 
